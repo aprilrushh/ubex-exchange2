@@ -1,0 +1,309 @@
+.trading-view-container {
+  background-color: #f9f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+/* 헤더 스타일 */
+.trading-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: white;
+  border-bottom: 1px solid #eee;
+}
+
+.market-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.coin-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.symbol {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.name {
+  font-size: 14px;
+  color: #666;
+}
+
+.price-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.current-price {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.price-change {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.positive {
+  color: #d60000;
+  background-color: rgba(214, 0, 0, 0.1);
+}
+
+.negative {
+  color: #0051c7;
+  background-color: rgba(0, 81, 199, 0.1);
+}
+
+.symbol-selector select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+  width: 200px;
+}
+
+/* 탭 스타일 */
+.trading-tabs {
+  display: flex;
+  background-color: white;
+  border-bottom: 1px solid #eee;
+}
+
+.tab {
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  background-color: #f5f5f5;
+}
+
+.tab.active {
+  border-bottom: 2px solid #0051c7;
+  color: #0051c7;
+  font-weight: bold;
+}
+
+/* 콘텐츠 스타일 */
+.trading-content {
+  padding: 0;
+  background-color: white;
+  min-height: 500px;
+}
+
+/* 차트 패널 스타일 */
+.chart-panel {
+  width: 100%;
+}
+
+.timeframe-selector {
+  display: flex;
+  padding: 10px 15px;
+  gap: 5px;
+  background-color: #f9f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.timeframe-btn {
+  padding: 5px 10px;
+  background-color: transparent;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.timeframe-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.timeframe-btn.active {
+  background-color: #0051c7;
+  color: white;
+  border-color: #0051c7;
+}
+
+.indicator-selector {
+  display: flex;
+  gap: 15px;
+  padding: 10px 15px;
+  background-color: #f9f9fa;
+  border-top: 1px solid #eee;
+}
+
+.indicator-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+}
+
+/* 호가창, 체결, 정보 패널 스타일 */
+.orderbook-panel,
+.trades-panel,
+.info-panel {
+  padding: 0;
+  height: 600px;
+  background-color: #f9f9fa;
+}
+
+/* 새로운 레이아웃 스타일 */
+.trading-view-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 0;
+  height: 600px;
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar {
+  border-left: 1px solid #eee;
+  height: 100%;
+}
+
+.orderbook-trade-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 0;
+  height: 600px;
+}
+
+.orderbook-container {
+  height: 100%;
+}
+
+.tradepanel-container {
+  border-left: 1px solid #eee;
+  height: 100%;
+}
+
+.info-content {
+  padding: 20px;
+}
+
+.info-content h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: #333;
+}
+
+.info-content p {
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.info-content ul {
+  margin-bottom: 20px;
+  padding-left: 20px;
+}
+
+.info-content li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+/* 미디어 쿼리 - 모바일 대응 */
+@media (max-width: 768px) {
+  .trading-view-layout,
+  .orderbook-trade-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar,
+  .tradepanel-container {
+    border-left: none;
+    border-top: 1px solid #eee;
+  }
+  
+  .trading-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .symbol-selector select {
+    width: 100%;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .trading-view-container {
+    background-color: #1e222d;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .trading-header,
+  .trading-tabs,
+  .trading-content {
+    background-color: #262b38;
+    border-color: #3a3f4c;
+  }
+  
+  .symbol-selector select {
+    background-color: #1e222d;
+    border-color: #3a3f4c;
+    color: #e4e6eb;
+  }
+  
+  .tab:hover {
+    background-color: #2d3341;
+  }
+  
+  .timeframe-selector,
+  .indicator-selector {
+    background-color: #1e222d;
+    border-color: #3a3f4c;
+  }
+  
+  .timeframe-btn {
+    border-color: #3a3f4c;
+    color: #e4e6eb;
+  }
+  
+  .timeframe-btn:hover {
+    background-color: #2d3341;
+  }
+  
+  .name {
+    color: #a0a3a8;
+  }
+  
+  .orderbook-panel,
+  .trades-panel,
+  .info-panel {
+    background-color: #1e222d;
+    color: #a0a3a8;
+  }
+  
+  .sidebar,
+  .tradepanel-container {
+    border-color: #3a3f4c;
+  }
+  
+  .info-content h2 {
+    color: #e4e6eb;
+  }
+}

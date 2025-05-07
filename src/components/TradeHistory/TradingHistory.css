@@ -1,0 +1,181 @@
+.trade-history-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.trade-history-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.trade-history-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.trade-history-filters {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.filter-group {
+  display: flex;
+  gap: 5px;
+}
+
+.filter-btn {
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background-color: #e9ecef;
+}
+
+.filter-btn.active {
+  background-color: #0051c7;
+  color: white;
+  border-color: #0051c7;
+}
+
+.filter-btn.active.buy {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.filter-btn.active.sell {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.trade-history-table {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.trade-history-table-header {
+  display: flex;
+  padding: 10px 15px;
+  background-color: #f9f9fa;
+  border-bottom: 1px solid #eee;
+  font-size: 12px;
+  color: #666;
+}
+
+.trade-history-table-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.trade-row {
+  display: flex;
+  padding: 10px 15px;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 13px;
+  transition: background-color 0.2s;
+}
+
+.trade-row:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.col {
+  flex: 1;
+  text-align: right;
+}
+
+.col.time {
+  flex: 1.5;
+  text-align: left;
+  color: #666;
+}
+
+.col.price {
+  font-weight: 600;
+}
+
+.buy-text {
+  color: #198754;
+}
+
+.sell-text {
+  color: #dc3545;
+}
+
+.no-trades {
+  padding: 30px;
+  text-align: center;
+  color: #666;
+}
+
+.new-trade-highlight {
+  animation: highlight 2s ease-out;
+}
+
+@keyframes highlight {
+  0% { background-color: rgba(0, 81, 199, 0.2); }
+  100% { background-color: transparent; }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .trade-history-container {
+    background-color: #1e222d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .trade-history-header {
+    border-color: #3a3f4c;
+  }
+  
+  .trade-history-table-header {
+    background-color: #262b38;
+    border-color: #3a3f4c;
+    color: #a0a3a8;
+  }
+  
+  .trade-row {
+    border-color: #2d3341;
+  }
+  
+  .trade-row:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .filter-btn {
+    background-color: #262b38;
+    border-color: #3a3f4c;
+    color: #e4e6eb;
+  }
+  
+  .filter-btn:hover {
+    background-color: #2d3341;
+  }
+  
+  .col.time {
+    color: #a0a3a8;
+  }
+  
+  .no-trades {
+    color: #a0a3a8;
+  }
+  
+  @keyframes highlight {
+    0% { background-color: rgba(0, 81, 199, 0.3); }
+    100% { background-color: transparent; }
+  }
+}

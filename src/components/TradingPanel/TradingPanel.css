@@ -1,0 +1,260 @@
+.trading-panel {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 헤더 스타일 */
+.trading-panel-header {
+  padding: 0;
+}
+
+.trading-tabs {
+  display: flex;
+  width: 100%;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  cursor: pointer;
+  font-weight: bold;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.tab.active {
+  color: #ffffff;
+}
+
+.tab.active.buy {
+  background-color: #198754;
+}
+
+.tab.active.sell {
+  background-color: #dc3545;
+}
+
+.order-type-selector {
+  display: flex;
+  background-color: #f9f9fa;
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.order-type {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 0 3px;
+}
+
+.order-type.active {
+  background-color: #e9ecef;
+  font-weight: bold;
+}
+
+/* 잔고 정보 스타일 */
+.trading-panel-balance {
+  padding: 12px 15px;
+  background-color: #f9f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.balance-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.balance-row:last-child {
+  margin-bottom: 0;
+}
+
+.balance-label {
+  color: #666;
+}
+
+.balance-value {
+  font-weight: 600;
+}
+
+/* 주문 폼 스타일 */
+.trading-panel-content {
+  padding: 15px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #0d6efd;
+}
+
+.price-input-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-controls {
+  display: flex;
+  margin-top: 8px;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.price-control-row {
+  display: flex;
+  gap: 5px;
+}
+
+.price-controls button {
+  flex: 1;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 6px 0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.price-controls button:hover {
+  background-color: #e9ecef;
+}
+
+.percentage-buttons {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 15px;
+}
+
+.percentage-buttons button {
+  flex: 1;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.percentage-buttons button:hover {
+  background-color: #e9ecef;
+}
+
+.total-amount {
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-radius: 4px;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submit-button.buy {
+  background-color: #198754;
+}
+
+.submit-button.sell {
+  background-color: #dc3545;
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .trading-panel {
+    background-color: #1e222d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .trading-panel-balance,
+  .order-type-selector {
+    background-color: #262b38;
+    border-color: #3a3f4c;
+  }
+  
+  .balance-label {
+    color: #a0a3a8;
+  }
+  
+  .form-group label {
+    color: #a0a3a8;
+  }
+  
+  .form-group input {
+    background-color: #262b38;
+    border-color: #3a3f4c;
+    color: #e4e6eb;
+  }
+  
+  .form-group input:focus {
+    border-color: #0d6efd;
+  }
+  
+  .price-controls button,
+  .percentage-buttons button {
+    background-color: #262b38;
+    border-color: #3a3f4c;
+    color: #e4e6eb;
+  }
+  
+  .price-controls button:hover,
+  .percentage-buttons button:hover {
+    background-color: #2d3341;
+  }
+  
+  .order-type.active {
+    background-color: #2d3341;
+  }
+  
+  .total-amount {
+    background-color: #262b38;
+    color: #e4e6eb;
+  }
+}

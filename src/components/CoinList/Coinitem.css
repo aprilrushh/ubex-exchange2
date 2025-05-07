@@ -1,0 +1,46 @@
+.coin-name {
+  display: flex;
+  align-items: center;
+}
+
+.coin-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  background-color: #eee;
+  border-radius: 50%;
+}
+
+.coin-symbol {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.coin-fullname {
+  color: #666;
+  font-size: 12px;
+}
+
+.price-up {
+  color: #d60000;
+}
+
+.price-down {
+  color: #0051c7;
+}
+
+.star-icon {
+  color: #ccc;
+  cursor: pointer;
+  margin-right: 10px;
+  font-size: 18px;
+  transition: color 0.2s;
+}
+
+.star-icon:hover {
+  color: #FFB800;
+}
+
+.star-icon.favorite {
+  color: #FFC107;
+}
