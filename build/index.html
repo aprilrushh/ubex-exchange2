@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBEX Exchange</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #212529;
+            color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #495057;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #0d6efd, #6610f2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .login-form {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: #343a40;
+            border-radius: 8px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #495057;
+            border-radius: 4px;
+            background-color: #2b3035;
+            color: #f8f9fa;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0a58ca;
+        }
+        .message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: rgba(25, 135, 84, 0.2);
+            color: #28a745;
+        }
+        .error {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">UBEX Exchange</div>
+        </header>
+        
+        <div class="login-form">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password">
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <div id="message" class="message"></div>
+            <div style="margin-top: 15px; text-align: center;">
+                <span>Don't have an account?</span>
+                <button id="registerBtn" style="width: auto; background: none; color: #0d6efd; text-decoration: underline;">Register</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = "Attempting login...";
+            messageEl.className = "message";
+            messageEl.style.display = "block";
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    messageEl.textContent = "Login successful!";
+                    messageEl.className = "message success";
+                    localStorage.setItem('user', JSON.stringify(data));
+                    
+                    // Redirect to trading page after successful login
+                    setTimeout(() => {
+                        window.location.href = '/trading.html';
+                    }, 1000);
+                } else {
+                    messageEl.textContent = data.error || "Login failed";
+                    messageEl.className = "message error";
+                }
+            } catch (err) {
+                messageEl.textContent = "Failed to connect to the server";
+                messageEl.className = "message error";
+                console.error(err);
+            }
+        });
+        
+        document.getElementById('registerBtn').addEventListener('click', function() {
+            // Simple toggle between login and register
+            const form = document.getElementById('loginForm');
+            const heading = document.querySelector('.login-form h2');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const toggleText = document.querySelector('.login-form > div > span');
+            const toggleBtn = document.getElementById('registerBtn');
+            
+            if (heading.textContent === "Login") {
+                heading.textContent = "Register";
+                submitBtn.textContent = "Register";
+                toggleText.textContent = "Already have an account?";
+                toggleBtn.textContent = "Login";
+                
+                // Change form submission to register endpoint
+                form.onsubmit = async function(e) {
+                    e.preventDefault();
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    
+                    const messageEl = document.getElementById('message');
+                    messageEl.textContent = "Registering...";
+                    messageEl.className = "message";
+                    messageEl.style.display = "block";
+                    
+                    try {
+                        const response = await fetch('/api/register', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ username, password })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            messageEl.textContent = "Registration successful! You can now login.";
+                            messageEl.className = "message success";
+                            
+                            // Switch back to login form after successful registration
+                            setTimeout(() => {
+                                heading.textContent = "Login";
+                                submitBtn.textContent = "Login";
+                                toggleText.textContent = "Don't have an account?";
+                                toggleBtn.textContent = "Register";
+                                form.onsubmit = null; // Reset to default behavior
+                            }, 2000);
+                        } else {
+                            messageEl.textContent = data.error || "Registration failed";
+                            messageEl.className = "message error";
+                        }
+                    } catch (err) {
+                        messageEl.textContent = "Failed to connect to the server";
+                        messageEl.className = "message error";
+                        console.error(err);
+                    }
+                };
+            } else {
+                heading.textContent = "Login";
+                submitBtn.textContent = "Login";
+                toggleText.textContent = "Don't have an account?";
+                toggleBtn.textContent = "Register";
+                form.onsubmit = null; // Reset to default behavior
+            }
+        });
+    </script>
+</body>
+</html>
