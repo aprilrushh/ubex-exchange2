@@ -1,0 +1,180 @@
+cat > public/test-realtime.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+  <title>UBEX 실시간 데이터 테스트</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .card { background: #f5f5f5; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+    .price { font-size: 22px; font-weight: bold; }
+    .up { color: #d60000; }
+    .down { color: #0051c7; }
+    .trades { height: 300px; overflow-y: auto; background: #fff; border: 1px solid #ddd; padding: 10px; }
+    .trade-item { padding: 8px; border-bottom: 1px solid #eee; }
+    .buy { border-left: 3px solid #d60000; }
+    .sell { border-left: 3px solid #0051c7; }
+    .trade-time { font-size: 0.8em; color: #666; }
+    button { padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #2980b9; }
+  </style>
+</head>
+<body>
+  <h1>UBEX 실시간 데이터 테스트</h1>
+  
+  <div class="card">
+    <h2>현재 가격</h2>
+    <div id="prices-container">로딩 중...</div>
+  </div>
+  
+  <div class="card">
+    <h2>최근 거래</h2>
+    <div id="trades" class="trades"></div>
+  </div>
+  
+  <button id="connect-btn">연결</button>
+  <button id="disconnect-btn" disabled>연결 해제</button>
+  
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // DOM 요소
+    const pricesContainer = document.getElementById('prices-container');
+    const tradesContainer = document.getElementById('trades');
+    const connectBtn = document.getElementById('connect-btn');
+    const disconnectBtn = document.getElementById('disconnect-btn');
+    
+    let socket;
+    let prices = {
+      'BTC/USDT': 75000,
+      'ETH/USDT': 4000,
+      'SOL/USDT': 120,
+      'LAYER/KRW': 2600
+    };
+    
+    // 초기 가격 표시 (페이지 로드 시)
+    updatePricesDisplay();
+    
+    // 소켓 연결 함수
+    function connectSocket() {
+      console.log('소켓 연결 시도...');
+      socket = io();
+      
+      // 연결 성공 이벤트
+      socket.on('connect', () => {
+        console.log('서버에 연결됨:', socket.id);
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+        
+        // 자동 업데이트 시작
+        startSimulation();
+      });
+      
+      // 연결 종료 이벤트
+      socket.on('disconnect', () => {
+        console.log('서버 연결 종료');
+        connectBtn.disabled = false;
+        disconnectBtn.disabled = true;
+      });
+    }
+    
+    // 시뮬레이션 시작 함수
+    function startSimulation() {
+      console.log('시뮬레이션 시작...');
+      
+      // 2초마다 가격 업데이트
+      setInterval(() => {
+        const symbols = Object.keys(prices);
+        const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+        const oldPrice = prices[randomSymbol];
+        const change = (Math.random() - 0.5) * oldPrice * 0.01; // 최대 0.5% 변동
+        prices[randomSymbol] = parseFloat(oldPrice) + change;
+        
+        const direction = change >= 0 ? 'up' : 'down';
+        updatePriceElement(randomSymbol, direction);
+        console.log(`${randomSymbol} 가격 업데이트: ${prices[randomSymbol].toFixed(2)}`);
+        
+        // 가끔 거래 생성
+        if (Math.random() > 0.7) {
+          const trade = {
+            symbol: randomSymbol,
+            price: prices[randomSymbol],
+            amount: (Math.random() * 2).toFixed(4),
+            type: Math.random() > 0.5 ? 'buy' : 'sell'
+          };
+          addTradeToDisplay(trade.symbol, trade);
+          console.log(`${trade.symbol} 새 거래: ${trade.amount} @ ${trade.price.toFixed(2)}`);
+        }
+      }, 2000);
+    }
+    
+    // 가격 표시 업데이트
+    function updatePricesDisplay() {
+      pricesContainer.innerHTML = '';
+      
+      Object.entries(prices).forEach(([symbol, price]) => {
+        const priceElement = document.createElement('div');
+        priceElement.id = `price-${symbol.replace('/', '-')}`;
+        priceElement.innerHTML = `
+          <div><strong>${symbol}</strong></div>
+          <div class="price">${parseFloat(price).toFixed(2)}</div>
+        `;
+        pricesContainer.appendChild(priceElement);
+      });
+    }
+    
+    // 가격 요소 업데이트
+    function updatePriceElement(symbol, direction) {
+      const id = `price-${symbol.replace('/', '-')}`;
+      const priceElement = document.getElementById(id);
+      
+      if (priceElement) {
+        const priceDisplay = priceElement.querySelector('.price');
+        priceDisplay.textContent = parseFloat(prices[symbol]).toFixed(2);
+        
+        // 색상 효과
+        priceDisplay.className = `price ${direction}`;
+        setTimeout(() => {
+          priceDisplay.className = 'price';
+        }, 1000);
+      }
+    }
+    
+    // 거래 내역 추가
+    function addTradeToDisplay(symbol, trade) {
+      const tradeItem = document.createElement('div');
+      tradeItem.className = `trade-item ${trade.type}`;
+      
+      const now = new Date();
+      const formattedTime = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+      
+      tradeItem.innerHTML = `
+        <div>
+          <strong>${symbol}</strong> - 
+          <span class="${trade.type}">${parseFloat(trade.price).toFixed(2)}</span>
+          <span>${trade.amount} ${trade.type === 'sell' ? '매도' : '매수'}</span>
+        </div>
+        <div class="trade-time">${formattedTime}</div>
+      `;
+      
+      tradesContainer.prepend(tradeItem);
+      
+      // 거래 내역이 너무 많으면 오래된 것 제거
+      if (tradesContainer.children.length > 50) {
+        tradesContainer.removeChild(tradesContainer.lastChild);
+      }
+    }
+    
+    // 이벤트 리스너
+    connectBtn.addEventListener('click', connectSocket);
+    disconnectBtn.addEventListener('click', () => {
+      if (socket) {
+        socket.disconnect();
+        socket = null;
+      }
+    });
+    
+    // 페이지 로드 시 자동 연결
+    window.addEventListener('load', connectSocket);
+  </script>
+</body>
+</html>
+EOF

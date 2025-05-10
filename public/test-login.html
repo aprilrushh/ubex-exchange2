@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>로그인 테스트</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
+    input, button { padding: 8px; margin: 5px 0; width: 100%; }
+    pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+    .debug { background: #ffe; padding: 10px; margin-top: 20px; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h1>UBEX 로그인 테스트</h1>
+  
+  <input type="text" id="username" placeholder="사용자 이름" value="test">
+  <input type="password" id="password" placeholder="비밀번호" value="test123">
+  <button id="loginBtn">로그인</button>
+  
+  <h3>결과:</h3>
+  <pre id="result">결과가 여기에 표시됩니다</pre>
+  
+  <div class="debug">
+    <h3>디버그 정보:</h3>
+    <div id="debug"></div>
+  </div>
+  
+  <script>
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      document.getElementById('debug').innerHTML = `
+        <p>시도하는 로그인 정보:</p>
+        <p>사용자명: ${username}</p>
+        <p>비밀번호: ${password.replace(/./g, '*')}</p>
+      `;
+      
+      try {
+        document.getElementById('result').textContent = "요청 전송 중...";
+        
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        
+        if (data.success) {
+          document.getElementById('result').style.color = 'green';
+        } else {
+          document.getElementById('result').style.color = 'red';
+        }
+      } catch (error) {
+        document.getElementById('result').textContent = '오류: ' + error.message;
+        document.getElementById('result').style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>

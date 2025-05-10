@@ -1,0 +1,174 @@
+// server.js
+const express = require('express');
+const http = require('http');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const path = require('path');
+
+// Express 앱 초기화
+const app = express();
+const server = http.createServer(app);
+
+// 미들웨어 설정 - 라우트 정의 전에 설정해야 함
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// 정적 파일 서빙
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 서비스 모듈 불러오기 - 2단계 (try/catch로 오류 처리)
+try {
+  const createExchangeService = require('./backend/services/ExchangeService');
+  console.log('Exchange 서비스 로드 성공');
+  
+  // 다른 서비스들도 필요하다면 아래처럼 추가
+  // const createWalletService = require('./backend/services/walletService');
+  // const createMarketDataService = require('./backend/services/marketDataService');
+  // const createBlockchainService = require('./backend/services/blockchainService');
+  // const createSecurityService = require('./backend/services/securityService');
+  // const createWebSocketService = require('./backend/services/websocketService');
+} catch (error) {
+  console.error('서비스 모듈 로드 오류:', error.message);
+  console.log('서비스 모듈 없이 기본 기능으로 계속합니다.');
+}
+
+// 로그인 API - 3단계 컨트롤러 사용 추가
+app.post('/api/login', async (req, res) => {
+  try {
+    console.log('로그인 요청 수신:', req.body);
+    console.log('헤더:', req.headers['content-type']);
+    
+    // req.body가 비어있는지 확인
+    if (!req.body || Object.keys(req.body).length === 0) {
+      console.log('요청 본문이 비어있습니다');
+      return res.status(400).json({
+        success: false,
+        message: '유효하지 않은 요청 본문'
+      });
+    }
+    
+    const { username, password } = req.body;
+    console.log(`로그인 시도: 사용자명="${username}", 비밀번호="${password}"`);
+    
+    if (!username || !password) {
+      console.log('사용자명 또는 비밀번호가 없습니다');
+      return res.status(400).json({
+        success: false,
+        message: '사용자 이름과 비밀번호가 필요합니다'
+      });
+    }
+    
+    // 3단계: 컨트롤러 로드 시도
+    try {
+      console.log('컨트롤러 로드 시도 중...');
+      const authController = require('./backend/controllers/authController');
+      console.log('컨트롤러 로드 성공, login 메서드 호출');
+      return authController.login(req, res);
+    } catch (controllerError) {
+      console.log('컨트롤러 로드 실패, 기본 인증 사용:', controllerError.message);
+      
+      // 기본 인증 로직 (이미 작동하는 코드)
+      if (username === 'test' && password === 'test123') {
+        console.log('로그인 성공 (fallback)');
+        return res.json({
+          success: true,
+          message: '로그인 성공 (fallback)',
+          userId: '123',
+          username
+        });
+      } else {
+        console.log('로그인 실패: 잘못된 인증 정보');
+        return res.status(401).json({
+          success: false,
+          message: '잘못된 인증 정보'
+        });
+      }
+    }
+  } catch (error) {
+    console.error('로그인 오류:', error);
+    return res.status(500).json({
+      success: false,
+      message: '로그인 중 오류 발생',
+      error: error.message
+    });
+  }
+});
+
+// 회원가입 API - 3단계 컨트롤러 사용 추가
+app.post('/api/register', async (req, res) => {
+  try {
+    console.log('회원가입 요청 수신:', req.body);
+    
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: '유효하지 않은 요청 본문'
+      });
+    }
+    
+    // 3단계: 컨트롤러 로드 시도
+    try {
+      console.log('컨트롤러 로드 시도 중...');
+      const authController = require('./backend/controllers/authController');
+      console.log('컨트롤러 로드 성공, register 메서드 호출');
+      return authController.register(req, res);
+    } catch (controllerError) {
+      console.log('컨트롤러 로드 실패, 기본 회원가입 사용:', controllerError.message);
+      
+      // 기본 회원가입 로직
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({
+          success: false,
+          message: '사용자 이름과 비밀번호가 필요합니다'
+        });
+      }
+      
+      // 간단한 회원가입 로직
+      const userId = Date.now().toString();
+      console.log('회원가입 성공 (fallback)');
+      
+      return res.json({
+        success: true,
+        message: '회원가입 성공 (fallback)',
+        userId,
+        username
+      });
+    }
+  } catch (error) {
+    console.error('회원가입 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '회원가입 중 오류 발생',
+      error: error.message
+    });
+  }
+});
+
+// 서버 시작
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {
+  console.log(`서버가 포트 ${PORT}에서 실행 중입니다`);
+});
+
+// 4단계: 라우트 설정
+try {
+  console.log('라우트 모듈 로드 시도 중...');
+  const authRoutes = require('./backend/routes/authRoutes');
+  console.log('authRoutes 모듈 로드 성공');
+  
+  // 라우트 추가
+  app.use('/api/auth', authRoutes);
+  console.log('인증 라우트 등록됨: /api/auth/*');
+  
+  // 다른 라우트도 필요하다면 추가
+  // app.use('/api/wallet', walletRoutes);
+  // app.use('/api/market', marketRoutes);
+} catch (error) {
+  console.error('라우트 모듈 로드 오류:', error.message);
+  console.log('기본 API 엔드포인트로 계속 진행합니다.');
+  
+  // 기존 fallback 코드...
+}
