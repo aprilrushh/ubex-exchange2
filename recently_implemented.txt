@@ -1,0 +1,111 @@
+=== 최근 구현 파일 확인 ===
+
+--- server.js (WebSocket 업데이트) ---
+// server.js
+const express = require('express');
+const http = require('http');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const path = require('path');
+const socketIo = require('socket.io'); // WebSocket 지원을 위해 추가
+
+// Express 앱 초기화
+const app = express();
+const server = http.createServer(app);
+
+// Socket.IO 초기화
+const io = socketIo(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+
+--- backend/services/websocketService.js ---
+// backend/services/websocketService.js
+const createWebSocketService = (server, marketDataService) => {
+  const io = require('socket.io')(server, {
+    cors: {
+      origin: '*', // 실제 운영 환경에서는 특정 도메인으로 제한하세요
+      methods: ['GET', 'POST']
+    }
+  });
+  
+  // 활성 연결 관리
+  const activeConnections = new Map();
+  // 구독 관리 (사용자별 구독 목록)
+  const subscriptions = new Map();
+  
+// 초기화 및 연결 리스너 설정
+const initialize = () => {
+  io.on('connection', handleNewConnection);   
+  console.log('WebSocket server initialized');
+  
+  // 시뮬레이션 데이터 설정 (개발 환경용)
+
+--- src/components/Chart/SimpleChart.js ---
+// src/components/Chart/SimpleChart.js
+
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { createChart } from 'lightweight-charts';
+import { connectWebSocket, subscribeToChannel, unsubscribeFromChannel } from '../../services/websocketService';
+import { calculateMA } from '../../utils/chartIndicators';
+import './SimpleChart.css';
+
+const SimpleChart = ({ 
+  symbol = 'BTC/USDT', 
+  timeframe = '1h', 
+  indicators = { 
+    ma5: false, 
+    ma10: false, 
+    ma20: false, 
+    ma60: false, 
+    ma120: false 
+  },
+  height = 400,
+}) => {
+
+--- src/services/websocketService.js ---
+// src/services/websocketService.js
+
+import io from 'socket.io-client';
+
+let socket = null;
+
+/**
+ * WebSocket 서버에 연결
+ * @returns {SocketIOClient.Socket} 연결된 소켓 인스턴스
+ */
+export const connectWebSocket = () => {
+  if (!socket) {
+    // 개발 환경에서는 localhost, 프로덕션에서는 실제 서버 주소로 변경
+    const SERVER_URL = window.location.hostname === 'localhost' 
+      ? 'http://localhost:3001' 
+      : window.location.origin;
+    
+    socket = io(SERVER_URL, {
+      transports: ['websocket'],
+      reconnection: true,
+
+--- src/utils/chartIndicators.js ---
+// src/utils/chartIndicators.js
+
+/**
+ * 이동평균선(Moving Average) 계산
+ * @param {Array} data - 캔들스틱 데이터 배열
+ * @param {number} period - 기간 (예: 5, 10, 20)
+ * @returns {Array} 이동평균 데이터 배열
+ */
+export const calculateMA = (data, period) => {
+  const result = [];
+  
+  // 데이터가 충분하지 않으면 빈 배열 반환
+  if (data.length < period) {
+    return result;
+  }
+  
+  // 처음 period-1개 캔들은 MA 계산 불가
+  for (let i = 0; i < period - 1; i++) {
+    // 빈 값을 넣지 않고 건너뜀
+  }

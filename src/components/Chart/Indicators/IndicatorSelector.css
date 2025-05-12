@@ -1,0 +1,238 @@
+/* src/components/Chart/Indicators/IndicatorSelector.css */
+
+/* 메인 컨테이너 */
+.indicator-selector {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #e9ecef;
+}
+
+/* 제목 */
+.indicator-selector h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 8px;
+}
+
+/* 지표 옵션 컨테이너 */
+.indicator-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* 지표 그룹 */
+.indicator-group {
+  min-width: 200px;
+  margin-bottom: 10px;
+}
+
+.indicator-group h5 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 체크박스 그룹 */
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+}
+
+.checkbox-group label:hover {
+  background-color: #f5f5f5;
+  border-color: #d0d0d0;
+}
+
+.checkbox-group label.active {
+  background-color: #e3f2fd;
+  border-color: #90caf9;
+}
+
+.checkbox-group input[type="checkbox"] {
+  margin-right: 6px;
+  cursor: pointer;
+  accent-color: #1976d2;
+}
+
+/* 이동평균선 색상 샘플 */
+.ma-color-sample {
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  margin-left: 4px;
+  border-radius: 1px;
+}
+
+.ma5-color { 
+  color: #ff5722; 
+}
+
+.ma5-color .ma-color-sample { 
+  background-color: #ff5722; 
+}
+
+.ma10-color { 
+  color: #2196f3; 
+}
+
+.ma10-color .ma-color-sample { 
+  background-color: #2196f3; 
+}
+
+.ma20-color { 
+  color: #4caf50; 
+}
+
+.ma20-color .ma-color-sample { 
+  background-color: #4caf50; 
+}
+
+.ma60-color { 
+  color: #9c27b0; 
+}
+
+.ma60-color .ma-color-sample { 
+  background-color: #9c27b0; 
+}
+
+.ma120-color { 
+  color: #795548; 
+}
+
+.ma120-color .ma-color-sample { 
+  background-color: #795548; 
+}
+
+/* 초기화 버튼 */
+.indicator-selector .reset-button {
+  margin-top: 10px;
+  padding: 6px 12px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.indicator-selector .reset-button:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+  color: #333;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .indicator-selector {
+    padding: 10px;
+    margin: 10px 0;
+  }
+  
+  .indicator-options {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .indicator-group {
+    min-width: 100%;
+  }
+  
+  .checkbox-group {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .indicator-selector h4 {
+    font-size: 13px;
+  }
+  
+  .indicator-group h5 {
+    font-size: 12px;
+  }
+  
+  .checkbox-group label {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+
+/* 애니메이션 효과 */
+.indicator-selector {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 지표별 특별 스타일 */
+.momentum-group label {
+  border-left: 3px solid #2196f3;
+}
+
+.volume-group label {
+  border-left: 3px solid #ff9800;
+}
+
+.trend-group label {
+  border-left: 3px solid #4caf50;
+}
+
+/* 툴팁 (미래 확장용) */
+.indicator-tooltip {
+  position: relative;
+}
+
+.indicator-tooltip:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 5px;
+  padding: 4px 8px;
+  background-color: #333;
+  color: #fff;
+  font-size: 11px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.indicator-tooltip:hover::after {
+  opacity: 1;
+}

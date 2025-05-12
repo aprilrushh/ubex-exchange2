@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance WebSocket 테스트</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #output {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Binance WebSocket 테스트</h1>
+        
+        <div class="input-group">
+            <input type="text" id="symbol" placeholder="거래쌍 입력 (예: BTCUSDT)" value="BTCUSDT">
+            <button id="connect">연결</button>
+            <button id="disconnect" disabled>연결 종료</button>
+        </div>
+
+        <div id="status" class="status disconnected">연결되지 않음</div>
+        
+        <h3>실시간 데이터:</h3>
+        <pre id="output"></pre>
+    </div>
+
+    <script type="module">
+        import webSocketService from '../src/services/websocketService.js';
+
+        const symbolInput = document.getElementById('symbol');
+        const connectBtn = document.getElementById('connect');
+        const disconnectBtn = document.getElementById('disconnect');
+        const statusDiv = document.getElementById('status');
+        const outputDiv = document.getElementById('output');
+
+        let lastData = null;
+
+        function updateStatus(connected) {
+            statusDiv.className = `status ${connected ? 'connected' : 'disconnected'}`;
+            statusDiv.textContent = connected ? '연결됨' : '연결되지 않음';
+            connectBtn.disabled = connected;
+            disconnectBtn.disabled = !connected;
+        }
+
+        function handleMessage(data) {
+            lastData = data;
+            outputDiv.textContent = JSON.stringify(data, null, 2);
+        }
+
+        connectBtn.addEventListener('click', () => {
+            const symbol = symbolInput.value.trim().toUpperCase();
+            if (!symbol) {
+                alert('거래쌍을 입력하세요.');
+                return;
+            }
+
+            webSocketService.connect(symbol, handleMessage);
+            updateStatus(true);
+        });
+
+        disconnectBtn.addEventListener('click', () => {
+            webSocketService.disconnect();
+            updateStatus(false);
+            outputDiv.textContent = '';
+        });
+    </script>
+</body>
+</html> 

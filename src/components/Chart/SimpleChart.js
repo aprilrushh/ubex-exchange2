@@ -1,337 +1,301 @@
 // src/components/Chart/SimpleChart.js
-
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createChart } from 'lightweight-charts';
-import { connectWebSocket, subscribeToChannel, unsubscribeFromChannel } from '../../services/websocketService';
-import { calculateMA } from '../../utils/chartIndicators';
+import TimeframeSelector from './TimeframeSelector';
+import IndicatorSelector from './Indicators/IndicatorSelector';
 import './SimpleChart.css';
 
-const SimpleChart = ({ 
-  symbol = 'BTC/USDT', 
-  timeframe = '1h', 
-  indicators = { 
-    ma5: false, 
-    ma10: false, 
-    ma20: false, 
-    ma60: false, 
-    ma120: false 
-  },
-  height = 400,
-}) => {
+const SimpleChart = ({ symbol = 'BTC/USDT', indicators, timeframe }) => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
   const candlestickSeriesRef = useRef(null);
-  const volumeSeriesRef = useRef(null);
-  const indicatorSeriesRefs = useRef({
-    ma5: null,
-    ma10: null,
-    ma20: null,
-    ma60: null,
-    ma120: null
+  const seriesRefs = useRef({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentTimeframe, setCurrentTimeframe] = useState(timeframe || '1d');
+  const [currentIndicators, setCurrentIndicators] = useState({
+    ma5: false,
+    ma10: false,
+    ma20: true,
+    ma60: false,
+    ma120: false,
+    rsi: false,
+    macd: false
   });
-  
-  const [candleData, setCandleData] = useState([]);
-  const [volumeData, setVolumeData] = useState([]);
-  const [isConnected, setIsConnected] = useState(false);
-  
-  // WebSocket 연결 및 데이터 구독
-  useEffect(() => {
-    // WebSocket 연결
-    const socket = connectWebSocket();
-    
-    socket.on('connect', () => {
-      console.log('WebSocket connected');
-      setIsConnected(true);
-      
-      // 심볼과 타임프레임에 따라 채널 구독
-      const channel = `candlestick:${symbol}:${timeframe}`;
-      subscribeToChannel(socket, channel);
-      
-      // 실시간 데이터 수신 처리
-      socket.on(channel, (newData) => {
-        setCandleData(prevData => {
-          // 새 캔들인지 기존 캔들 업데이트인지 확인
-          const lastCandle = prevData[prevData.length - 1];
-          if (lastCandle && lastCandle.time === newData.time) {
-            // 기존 캔들 업데이트
-            const updatedData = [...prevData];
-            updatedData[updatedData.length - 1] = newData;
-            return updatedData;
-          } else {
-            // 새 캔들 추가
-            return [...prevData, newData];
-          }
-        });
-        
-        // 볼륨 데이터 업데이트
-        setVolumeData(prevData => {
-          const volumeDataPoint = {
-            time: newData.time,
-            value: newData.volume,
-            color: newData.close >= newData.open 
-              ? 'rgba(214, 0, 0, 0.5)' // 상승 - 빨간색 (한국식)
-              : 'rgba(0, 81, 199, 0.5)' // 하락 - 파란색 (한국식)
-          };
-          
-          const lastVolume = prevData[prevData.length - 1];
-          if (lastVolume && lastVolume.time === newData.time) {
-            // 기존 볼륨 업데이트
-            const updatedData = [...prevData];
-            updatedData[updatedData.length - 1] = volumeDataPoint;
-            return updatedData;
-          } else {
-            // 새 볼륨 추가
-            return [...prevData, volumeDataPoint];
-          }
-        });
-      });
-    });
-    
-    // 초기 캔들스틱 데이터 로드
-    const fetchHistoricalData = async () => {
-      try {
-        // 실제 API 엔드포인트로 대체하세요
-        const response = await fetch(`/api/candlestick/${symbol}/${timeframe}`);
-        const data = await response.json();
-        
-        if (data && data.length > 0) {
-          setCandleData(data);
-          
-          // 볼륨 데이터 생성
-          const volumeData = data.map(candle => ({
-            time: candle.time,
-            value: candle.volume,
-            color: candle.close >= candle.open 
-              ? 'rgba(214, 0, 0, 0.5)' // 상승 - 빨간색 (한국식)
-              : 'rgba(0, 81, 199, 0.5)' // 하락 - 파란색 (한국식)
-          }));
-          
-          setVolumeData(volumeData);
-        } else {
-          // 데이터가 없으면 샘플 데이터 생성
-          const { sampleCandles, sampleVolumes } = generateSampleData();
-          setCandleData(sampleCandles);
-          setVolumeData(sampleVolumes);
-        }
-      } catch (error) {
-        console.error('Error fetching historical data:', error);
-        // 오류 시 샘플 데이터 사용
-        const { sampleCandles, sampleVolumes } = generateSampleData();
-        setCandleData(sampleCandles);
-        setVolumeData(sampleVolumes);
-      }
-    };
-    
-    fetchHistoricalData();
-    
-    // 컴포넌트 언마운트 시 정리
-    return () => {
-      if (socket && isConnected) {
-        const channel = `candlestick:${symbol}:${timeframe}`;
-        unsubscribeFromChannel(socket, channel);
-        socket.disconnect();
-      }
-    };
-  }, [symbol, timeframe]);
-  
-  // 샘플 데이터 생성 함수
-  const generateSampleData = useCallback(() => {
-    const sampleCandles = [];
-    const sampleVolumes = [];
-    const baseDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).getTime() / 1000;
-    let basePrice = 50000; // BTC 기준 시작 가격
-    
-    for (let i = 0; i < 300; i++) {
-      const time = baseDate + (i * getTimeframeSeconds(timeframe));
-      const volatility = 0.01;
-      const changePercent = (Math.random() * 2 - 1) * volatility;
-      
-      const open = i === 0 ? basePrice : sampleCandles[i-1].close;
-      const close = Math.max(100, open * (1 + changePercent));
-      const high = Math.max(open, close) * (1 + Math.random() * 0.005);
-      const low = Math.min(open, close) * (1 - Math.random() * 0.005);
-      const volume = Math.floor(Math.random() * 100) + 10;
-      
-      sampleCandles.push({ time, open, high, low, close, volume });
-      
-      sampleVolumes.push({
-        time,
-        value: volume,
-        color: close >= open 
-          ? 'rgba(214, 0, 0, 0.5)' // 상승 - 빨간색 (한국식)
-          : 'rgba(0, 81, 199, 0.5)' // 하락 - 파란색 (한국식)
-      });
+  const [chartData, setChartData] = useState([]);
+
+  // 이동평균선 계산 함수
+  const calculateSMA = (data, period) => {
+    if (!data || !Array.isArray(data) || data.length < period) {
+      return [];
     }
-    
-    return { sampleCandles, sampleVolumes };
-  }, [timeframe]);
-  
-  // 타임프레임에 따른 초 단위 시간 반환
-  const getTimeframeSeconds = (timeframe) => {
-    switch(timeframe) {
-      case '1m': return 60;
-      case '5m': return 5 * 60;
-      case '15m': return 15 * 60;
-      case '30m': return 30 * 60;
-      case '1h': return 60 * 60;
-      case '4h': return 4 * 60 * 60;
-      case '1d': return 24 * 60 * 60;
-      case '1w': return 7 * 24 * 60 * 60;
-      default: return 60 * 60; // 기본값 1시간
+
+    const smaData = [];
+    for (let i = period - 1; i < data.length; i++) {
+      let sum = 0;
+      let validCount = 0;
+      
+      for (let j = 0; j < period; j++) {
+        const candle = data[i - j];
+        if (candle && typeof candle.close === 'number' && !isNaN(candle.close)) {
+          sum += candle.close;
+          validCount++;
+        }
+      }
+      
+      if (validCount === period) {
+        smaData.push({
+          time: data[i].time,
+          value: sum / period
+        });
+      }
+    }
+    return smaData;
+  };
+
+  // 지표 시리즈 제거 함수
+  const removeAllIndicators = () => {
+    Object.keys(seriesRefs.current).forEach(key => {
+      if (seriesRefs.current[key]) {
+        try {
+          // 시리즈가 유효한지 확인
+          if (chartRef.current && seriesRefs.current[key] && typeof seriesRefs.current[key].remove === 'function') {
+            chartRef.current.removeSeries(seriesRefs.current[key]);
+          }
+        } catch (e) {
+          // 에러 무시 (이미 제거된 시리즈일 가능성)
+        }
+        delete seriesRefs.current[key];
+      }
+    });
+  };
+
+  // 지표 시리즈 업데이트 함수
+  const updateIndicators = (indicators, data) => {
+    if (!chartRef.current || !data || data.length === 0) {
+      return;
+    }
+
+    try {
+      // 기존 지표 제거
+      removeAllIndicators();
+
+      // 지표 설정
+      const indicatorsConfig = [
+        { key: 'ma5', period: 5, color: '#ff5722', width: 1 },
+        { key: 'ma10', period: 10, color: '#2196f3', width: 1 },
+        { key: 'ma20', period: 20, color: '#4caf50', width: 2 },
+        { key: 'ma60', period: 60, color: '#9c27b0', width: 1 },
+        { key: 'ma120', period: 120, color: '#795548', width: 1 },
+      ];
+
+      // 지표 추가
+      indicatorsConfig.forEach(config => {
+        if (indicators[config.key]) {
+          const smaData = calculateSMA(data, config.period);
+          if (smaData.length > 0) {
+            seriesRefs.current[config.key] = chartRef.current.addLineSeries({
+              color: config.color,
+              lineWidth: config.width,
+              title: config.key.toUpperCase(),
+              priceLineVisible: false,
+              lastValueVisible: true,
+            });
+            seriesRefs.current[config.key].setData(smaData);
+          }
+        }
+      });
+
+    } catch (error) {
+      console.warn('지표 업데이트 중 경고:', error.message);
     }
   };
-  
-  // 차트 생성 및 데이터 업데이트
-  useEffect(() => {
-    if (!chartContainerRef.current || candleData.length === 0) return;
-    
-    // 차트가 없으면 새로 생성
-    if (!chartRef.current) {
+
+  const initChart = () => {
+    if (!chartContainerRef.current) return;
+
+    try {
+      // 기존 차트 제거
+      if (chartRef.current) {
+        removeAllIndicators();
+        chartRef.current.remove();
+        chartRef.current = null;
+        candlestickSeriesRef.current = null;
+      }
+
+      // 새 차트 생성
       const chart = createChart(chartContainerRef.current, {
         width: chartContainerRef.current.clientWidth,
-        height: height,
+        height: 400,
         layout: {
           backgroundColor: '#ffffff',
           textColor: '#333',
         },
         grid: {
-          vertLines: {
-            color: 'rgba(197, 203, 206, 0.5)',
-          },
-          horzLines: {
-            color: 'rgba(197, 203, 206, 0.5)',
-          },
+          vertLines: { color: 'rgba(197, 203, 206, 0.5)' },
+          horzLines: { color: 'rgba(197, 203, 206, 0.5)' },
         },
-        crosshair: {
-          mode: 1,
-        },
-        rightPriceScale: {
-          borderColor: 'rgba(197, 203, 206, 0.8)',
-        },
-        timeScale: {
+        crosshair: { mode: 0 },
+        rightPriceScale: { borderColor: 'rgba(197, 203, 206, 0.8)' },
+        timeScale: { 
           borderColor: 'rgba(197, 203, 206, 0.8)',
           timeVisible: true,
           secondsVisible: false,
         },
       });
-      
-      chartRef.current = chart;
-      
-      // 캔들스틱 시리즈 생성
+
+      // 캔들스틱 시리즈 추가
       const candlestickSeries = chart.addCandlestickSeries({
-        upColor: '#d60000',       // 상승 - 빨간색 (한국식)
-        downColor: '#0051c7',     // 하락 - 파란색 (한국식)
-        borderUpColor: '#d60000', // 상승 테두리 - 빨간색
-        borderDownColor: '#0051c7', // 하락 테두리 - 파란색
-        wickUpColor: '#d60000',   // 상승 wick - 빨간색
-        wickDownColor: '#0051c7', // 하락 wick - 파란색
+        upColor: '#d60000',
+        downColor: '#0051c7',
+        borderDownColor: '#0051c7',
+        borderUpColor: '#d60000',
+        wickDownColor: '#0051c7',
+        wickUpColor: '#d60000',
       });
-      
+
+      // 차트 참조 저장
+      chartRef.current = chart;
       candlestickSeriesRef.current = candlestickSeries;
+
+      // 샘플 데이터 생성
+      const data = generateSampleData();
+      candlestickSeries.setData(data);
+      setChartData(data);
       
-      // 볼륨 시리즈 생성
-      const volumeSeries = chart.addHistogramSeries({
-        color: '#26a69a',
-        priceFormat: {
-          type: 'volume',
-        },
-        priceScaleId: '',
-        scaleMargins: {
-          top: 0.8,
-          bottom: 0,
-        },
+      // 차트 맞춤
+      chart.timeScale().fitContent();
+      
+      // 지표 업데이트 - 처음에는 약간 지연
+      setTimeout(() => {
+        updateIndicators(currentIndicators, data);
+      }, 100);
+      
+      setLoading(false);
+      setError(null);
+      
+    } catch (error) {
+      console.error('차트 초기화 오류:', error);
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
+  // 샘플 데이터 생성 함수
+  const generateSampleData = () => {
+    const data = [];
+    const basePrice = 50000;
+    let lastClose = basePrice;
+    
+    for (let i = 0; i < 200; i++) {
+      const timestamp = Math.floor(Date.now() / 1000) - (200 - i) * 86400;
+      const change = (Math.random() - 0.5) * lastClose * 0.05;
+      const open = lastClose;
+      const close = Math.max(open + change, 100);
+      const high = Math.max(open, close) * (1 + Math.random() * 0.02);
+      const low = Math.min(open, close) * (1 - Math.random() * 0.02);
+      
+      data.push({
+        time: timestamp,
+        open: Number(open.toFixed(2)),
+        high: Number(high.toFixed(2)),
+        low: Number(low.toFixed(2)),
+        close: Number(close.toFixed(2)),
       });
       
-      volumeSeriesRef.current = volumeSeries;
-      
-      // 윈도우 리사이즈 이벤트 핸들러
-      const handleResize = () => {
-        if (chartRef.current && chartContainerRef.current) {
-          chartRef.current.applyOptions({
-            width: chartContainerRef.current.clientWidth,
-          });
-        }
-      };
-      
-      window.addEventListener('resize', handleResize);
-      
-      return () => {
-        window.removeEventListener('resize', handleResize);
-      };
+      lastClose = close;
     }
     
-    // 데이터 업데이트
-    if (candlestickSeriesRef.current) {
-      candlestickSeriesRef.current.setData(candleData);
-    }
-    
-    if (volumeSeriesRef.current && volumeData.length > 0) {
-      volumeSeriesRef.current.setData(volumeData);
-    }
-    
-    // 차트 범위 조정
-    chartRef.current.timeScale().fitContent();
-    
-  }, [candleData, volumeData, height]);
-  
-  // 이동평균선 지표 관리
+    return data;
+  };
+
+  // 차트 초기화
   useEffect(() => {
-    if (!chartRef.current || candleData.length === 0) return;
-    
-    // 각 이동평균선 처리
-    Object.entries(indicators).forEach(([key, isEnabled]) => {
-      const period = parseInt(key.replace('ma', ''));
-      
-      // 이미 생성된 시리즈가 있고, 비활성화되었을 경우 제거
-      if (indicatorSeriesRefs.current[key] && !isEnabled) {
-        chartRef.current.removeSeries(indicatorSeriesRefs.current[key]);
-        indicatorSeriesRefs.current[key] = null;
-        return;
+    const timer = setTimeout(() => {
+      initChart();
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      if (chartRef.current) {
+        removeAllIndicators();
+        chartRef.current.remove();
+        chartRef.current = null;
       }
+    };
+  }, [symbol, currentTimeframe]);
+
+  // 지표 변경 감지
+  useEffect(() => {
+    if (chartRef.current && chartData.length > 0) {
+      // 지표 변경 시 약간의 지연을 두고 업데이트
+      const timer = setTimeout(() => {
+        updateIndicators(currentIndicators, chartData);
+      }, 50);
       
-      // 활성화되었고, 아직 시리즈가 없는 경우 생성
-      if (isEnabled && !indicatorSeriesRefs.current[key]) {
-        // 이동평균 데이터 계산
-        const maData = calculateMA(candleData, period);
-        
-        // 색상 설정
-        let lineColor;
-        switch(period) {
-          case 5: lineColor = '#FF5733'; break;   // 주황색
-          case 10: lineColor = '#33FF57'; break;  // 녹색
-          case 20: lineColor = '#3357FF'; break;  // 파란색
-          case 60: lineColor = '#F033FF'; break;  // 보라색
-          case 120: lineColor = '#FF33A8'; break; // 핑크색
-          default: lineColor = '#787B86'; break;  // 회색
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndicators]);
+
+  // Window resize 처리
+  useEffect(() => {
+    const handleResize = () => {
+      if (chartRef.current && chartContainerRef.current) {
+        try {
+          chartRef.current.applyOptions({ 
+            width: chartContainerRef.current.clientWidth 
+          });
+        } catch (e) {
+          console.warn('리사이즈 중 경고:', e);
         }
-        
-        // 이동평균선 시리즈 생성
-        const maSeries = chartRef.current.addLineSeries({
-          color: lineColor,
-          lineWidth: 2,
-          title: `MA ${period}`,
-        });
-        
-        maSeries.setData(maData);
-        indicatorSeriesRefs.current[key] = maSeries;
       }
-      
-      // 이미 생성된 시리즈가 있고, 여전히 활성화된 경우 데이터 업데이트
-      if (isEnabled && indicatorSeriesRefs.current[key]) {
-        const maData = calculateMA(candleData, period);
-        indicatorSeriesRefs.current[key].setData(maData);
-      }
-    });
-    
-  }, [candleData, indicators]);
-  
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleTimeframeChange = (newTimeframe) => {
+    setCurrentTimeframe(newTimeframe);
+  };
+
+  const handleIndicatorChange = (newIndicators) => {
+    setCurrentIndicators(newIndicators);
+  };
+
   return (
     <div className="chart-container">
       <div className="chart-header">
-        <div className="chart-symbol">{symbol}</div>
-        <div className="chart-timeframe">{timeframe}</div>
+        <h2>차트 분석</h2>
+        <div className="chart-controls">
+          <TimeframeSelector
+            activeTimeframe={currentTimeframe}
+            onTimeframeChange={handleTimeframeChange}
+          />
+          <IndicatorSelector
+            indicators={currentIndicators}
+            onIndicatorChange={handleIndicatorChange}
+          />
+        </div>
       </div>
-      <div ref={chartContainerRef} className="chart" />
+      
+      {error && (
+        <div className="error-message">
+          에러 발생: {error}
+        </div>
+      )}
+      
+      {loading && (
+        <div className="loading-message">
+          로딩 중...
+        </div>
+      )}
+      
+      <div 
+        ref={chartContainerRef} 
+        className="chart" 
+        style={{ width: '100%', height: '400px', display: loading ? 'none' : 'block' }}
+      />
     </div>
   );
 };

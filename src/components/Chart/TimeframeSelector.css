@@ -1,0 +1,166 @@
+/* src/components/Chart/SimpleChart.css - 업데이트된 버전 */
+.chart-container {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .chart-controls {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .chart-header {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .chart-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .chart-symbol {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .chart-timeframe {
+    font-size: 14px;
+    color: #666;
+    background-color: #f0f0f0;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  
+  .connection-status {
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  
+  .connection-status.connected {
+    color: #4caf50;
+    background-color: #e8f5e9;
+  }
+  
+  .connection-status.disconnected {
+    color: #ff9800;
+    background-color: #fff3e0;
+  }
+  
+  .connection-status.error {
+    color: #f44336;
+    background-color: #ffebee;
+  }
+  
+  .chart {
+    width: 100%;
+    height: 400px;
+    background-color: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+    position: relative;
+  }
+  
+  .chart-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+  }
+  
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #4caf50;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* 반응형 디자인 */
+  @media (max-width: 768px) {
+    .chart-container {
+      padding: 8px;
+    }
+    
+    .chart-controls {
+      gap: 8px;
+    }
+    
+    .chart-info {
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .chart {
+      height: 300px;
+    }
+    
+    .chart-symbol {
+      font-size: 14px;
+    }
+    
+    .chart-timeframe {
+      font-size: 12px;
+      padding: 2px 6px;
+    }
+    
+    .connection-status {
+      font-size: 11px;
+      padding: 2px 6px;
+    }
+  }
+  
+  /* 다크 모드 지원 */
+  @media (prefers-color-scheme: dark) {
+    .chart-container {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+    
+    .chart-symbol {
+      color: #e0e0e0;
+    }
+    
+    .chart-timeframe {
+      background-color: #333;
+      color: #e0e0e0;
+    }
+    
+    .chart {
+      background-color: #1e1e1e;
+      border-color: #333;
+    }
+    
+    .chart-loading {
+      background-color: rgba(30, 30, 30, 0.9);
+      color: #e0e0e0;
+    }
+  }

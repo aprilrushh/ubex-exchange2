@@ -1,123 +1,103 @@
 // src/services/websocketService.js
 
-import io from 'socket.io-client';
+class WebSocketService {
+  constructor() {
+    this.ws = null;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.reconnectDelay = 1000;
+    this.reconnectTimeout = null;
+    this.currentSymbol = null;
+    this.onMessageCallback = null;
+  }
 
-let socket = null;
+  /**
+   * Binance WebSocket에 연결
+   * @param {string} symbol - 거래쌍 심볼 (예: 'BTCUSDT')
+   * @param {Function} onMessage - 메시지 수신 시 호출될 콜백 함수
+   */
+  connect(symbol, onMessage) {
+    if (this.ws) {
+      console.warn('이미 연결된 WebSocket이 있습니다. 먼저 disconnect()를 호출하세요.');
+      return;
+    }
 
-/**
- * WebSocket 서버에 연결
- * @returns {SocketIOClient.Socket} 연결된 소켓 인스턴스
- */
-export const connectWebSocket = () => {
-  if (!socket) {
-    // 개발 환경에서는 localhost, 프로덕션에서는 실제 서버 주소로 변경
-    const SERVER_URL = window.location.hostname === 'localhost' 
-      ? 'http://localhost:3001' 
-      : window.location.origin;
-    
-    socket = io(SERVER_URL, {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000
-    });
-    
-    // 연결 이벤트 핸들러
-    socket.on('connect', () => {
-      console.log('WebSocket 연결 성공');
-    });
-    
-    socket.on('disconnect', () => {
-      console.log('WebSocket 연결 끊김');
-    });
-    
-    socket.on('error', (error) => {
+    this.currentSymbol = symbol.toLowerCase();
+    this.onMessageCallback = onMessage;
+
+    const wsUrl = `wss://stream.binance.com:9443/ws/${this.currentSymbol}@ticker`;
+    this.ws = new WebSocket(wsUrl);
+
+    this.ws.onopen = () => {
+      console.log(`WebSocket 연결 성공: ${this.currentSymbol}`);
+      this.reconnectAttempts = 0;
+    };
+
+    this.ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        const formattedData = {
+          pair: data.s,
+          price: parseFloat(data.c),
+          timestamp: data.E
+        };
+        this.onMessageCallback(formattedData);
+      } catch (error) {
+        console.error('메시지 파싱 오류:', error);
+      }
+    };
+
+    this.ws.onerror = (error) => {
       console.error('WebSocket 오류:', error);
-    });
-    
-    socket.on('reconnect', (attemptNumber) => {
-      console.log(`WebSocket 재연결 성공 (시도: ${attemptNumber})`);
-    });
-    
-    socket.on('reconnect_error', (error) => {
-      console.error('WebSocket 재연결 오류:', error);
-    });
-  }
-  
-  return socket;
-};
+    };
 
-/**
- * 지정된 채널 구독
- * @param {SocketIOClient.Socket} socket - 소켓 인스턴스
- * @param {string} channel - 구독할 채널명
- */
-export const subscribeToChannel = (socket, channel) => {
-  if (!socket) {
-    console.error('소켓이 연결되지 않았습니다.');
-    return;
+    this.ws.onclose = () => {
+      console.log('WebSocket 연결 종료');
+      this.ws = null;
+      this.attemptReconnect();
+    };
   }
-  
-  console.log(`채널 구독: ${channel}`);
-  socket.emit('subscribe', { channel });
-};
 
-/**
- * 지정된 채널 구독 해제
- * @param {SocketIOClient.Socket} socket - 소켓 인스턴스
- * @param {string} channel - 구독 해제할 채널명
- */
-export const unsubscribeFromChannel = (socket, channel) => {
-  if (!socket) {
-    console.error('소켓이 연결되지 않았습니다.');
-    return;
+  /**
+   * 연결이 끊어진 경우 재연결 시도
+   */
+  attemptReconnect() {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.log('최대 재연결 시도 횟수 초과');
+      return;
+    }
+
+    this.reconnectAttempts++;
+    console.log(`재연결 시도 ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
+
+    this.reconnectTimeout = setTimeout(() => {
+      if (this.currentSymbol && this.onMessageCallback) {
+        this.connect(this.currentSymbol, this.onMessageCallback);
+      }
+    }, this.reconnectDelay);
   }
-  
-  console.log(`채널 구독 해제: ${channel}`);
-  socket.emit('unsubscribe', { channel });
-};
 
-/**
- * 소켓 연결 종료
- */
-export const disconnectWebSocket = () => {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-    console.log('WebSocket 연결 종료');
+  /**
+   * WebSocket 연결 종료
+   */
+  disconnect() {
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+
+    this.currentSymbol = null;
+    this.onMessageCallback = null;
+    this.reconnectAttempts = 0;
   }
-};
+}
 
-/**
- * 소켓 인스턴스 가져오기
- * @returns {SocketIOClient.Socket|null} 소켓 인스턴스 또는 null
- */
-export const getSocket = () => socket;
+// 싱글톤 인스턴스 생성
+const webSocketService = new WebSocketService();
 
-/**
- * 카스텀 이벤트 리스너 등록
- * @param {string} event - 이벤트 이름
- * @param {Function} callback - 콜백 함수
- */
-export const addSocketListener = (event, callback) => {
-  if (!socket) {
-    console.error('소켓이 연결되지 않았습니다.');
-    return;
-  }
-  
-  socket.on(event, callback);
-};
-
-/**
- * 카스텀 이벤트 리스너 제거
- * @param {string} event - 이벤트 이름
- * @param {Function} callback - 제거할 콜백 함수
- */
-export const removeSocketListener = (event, callback) => {
-  if (!socket) {
-    console.error('소켓이 연결되지 않았습니다.');
-    return;
-  }
-  
-  socket.off(event, callback);
-};
+export default webSocketService;

@@ -1,0 +1,21 @@
+.portfolio-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.portfolio-tabs button {
+  background: #f5f6fa;
+  border: none;
+  border-radius: 16px 16px 0 0;
+  padding: 10px 22px;
+  font-size: 15px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.portfolio-tabs button.active {
+  background: #fff;
+  color: #e0004e;
+  font-weight: bold;
+  border-bottom: 2px solid #e0004e;
+} 

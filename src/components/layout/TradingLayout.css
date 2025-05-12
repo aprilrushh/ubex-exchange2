@@ -1,0 +1,715 @@
+/* src/components/layout/TradingLayout.css */
+
+/* 전체 레이아웃 */
+.trading-layout {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #10131a;
+    color: #ffffff;
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    overflow: hidden;
+  }
+  
+  /* 상단 네비게이션 바 */
+  .navbar {
+    background-color: #1f2131;
+    height: 50px;
+    border-bottom: 1px solid #2a2e42;
+    z-index: 100;
+  }
+  
+  .navbar-content {
+    max-width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+  }
+  
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+  
+  .logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1b9cfc;
+  }
+  
+  .nav-menu {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .nav-item {
+    color: #8a95aa;
+    text-decoration: none;
+    padding: 15px 5px;
+    font-size: 14px;
+    transition: color 0.2s;
+  }
+  
+  .nav-item:hover, .nav-item.active {
+    color: #ffffff;
+  }
+  
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .login-btn, .register-btn {
+    background: none;
+    border: none;
+    color: #8a95aa;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 10px;
+  }
+  
+  .login-btn:hover, .register-btn:hover {
+    color: #ffffff;
+  }
+  
+  .notification-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .language-selector {
+    color: #8a95aa;
+    font-size: 13px;
+    padding: 5px;
+  }
+  
+  /* 메인 거래 그리드 */
+  .trading-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr 400px;
+    grid-template-rows: 1fr auto;
+    flex: 1;
+    overflow: hidden;
+    gap: 1px;
+    background-color: #2a2e42;
+  }
+  
+  /* 코인 리스트 섹션 */
+  .coin-list-section {
+    grid-row: 1 / -1;
+    background-color: #1a1e29;
+    border-right: 1px solid #2a2e42;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .coin-list-header {
+    padding: 15px;
+    border-bottom: 1px solid #2a2e42;
+  }
+  
+  .market-tabs {
+    display: flex;
+    margin-bottom: 10px;
+  }
+  
+  .market-tab {
+    flex: 1;
+    padding: 8px;
+    background: none;
+    border: none;
+    color: #8a95aa;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  
+  .market-tab.active {
+    color: #1b9cfc;
+    font-weight: bold;
+  }
+  
+  .coin-search input {
+    width: 100%;
+    padding: 8px;
+    background-color: #2a2e42;
+    border: 1px solid #3a4158;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 12px;
+  }
+  
+  .coin-search input::placeholder {
+    color: #8a95aa;
+  }
+  
+  .coin-list {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3a4158 transparent;
+  }
+  
+  .coin-list-labels {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    padding: 10px 15px;
+    color: #8a95aa;
+    font-size: 11px;
+    border-bottom: 1px solid #2a2e42;
+  }
+  
+  .coin-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    padding: 10px 15px;
+    border-bottom: 1px solid #2a2e42;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .coin-item:hover {
+    background-color: #2a2e42;
+  }
+  
+  .coin-item.selected {
+    background-color: #1f2131;
+  }
+  
+  .coin-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .star {
+    color: #8a95aa;
+    font-size: 12px;
+  }
+  
+  .coin-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .coin-symbol {
+    font-weight: bold;
+    font-size: 13px;
+  }
+  
+  .coin-name {
+    color: #8a95aa;
+    font-size: 11px;
+  }
+  
+  .coin-price {
+    text-align: right;
+    font-size: 13px;
+  }
+  
+  .coin-change {
+    text-align: right;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  
+  .coin-change.positive {
+    color: #e0004e;
+  }
+  
+  .coin-change.negative {
+    color: #0067a3;
+  }
+  
+  .coin-volume {
+    text-align: right;
+    font-size: 11px;
+    color: #8a95aa;
+  }
+  
+  /* 차트 섹션 */
+  .chart-section {
+    background-color: #1a1e29;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chart-header {
+    padding: 15px;
+    border-bottom: 1px solid #2a2e42;
+  }
+  
+  .coin-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .coin-name {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .coin-symbol {
+    font-size: 12px;
+  }
+  
+  .coin-text {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .coin-pair {
+    color: #8a95aa;
+    font-size: 13px;
+  }
+  
+  .current-price {
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 20px;
+  }
+  
+  .price-unit {
+    color: #8a95aa;
+    font-size: 13px;
+  }
+  
+  .price-change {
+    margin-left: 10px;
+  }
+  
+  .price-change-value.positive {
+    color: #e0004e;
+  }
+  
+  .price-change-value.negative {
+    color: #0067a3;
+  }
+  
+  .chart-controls {
+    padding: 10px 15px;
+    border-bottom: 1px solid #2a2e42;
+  }
+  
+  .chart-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .chart-buttons button {
+    background: none;
+    border: 1px solid #3a4158;
+    color: #8a95aa;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+  
+  .chart-buttons button:hover {
+    border-color: #1b9cfc;
+    color: #1b9cfc;
+  }
+  
+  .chart-container {
+    flex: 1;
+    background-color: #10131a;
+    min-height: 400px;
+  }
+  
+  /* 우측 정보 섹션 */
+  .info-section {
+    background-color: #1a1e29;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .price-info {
+    padding: 15px;
+    border-bottom: 1px solid #2a2e42;
+  }
+  
+  .price-stats {
+    display: flex;
+    margin-bottom: 15px;
+  }
+  
+  .info-tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    cursor: pointer;
+    color: #8a95aa;
+    border-bottom: 2px solid transparent;
+  }
+  
+  .info-tab.active {
+    color: #ffffff;
+    border-bottom-color: #1b9cfc;
+  }
+  
+  .price-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .price-item {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .label {
+    color: #8a95aa;
+  }
+  
+  .value {
+    font-weight: bold;
+  }
+  
+  .value.red {
+    color: #e0004e;
+  }
+  
+  .value.blue {
+    color: #0067a3;
+  }
+  
+  .exchange-prices {
+    padding: 15px;
+    border-bottom: 1px solid #2a2e42;
+  }
+  
+  .exchange-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 5px;
+  }
+  
+  .exchange-name {
+    color: #8a95aa;
+    width: 60px;
+  }
+  
+  .exchange-price {
+    flex: 1;
+    text-align: right;
+    margin-right: 10px;
+  }
+  
+  .exchange-diff {
+    color: #8a95aa;
+    font-size: 11px;
+  }
+  
+  /* 호가창 */
+  .orderbook {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .orderbook-controls {
+    padding: 10px 15px;
+    border-bottom: 1px solid #2a2e42;
+  }
+  
+  .view-toggle {
+    display: flex;
+  }
+  
+  .orderbook-view {
+    background: none;
+    border: none;
+    color: #8a95aa;
+    padding: 5px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  
+  .orderbook-view.active {
+    color: #ffffff;
+    border-bottom-color: #1b9cfc;
+  }
+  
+  .orderbook-content {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3a4158 transparent;
+  }
+  
+  .orderbook-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 10px 15px;
+    color: #8a95aa;
+    font-size: 11px;
+    border-bottom: 1px solid #2a2e42;
+  }
+  
+  .order-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 5px 15px;
+    font-size: 11px;
+  }
+  
+  .ask {
+    background-color: rgba(224, 0, 78, 0.1);
+  }
+  
+  .bid {
+    background-color: rgba(0, 103, 163, 0.1);
+  }
+  
+  .ask .price {
+    color: #e0004e;
+  }
+  
+  .bid .price {
+    color: #0067a3;
+  }
+  
+  .quantity {
+    text-align: left;
+  }
+  
+  .price {
+    text-align: center;
+  }
+  
+  .total {
+    text-align: right;
+  }
+  
+  .current-price-row {
+    padding: 10px 15px;
+    text-align: center;
+    font-weight: bold;
+    border-top: 1px solid #2a2e42;
+    border-bottom: 1px solid #2a2e42;
+    background-color: #1f2131;
+  }
+  
+  /* 하단 거래 패널 */
+  .trading-panel {
+    height: 350px;
+    background-color: #1a1e29;
+    border-top: 1px solid #2a2e42;
+    grid-column: 1 / -1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .trading-tabs {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #2a2e42;
+    height: 50px;
+  }
+  
+  .trading-tab {
+    background: none;
+    border: none;
+    color: #8a95aa;
+    padding: 10px 15px;
+    font-size: 13px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  
+  .trading-tab.active {
+    color: #ffffff;
+    border-bottom-color: #1b9cfc;
+  }
+  
+  .account-balance {
+    margin-left: auto;
+    color: #8a95aa;
+    font-size: 12px;
+  }
+  
+  .trading-form {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .order-type {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  
+  .order-btn {
+    flex: 1;
+    padding: 10px;
+    background-color: #2a2e42;
+    border: 1px solid #3a4158;
+    color: #8a95aa;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .order-btn:first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-right: none;
+  }
+  
+  .order-btn:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+  
+  .order-btn.active {
+    background-color: #e0004e;
+    border-color: #e0004e;
+    color: #ffffff;
+  }
+  
+  .order-input {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .input-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .input-group label {
+    color: #8a95aa;
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+  
+  .input-group input {
+    padding: 10px;
+    background-color: #2a2e42;
+    border: 1px solid #3a4158;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 13px;
+    text-align: right;
+  }
+  
+  .input-group .currency {
+    color: #8a95aa;
+    font-size: 11px;
+    margin-top: 5px;
+    text-align: right;
+  }
+  
+  .order-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .quick-order {
+    background: none;
+    border: 1px solid #3a4158;
+    color: #8a95aa;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+  
+  .quick-order:hover {
+    border-color: #1b9cfc;
+    color: #1b9cfc;
+  }
+  
+  .cancel-orders {
+    background: none;
+    border: 1px solid #8a95aa;
+    color: #8a95aa;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: auto;
+  }
+  
+  .submit-order {
+    background-color: #e0004e;
+    border: none;
+    color: #ffffff;
+    padding: 10px 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+  }
+  
+  .submit-order.buy {
+    background-color: #e0004e;
+  }
+  
+  .submit-order.sell {
+    background-color: #0067a3;
+  }
+  
+  /* 스크롤바 스타일 */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #3a4158;
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4a5268;
+  }
+  
+  /* 반응형 디자인 */
+  @media (max-width: 1200px) {
+    .trading-grid {
+      grid-template-columns: 240px 1fr 320px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .trading-grid {
+      grid-template-columns: 200px 1fr;
+      grid-template-rows: auto 1fr auto;
+    }
+    
+    .info-section {
+      display: none;
+    }
+    
+    .trading-panel {
+      height: 300px;
+    }
+  }

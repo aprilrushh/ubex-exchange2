@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MarketContext } from '../context/MarketContext';
 import Header from '../components/common/Header';
 import TradingPanel from '../components/TradingView/TradingPanel';
-import OrderBook from '../components/TradingView/OrderBook';
+import OrderBook from '../components/OrderBook/OrderBook';
 import SimpleChart from '../components/Chart/SimpleChart';
 import './TradingPage.css';
 

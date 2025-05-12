@@ -1,0 +1,33 @@
+.asset-list table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.asset-list th, .asset-list td {
+  padding: 12px 10px;
+  text-align: center;
+}
+.asset-list th {
+  background: #f5f6fa;
+  color: #333;
+  font-weight: 600;
+  font-size: 15px;
+}
+.asset-list tr:not(:last-child) {
+  border-bottom: 1px solid #eee;
+}
+.asset-list .positive {
+  color: #e0004e;
+  font-weight: bold;
+}
+.asset-list .negative {
+  color: #0067a3;
+  font-weight: bold;
+}
+.asset-list .symbol {
+  color: #888;
+  font-size: 13px;
+  margin-left: 2px;
+} 

@@ -1,0 +1,105 @@
+# nano로 계획된 구조 파일 생성
+ubex-exchange/
+├── .gitignore                  # Git ignore file
+├── package.json                # Project configuration
+├── package-lock.json           # Dependency lock file
+├── server.js                   # Main server file (moved to root for easier PM2 management)
+├── jest.config.js              # [PLANNED] Jest testing configuration
+├── .github/                    # [PLANNED] GitHub configuration
+│   └── workflows/              # [PLANNED] GitHub Actions CI/CD
+│       └── deploy.yml          # [PLANNED] Automatic deployment workflow
+├── node_modules/               # Dependencies
+├── public/                     # Public static files
+│   ├── test-login.html         # Login test page
+│   ├── test-realtime.html      # Realtime data test page
+│   ├── favicon.ico             # Site favicon
+│   └── assets/                 # Static assets
+│       └── images/             # Image files
+├── src/                        # Source code
+│   ├── components/             # React components
+│   │   ├── Auth/               # Authentication components
+│   │   │   ├── Login.js        # Login component
+│   │   │   ├── Register.js     # Registration component
+│   │   │   ├── Profile.js      # [PLANNED] User profile component
+│   │   │   ├── TwoFactorAuth.js # [PLANNED] 2FA component
+│   │   │   └── Auth.css        # Authentication styles
+│   │   ├── Chart/              # Chart components
+│   │   │   ├── SimpleChart.js  # Cryptocurrency chart component
+│   │   │   ├── SimpleChart.css # Chart styles
+│   │   │   ├── Indicators/     # [PLANNED] Technical indicators
+│   │   │   │   ├── MovingAverage.js    # [PLANNED] MA indicator
+│   │   │   │   ├── RSI.js             # [PLANNED] RSI indicator
+│   │   │   │   └── MACD.js            # [PLANNED] MACD indicator
+│   │   │   ├── TimeframeSelector.js   # [PLANNED] Chart timeframe selector
+│   │   │   └── ChartControls.js       # [PLANNED] Zoom/pan controls
+│   │   ├── OrderBook/          # Order book components
+│   │   │   ├── OrderBook.js    # Order book display
+│   │   │   ├── OrderBook.css   # Order book styles
+│   │   │   └── DepthChart.js   # [PLANNED] Order book depth visualization
+│   │   ├── TradeHistory/       # Trade history components
+│   │   │   ├── TradeHistory.js # Trade history display
+│   │   │   ├── TradeHistory.css # Trade history styles
+│   │   │   └── VolumeAnalysis.js # [PLANNED] Trading volume analysis
+│   │   ├── TradingPanel/       # Trading panel components
+│   │   │   ├── TradingPanel.js # Buy/sell panel
+│   │   │   ├── TradingPanel.css # Trading panel styles
+│   │   │   ├── OrderTypes/     # [PLANNED] Order type components
+│   │   │   │   ├── LimitOrder.js      # [PLANNED] Limit order form
+│   │   │   │   ├── MarketOrder.js     # [PLANNED] Market order form
+│   │   │   │   └── StopOrder.js       # [PLANNED] Stop loss/take profit
+│   │   │   └── BalanceDisplay.js      # [PLANNED] User balance display
+│   │   ├── TradingView/        # Main trading view
+│   │   │   ├── TradingView.js  # Trading view component
+│   │   │   └── TradingView.css # Trading view styles
+│   │   ├── Common/             # [PLANNED] Common UI components
+│   │   │   ├── ThemeToggle.js  # [PLANNED] Dark/light mode toggle
+│   │   │   ├── Notification.js # [PLANNED] Notification component
+│   │   │   ├── AlertsManager.js # [PLANNED] Price alerts component
+│   │   │   └── Layout.js       # [PLANNED] Responsive layout component
+│   │   └── __tests__/          # [PLANNED] Component tests
+│   ├── context/                # React context
+│   │   ├── AuthContext.js      # Authentication context provider
+│   │   ├── ThemeContext.js     # [PLANNED] Theme context (dark/light)
+│   │   ├── WebSocketContext.js # [PLANNED] WebSocket connection context
+│   │   └── AlertsContext.js    # [PLANNED] Price alerts context
+│   ├── services/               # Service layer
+│   │   ├── api.js              # API service functions
+│   │   ├── auth.js             # Authentication service
+│   │   ├── websocket.js        # [PLANNED] WebSocket service
+│   │   ├── marketData.js       # [PLANNED] Market data service
+│   │   ├── notifications.js    # [PLANNED] Notifications service
+│   │   └── __tests__/          # [PLANNED] Service tests
+│   ├── utils/                  # [PLANNED] Utility functions
+│   ├── hooks/                  # [PLANNED] Custom React hooks
+│   ├── App.js                  # Main application component
+│   ├── App.css                 # Main application styles
+│   ├── index.css               # [PLANNED] Global styles (with Tailwind)
+│   ├── routes.js               # Application routes
+│   └── index.js                # Entry point
+├── backend/                    # Backend directory
+│   ├── controllers/            # API controllers
+│   │   ├── authController.js   # Authentication controller
+│   │   ├── tradeController.js  # Trading operations controller
+│   │   ├── marketController.js # [PLANNED] Market data controller
+│   │   └── alertsController.js # [PLANNED] Price alerts controller
+│   ├── middlewares/            # Express middlewares
+│   │   ├── authMiddleware.js   # Authentication middleware
+│   │   ├── rateLimiter.js      # [PLANNED] API rate limiting
+│   │   └── errorHandler.js     # [PLANNED] Error handling middleware
+│   ├── models/                 # Data models
+│   │   ├── User.js             # User model
+│   │   ├── Order.js            # [PLANNED] Order model
+│   │   └── Alert.js            # [PLANNED] Price alert model
+│   ├── routes/                 # API routes
+│   │   ├── authRoutes.js       # Authentication routes
+│   │   ├── tradeRoutes.js      # Trading routes
+│   │   ├── marketRoutes.js     # [PLANNED] Market data routes
+│   │   └── alertsRoutes.js     # [PLANNED] Price alerts routes
+│   ├── services/               # Backend services
+│   │   ├── ExchangeService.js  # Exchange service
+│   │   ├── websocketService.js # WebSocket service
+│   │   └── ExternalApiService.js # [PLANNED] External exchange API service
+│   ├── utils/                  # [PLANNED] Backend utilities
+│   └── config/                 # [PLANNED] Configuration files
+├── build/                      # Production build folder
+└── docs/                       # [PLANNED] Documentation

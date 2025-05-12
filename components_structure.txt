@@ -1,0 +1,63 @@
+=== SRC 디렉토리 구조 ===
+src
+├── App.js
+├── components
+│   ├── Chart
+│   │   ├── SimpleChart.css
+│   │   └── SimpleChart.js
+│   ├── CoinList
+│   │   ├── Coinitem.css
+│   │   └── Coinitem.js
+│   ├── OrderBook
+│   │   ├── OrderBook.css
+│   │   └── OrderBook.js
+│   ├── TradeHistory
+│   │   ├── TradingHistory.css
+│   │   └── TradingHistory.js
+│   ├── TradingPanel
+│   │   ├── TradingPanel.css
+│   │   └── TradingPanel.js
+│   ├── TradingView
+│   │   ├── TradingPanel.css
+│   │   ├── TradingPanel.js
+│   │   ├── TradingView.css
+│   │   └── TradingView.js
+│   └── common
+│       ├── Header.css
+│       └── Header.js
+├── context
+│   └── MarketContext.js
+├── pages
+│   ├── CoinListPage.css
+│   ├── CoinListPage.js
+│   ├── TradingPage.css
+│   └── TradingPage.js
+├── routes.js
+├── services
+│   ├── api.js
+│   └── websocketService.js
+└── utils
+    └── chartIndicators.js
+
+13 directories, 26 files
+
+=== BACKEND 디렉토리 구조 ===
+backend
+├── controllers
+│   └── authController.js
+├── engines
+│   └── TradeEngine.js
+├── middlewares
+│   └── authMiddleware.js
+├── routes
+│   └── authRoutes.js
+└── services
+    ├── ExchangeService.js
+    ├── blockchainService.js
+    ├── marketDataService
+    ├── marketDataService.js
+    ├── securityService.js
+    ├── walletService.js
+    └── websocketService.js
+
+6 directories, 11 files

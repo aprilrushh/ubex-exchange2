@@ -16,7 +16,9 @@ const Header = () => {
       <nav className="nav-menu">
         <ul>
           <li><Link to="/">거래소</Link></li>
-          <li><Link to="/balance">입출금</Link></li>
+          <li><Link to="/chart">차트</Link></li>
+      <li><Link to="/chart">차트</Link></li>
+      <li><Link to="/balance">입출금</Link></li>
           <li><Link to="/portfolio">투자내역</Link></li>
           <li><Link to="/info">코인정보</Link></li>
           <li><Link to="/support">고객센터</Link></li>

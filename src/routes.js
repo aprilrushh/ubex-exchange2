@@ -1,17 +1,22 @@
+// src/routes.js 수정
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import CoinListPage from './pages/CoinListPage';
-import TradingPage from './pages/TradingPage';
-import ChartPage from './pages/ChartPage';
-import TradeHistoryPage from './pages/TradeHistoryPage';
+import TradingLayout from './components/layout/TradingLayout';
+// 기존 임포트 주석 처리
+// import CoinListPage from './pages/CoinListPage';
+// import TradingPage from './pages/TradingPage';
+// import ChartPage from './pages/ChartPage';
+// import TradeHistoryPage from './pages/TradeHistoryPage';
 
 const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<CoinListPage />} />
+      <Route path="/" element={<TradingLayout />} />
+      {/* 기존 라우트들 주석 처리 
       <Route path="/trade/:symbol" element={<TradingPage />} />
+      <Route path="/chart" element={<ChartPage />} />
       <Route path="/chart/:symbol" element={<ChartPage />} />
       <Route path="/history/:symbol" element={<TradeHistoryPage />} />
-      {/* 추가 라우트는 여기에 정의 */}
+      */}
     </Routes>
   </BrowserRouter>
 );

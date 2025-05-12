@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './TradeHistory.css';
+import './TradingHistory.css';
 
 const TradeHistory = ({ symbol }) => {
   const [trades, setTrades] = useState([]);
