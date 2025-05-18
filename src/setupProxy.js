@@ -4,7 +4,7 @@ module.exports = function(app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://localhost:3000',  // 백엔드 서버 포트를 3000으로 수정
+      target: 'http://localhost:3035',  // 백엔드 서버 포트를 3035로 수정
       changeOrigin: true,
       pathRewrite: {
         '^/api': '/api'  // /api를 유지

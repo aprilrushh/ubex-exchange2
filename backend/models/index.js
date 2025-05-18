@@ -6,7 +6,7 @@ const path    = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
 const env      = process.env.NODE_ENV || 'development';
-const config   = require(__dirname + '/../config/config.js')[env];
+const config   = require('../config/config.json')[env];
 
 const db = {};
 let sequelize;
@@ -22,6 +22,10 @@ if (config.use_env_variable) {
   );
 }
 
+// User 모델 로드
+const UserModel = require('./User');
+db.User = UserModel(sequelize, Sequelize.DataTypes);
+
 // 현재 폴더의 모델 파일들 모두 읽어서 초기화
 fs
   .readdirSync(__dirname)
@@ -29,6 +33,7 @@ fs
     return (
       file.indexOf('.') !== 0 &&
       file !== basename &&
+      file !== 'User.js' &&
       file.slice(-3) === '.js'
     );
   })
@@ -40,7 +45,7 @@ fs
     db[model.name] = model;
   });
 
-// associate 메서드가 있는 모델은 관계 설정
+// 모델 간의 관계 설정
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);

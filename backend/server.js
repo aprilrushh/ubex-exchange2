@@ -20,17 +20,52 @@ if (websocketService) {
 
 const app = express();
 const server = http.createServer(app);
-const PORT = process.env.PORT || 3035; // 포트를 3035로 변경
-const JWT_SECRET = 'mySuperSecretKeyForUbexExchange2025!'; // 중앙 설정 권장
+const PORT = process.env.PORT || 3035;
 
 app.set('port', PORT);
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3002',
+  credentials: true
+}));
 app.use(express.json());
 
+// DB 초기화와 모델 동기화
+const db = require('./models');
+db.sequelize.authenticate()
+  .then(() => {
+    console.log('[DB] Connected successfully.');
+    return db.sequelize.sync({ alter: true }); // 개발 환경에서는 alter: true로 설정
+  })
+  .then(() => {
+    console.log('[DB] Models synchronized.');
+  })
+  .catch(err => {
+    console.error('[DB] Error:', err);
+    process.exit(1); // DB 연결 실패 시 서버 종료
+  });
+
+// JWT 미들웨어
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: '인증 토큰이 필요합니다.' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: '유효하지 않은 토큰입니다.' });
+    }
+    req.user = user;
+    next();
+  });
+};
+
 // API 라우트 설정
+app.use('/api/v1', authenticateToken, walletRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/orders', tradeRoutes);
-app.use('/api/wallet', walletRoutes);
+app.use('/auth', authRoutes);
 
 // 임시 포트폴리오 및 관리자 API (라우트 파일로 분리 권장)
 app.get('/api/portfolio/summary', authMiddleware, (req, res) => {
@@ -56,12 +91,19 @@ if (websocketService && typeof websocketService.initWebSocket === 'function') {
   console.error(`[${PORT}] backend/services/websocketService 또는 initWebSocket 함수를 찾을 수 없습니다.`);
 }
 
-server.listen(PORT, () => {
-  console.log(`Backend HTTP and WebSocket server is running on http://localhost:${PORT}`);
-}).on('error', (err) => {
-  console.error(`[${PORT}] 서버 시작 오류:`, err.message);
-  if (err.code === 'EADDRINUSE') {
-    console.error(`[${PORT}] 포트 ${PORT}가 이미 사용 중입니다.`);
-  }
-});
+// 포트 충돌 처리 개선
+const startServer = (port) => {
+  server.listen(port, () => {
+    console.log(`Backend HTTP and WebSocket server is running on http://localhost:${port}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`[${port}] 포트 ${port}가 이미 사용 중입니다. 다른 포트를 시도합니다...`);
+      startServer(port + 1); // 다음 포트 시도
+    } else {
+      console.error(`[${port}] 서버 시작 오류:`, err.message);
+    }
+  });
+};
+
+startServer(PORT);
 
