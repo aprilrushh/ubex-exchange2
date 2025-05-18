@@ -1,15 +1,14 @@
    // backend/routes/authRoutes.js
    const express = require('express');
    const router = express.Router();
-   const bcrypt = require('bcryptjs');
+   const bcrypt = require('bcrypt');
    const jwt = require('jsonwebtoken');
-   const { JWT_SECRET } = require('../config/jwtConfig');
    const { User } = require('../models');
 
    // 회원가입
    router.post('/register', async (req, res) => {
      try {
-       const { email, password, username } = req.body;
+       const { username, email, password } = req.body;
 
        // 이메일 중복 체크
        const existingUser = await User.findOne({ where: { email } });
@@ -22,9 +21,9 @@
 
        // 사용자 생성
        const user = await User.create({
+         username,
          email,
-         password: hashedPassword,
-         username
+         password: hashedPassword
        });
 
        // 비밀번호 제외하고 응답
@@ -53,15 +52,15 @@
          return res.status(401).json({ message: '이메일 또는 비밀번호가 올바르지 않습니다.' });
        }
 
-       // 비밀번호 제외하고 응답
        // 비밀번호 제외하고 JWT 발급
        const { password: _, ...userWithoutPassword } = user.toJSON();
-       res.json(userWithoutPassword);
        const token = jwt.sign(
          { id: user.id, email: user.email, username: user.username },
-         JWT_SECRET,
+         process.env.JWT_SECRET,
          { expiresIn: '1h' }
        );
+
+       // 토큰과 사용자 정보를 한 번에 응답
        res.json({ token, user: userWithoutPassword });
      } catch (error) {
        console.error('로그인 오류:', error);
@@ -70,5 +69,5 @@
    });
 
    module.exports = router;
-   
+      
    
