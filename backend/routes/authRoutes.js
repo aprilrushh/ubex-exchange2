@@ -2,6 +2,8 @@
    const express = require('express');
    const router = express.Router();
    const bcrypt = require('bcryptjs');
+   const jwt = require('jsonwebtoken');
+   const { JWT_SECRET } = require('../config/jwtConfig');
    const { User } = require('../models');
 
    // 회원가입
@@ -52,8 +54,15 @@
        }
 
        // 비밀번호 제외하고 응답
+       // 비밀번호 제외하고 JWT 발급
        const { password: _, ...userWithoutPassword } = user.toJSON();
        res.json(userWithoutPassword);
+       const token = jwt.sign(
+         { id: user.id, email: user.email, username: user.username },
+         JWT_SECRET,
+         { expiresIn: '1h' }
+       );
+       res.json({ token, user: userWithoutPassword });
      } catch (error) {
        console.error('로그인 오류:', error);
        res.status(500).json({ message: '로그인 중 오류가 발생했습니다.' });
@@ -61,4 +70,5 @@
    });
 
    module.exports = router;
+   
    
