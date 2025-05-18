@@ -1,48 +1,32 @@
 // backend/middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../config/jwtConfig');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+module.exports = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const currentPort = req.app ? (req.app.get('port') || process.env.PORT || 3030) : (process.env.PORT || 3030);
 
-exports.verifyToken = (req, res, next) => {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log(`[Port:${currentPort}] JWT 검증: 실패 - 토큰 없음 또는 형식 오류`);
+    return res.status(401).json({ message: '인증 토큰이 없거나 형식이 올바르지 않습니다.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
   try {
-    // Authorization 헤더에서 토큰 추출
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      return res.status(401).json({
-        success: false,
-        message: 'No token provided'
-      });
-    }
-
-    // Bearer 토큰 처리
-    const token = authHeader.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid token format'
-      });
-    }
-
-    // 토큰 검증
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-      if (err) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid token',
-          error: err.message
-        });
-      }
-
-      // 검증된 사용자 ID를 요청 객체에 추가
-      req.user = { id: decoded.id };
-      next();
-    });
+    // 토큰 검증 시 동일한 JWT_SECRET 사용
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // payload에 id, email 등이 포함되어 있어야 함
+    console.log(`[Port:${currentPort}] JWT 검증: 성공 - 사용자 ID: ${req.user.id}, 이메일: ${req.user.email}`);
+    next();
   } catch (error) {
-    console.error('Token verification error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error verifying token',
-      error: error.message
-    });
+    console.error(`[Port:${currentPort}] JWT 검증 실패: ${error.name} - ${error.message}`);
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: '토큰이 만료되었습니다.' });
+    }
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: '유효하지 않은 토큰입니다 (서명 또는 형식 오류).' });
+    }
+    return res.status(401).json({ message: '유효하지 않은 토큰입니다.' });
   }
 };

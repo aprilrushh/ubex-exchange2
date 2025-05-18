@@ -1,6 +1,8 @@
+/* Header.css 파일에 다음 스타일을 추가 또는 수정하세요 */
+
 .app-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* 요소 간격을 균등하게 배치 */
   align-items: center;
   padding: 15px 20px;
   background-color: #ffffff;
@@ -11,71 +13,52 @@
 .logo {
   font-size: 24px;
   font-weight: bold;
+  flex: 0 0 auto; /* 로고 크기 고정 */
 }
 
 .logo a {
-  color: #1E3DA8;
   text-decoration: none;
-  background: linear-gradient(90deg, #0d6efd, #6610f2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #003087;
+}
+
+.nav-menu {
+  flex: 1; /* 네비게이션이 가능한 공간을 모두 사용 */
+  margin-right: 20px; /* 오른쪽 여백 추가 */
 }
 
 .nav-menu ul {
   display: flex;
-  list-style: none;
+  list-style-type: none;
   margin: 0;
   padding: 0;
+  justify-content: flex-start; /* 왼쪽부터 메뉴 시작 */
+  flex-wrap: wrap; /* 화면 크기에 따라 메뉴가 여러 줄로 표시될 수 있도록 */
 }
 
 .nav-menu li {
-  margin-left: 20px;
+  margin-right: 20px; /* 메뉴 간 간격 */
 }
 
 .nav-menu a {
   text-decoration: none;
   color: #333;
   font-weight: 500;
-  padding: 5px 0;
-  position: relative;
+  padding: 8px 10px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
 .nav-menu a:hover {
-  color: #1E3DA8;
+  background-color: #f0f0f0;
 }
 
-.nav-menu a:hover::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #1E3DA8;
+/* 로그인/회원가입 메뉴 특별 스타일 */
+.nav-menu li:nth-last-child(-n+2) a {
+  color: #003087;
+  font-weight: 600;
 }
 
-.coin-quick-info {
-  display: flex;
-  align-items: center;
-}
-
-.coin-icon {
-  width: 24px;
-  height: 24px;
-  background-color: #eee;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-.coin-name {
-  font-weight: bold;
-  margin-right: 5px;
-}
-
-.coin-symbol {
-  color: #666;
-}
-
+/* 반응형 디자인 */
 @media (max-width: 768px) {
   .app-header {
     flex-direction: column;
@@ -83,19 +66,16 @@
   }
   
   .nav-menu {
-    margin-top: 15px;
+    margin-top: 10px;
     width: 100%;
   }
   
   .nav-menu ul {
-    flex-wrap: wrap;
+    flex-direction: column;
   }
   
   .nav-menu li {
-    margin: 5px 15px 5px 0;
-  }
-  
-  .coin-quick-info {
-    margin-top: 15px;
+    margin-right: 0;
+    margin-bottom: 8px;
   }
 }

@@ -1,0 +1,80 @@
+/* 코인 헤더 스타일 - 업비트 스타일 적용 */
+.coin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.coin-info {
+  display: flex;
+  align-items: center;
+}
+
+.coin-symbol {
+  font-size: 18px;
+  font-weight: 700;
+  color: #14204c;
+}
+
+.coin-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.current-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #14204c;
+}
+
+.price-change {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 14px;
+}
+
+.price-change.up {
+  color: #d60000; /* 상승 - 빨간색 (한국 스타일) */
+}
+
+.price-change.down {
+  color: #0051c7; /* 하락 - 파란색 (한국 스타일) */
+}
+
+.percent {
+  font-weight: 500;
+}
+
+.change {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.chart-preview {
+  margin-left: 20px;
+  width: 100px;
+  height: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+  .coin-header {
+    padding: 10px;
+  }
+  
+  .current-price {
+    font-size: 18px;
+  }
+  
+  .chart-preview {
+    width: 80px;
+    height: 32px;
+  }
+}

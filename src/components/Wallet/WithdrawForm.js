@@ -1,58 +1,95 @@
-import React, { useState } from 'react';
-import { requestWithdraw } from '../../services/WalletService';
+// 폴더: src/components/Wallet/WithdrawForm.js
 
-const WithdrawForm = ({ asset }) => {
+import React, { useState, useEffect } from 'react';
+import {
+  listWhitelist,
+  addWhitelist,
+  deleteWhitelist,
+  requestWithdrawal
+} from '../../services/WalletService';
+
+export default function WithdrawForm({ coin }) {
+  const [whitelist, setWhitelist] = useState([]);
   const [toAddress, setToAddress] = useState('');
+  const [label, setLabel] = useState('');
   const [amount, setAmount] = useState('');
-  const [otp, setOtp] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-    if (!toAddress || !amount || isNaN(amount) || Number(amount) <= 0) {
-      setError('출금 주소와 금액을 올바르게 입력하세요.');
-      return;
-    }
-    setLoading(true);
-    try {
-      await requestWithdraw({ asset, amount, toAddress, otp });
-      setSuccess('출금 요청이 완료되었습니다.');
-      setToAddress(''); setAmount(''); setOtp('');
-    } catch {
-      setError('출금 요청에 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
+  // 1) 화이트리스트 로딩
+  useEffect(() => {
+    (async () => {
+      try {
+        const list = await listWhitelist(coin);
+        setWhitelist(list);
+      } catch (e) {
+        console.error('화이트리스트 조회 실패', e);
+      }
+    })();
+  }, [coin]);
+
+  // 2) 화이트리스트 추가
+  const handleAdd = async () => {
+    if (!toAddress) return alert('주소를 입력하세요');
+    await addWhitelist(coin, toAddress, label);
+    const list = await listWhitelist(coin);
+    setWhitelist(list);
+    setToAddress('');
+    setLabel('');
+  };
+
+  // 3) 출금 요청
+  const handleWithdraw = async () => {
+    if (!toAddress || !amount) return alert('주소와 수량을 입력하세요');
+    await requestWithdrawal(coin, toAddress, amount);
+    alert('출금 요청이 완료되었습니다');
   };
 
   return (
-    <form className="withdraw-form" onSubmit={handleSubmit}>
-      <h3>{asset} 출금</h3>
-      <div className="form-row">
-        <label>출금 주소</label>
-        <input type="text" value={toAddress} onChange={e => setToAddress(e.target.value)} required />
-      </div>
-      <div className="form-row">
-        <label>출금 금액</label>
-        <input type="number" value={amount} onChange={e => setAmount(e.target.value)} min="0" step="any" required />
-      </div>
-      <div className="form-row">
-        <label>OTP 코드</label>
-        <input type="text" value={otp} onChange={e => setOtp(e.target.value)} placeholder="6자리" maxLength={6} />
-      </div>
-      <button type="submit" disabled={loading}>{loading ? '처리 중...' : '출금 요청'}</button>
-      {error && <div style={{color:'red', marginTop:8}}>{error}</div>}
-      {success && <div style={{color:'green', marginTop:8}}>{success}</div>}
-      <div className="notice" style={{color:'#888', fontSize:'14px', marginTop:12}}>
-        - 출금 전 주소와 금액을 반드시 확인하세요.<br/>
-        - OTP 미입력 시 출금이 제한될 수 있습니다.
-      </div>
-    </form>
-  );
-};
+    <div className="withdraw-form">
+      <h2>{coin} 출금</h2>
 
-export default WithdrawForm; 
+      <div className="whitelist-list">
+        <h3>화이트리스트</h3>
+        <ul>
+          {whitelist.map(item => (
+            <li key={item.id}>
+              {item.label || item.address}
+              <button onClick={() => setToAddress(item.address)}>선택</button>
+              <button onClick={async () => {
+                await deleteWhitelist(coin, item.id);
+                setWhitelist(whitelist.filter(x => x.id !== item.id));
+              }}>삭제</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="whitelist-add">
+        <input
+          type="text"
+          placeholder="새 주소"
+          value={toAddress}
+          onChange={e => setToAddress(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="레이블 (선택)"
+          value={label}
+          onChange={e => setLabel(e.target.value)}
+        />
+        <button onClick={handleAdd}>화이트리스트 추가</button>
+      </div>
+
+      <div className="withdraw-action" style={{ marginTop: 16 }}>
+        <input
+          type="number"
+          placeholder="수량"
+          value={amount}
+          onChange={e => setAmount(e.target.value)}
+        />
+        <button onClick={handleWithdraw}>출금 요청</button>
+      </div>
+    </div>
+  );
+}
+
+    

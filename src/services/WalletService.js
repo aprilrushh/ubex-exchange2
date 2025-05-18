@@ -1,27 +1,36 @@
-const API_BASE_URL = 'http://localhost:3001/api';
+// src/services/WalletService.js
+import axios from 'axios';
 
-export const getDepositAddress = async (asset) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/wallet/deposit-address/${asset}`);
-    if (!response.ok) throw new Error(`API 오류: ${response.status}`);
-    return response.json();
-  } catch (error) {
-    console.error('입금 주소 조회 실패:', error);
-    throw error;
-  }
-};
+/**
+ * 입금 주소 생성/조회
+ */
+export async function getDepositAddress(coin) {
+  const res = await axios.get(`/api/v1/${coin}/deposit-address`);
+  return res.data.data;  // { address }
+}
 
-export const requestWithdraw = async ({ asset, amount, toAddress, otp }) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/wallet/withdraw`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asset, amount, toAddress, otp }),
-    });
-    if (!response.ok) throw new Error(`API 오류: ${response.status}`);
-    return response.json();
-  } catch (error) {
-    console.error('출금 요청 실패:', error);
-    throw error;
-  }
-}; 
+/**
+ * 화이트리스트 조회/등록/삭제
+ */
+export async function listWhitelist(coin) {
+  const res = await axios.get(`/api/v1/${coin}/whitelist`);
+  return res.data.data;
+}
+
+export async function addWhitelist(coin, address, label) {
+  const res = await axios.post(`/api/v1/${coin}/whitelist`, { address, label });
+  return res.data.data;
+}
+
+export async function deleteWhitelist(coin, id) {
+  const res = await axios.delete(`/api/v1/${coin}/whitelist/${id}`);
+  return res.data.success;
+}
+
+/**
+ * 출금 요청
+ */
+export async function requestWithdrawal(coin, toAddress, amount) {
+  const res = await axios.post(`/api/v1/${coin}/withdraw`, { toAddress, amount });
+  return res.data.data; // { txHash }
+}

@@ -1,136 +1,32 @@
-const API_BASE_URL = 'http://localhost:3001/api';
+// src/services/api.js
 
 export const fetchCoinList = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/coins`);
-    if (!response.ok) {
-      throw new Error(`API 오류: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error('코인 목록 불러오기 실패:', error);
-    throw error;
-  }
+  console.warn('[services/api.js] fetchCoinList: 실제 API 연동이 필요합니다. 현재는 빈 배열을 반환합니다.');
+  return Promise.resolve([]);
 };
 
 export const fetchPrice = async (symbol) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/price/${symbol}`);
-    if (!response.ok) {
-      throw new Error(`API 오류: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error(`${symbol} 가격 불러오기 실패:`, error);
-    throw error;
-  }
+  console.warn(`[services/api.js] fetchPrice(${symbol}): 실제 API 연동이 필요합니다. 현재는 빈 객체를 반환합니다.`);
+  return Promise.resolve({});
 };
 
-export const fetchOrderBook = async (symbol) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/orderbook/${symbol}`);
-    if (!response.ok) {
-      throw new Error(`API 오류: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error(`${symbol} 오더북 불러오기 실패:`, error);
-    throw error;
-  }
+// 캔들 데이터 가져오기 (SimpleChart 또는 CryptoChart에서 사용될 수 있음)
+export const fetchCandleData = async (symbol, timeframe) => {
+    console.warn(`[services/api.js] fetchCandleData(${symbol}, ${timeframe}): 실제 API 연동 필요. 현재는 빈 배열 반환.`);
+    // 이 함수는 SimpleChart.js 또는 CryptoChart.js의 getCandleData 내부에서 호출될 수 있습니다.
+    // MarketContext.js의 getSamplePriceData를 참고하여 유사한 샘플 데이터 구조를 반환할 수 있습니다.
+    return Promise.resolve([]);
 };
 
-export const fetchTradeHistory = async (symbol) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/trades/${symbol}`);
-    if (!response.ok) {
-      throw new Error(`API 오류: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error(`${symbol} 체결 내역 불러오기 실패:`, error);
-    throw error;
-  }
-};
-
-export const fetchChartData = async (symbol, timeframe = 'day') => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/chart/${symbol}?timeframe=${timeframe}`);
-    if (!response.ok) {
-      throw new Error(`API 오류: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error(`${symbol} 차트 데이터 불러오기 실패:`, error);
-    throw error;
-  }
-};
-
-export const placeOrder = async (type, data) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/order/${type}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+// 실시간 가격 데이터 (이 함수는 CryptoChart.js의 getRealtimePrice에서 사용될 수 있음)
+export const fetchRealtimePrice = async (symbol) => {
+    console.warn(`[services/api.js] fetchRealtimePrice(${symbol}): 실제 API 연동 필요. 현재는 임시 데이터 반환.`);
+    // MarketContext.js의 getSamplePriceData와 유사한 구조로 반환
+    const basePrice = Math.random() * 50000;
+    const change = (Math.random() - 0.5) * 1000;
+    return Promise.resolve({
+        price: basePrice + change,
+        change: change,
+        changePercent: (change / basePrice) * 100
     });
-    if (!response.ok) {
-      throw new Error(`API 오류: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error(`주문 요청 실패:`, error);
-    throw error;
-  }
-};
-
-export const register = async (userData) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-    if (!response.ok) {
-      throw new Error(`API 오류: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error('회원가입 실패:', error);
-    throw error;
-  }
-};
-
-export const login = async (credentials) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-    if (!response.ok) {
-      throw new Error(`API 오류: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error('로그인 실패:', error);
-    throw error;
-  }
-};
-
-export const fetchBalance = async (userId) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/balance/${userId}`);
-    if (!response.ok) {
-      throw new Error(`API 오류: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error('잔고 정보 불러오기 실패:', error);
-    throw error;
-  }
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './OrderBook.css';
 
-const OrderBook = ({ symbol }) => {
+const OrderBook = ({ data, symbol }) => {
   const [orderBookData, setOrderBookData] = useState({
     asks: [], // 매도 주문
     bids: [], // 매수 주문
@@ -9,11 +9,43 @@ const OrderBook = ({ symbol }) => {
   const [depthView, setDepthView] = useState('0.1%'); // 호가 간격
   const [grouping, setGrouping] = useState(true); // 호가 그룹핑 여부
   
+  // 방어 코드: 데이터 유효성 검사
+  const validateOrderBookData = (book) => {
+    if (!book || !book.asks || !book.bids) {
+      return { asks: [], bids: [] };
+    }
+    return {
+      asks: book.asks.map(ask => ({
+        price: parseFloat(ask.price) || 0,
+        amount: parseFloat(ask.quantity) || 0,
+        total: (parseFloat(ask.price) * parseFloat(ask.quantity)) || 0,
+        sum: 0 // 누적 합계는 나중에 계산
+      })),
+      bids: book.bids.map(bid => ({
+        price: parseFloat(bid.price) || 0,
+        amount: parseFloat(bid.quantity) || 0,
+        total: (parseFloat(bid.price) * parseFloat(bid.quantity)) || 0,
+        sum: 0 // 누적 합계는 나중에 계산
+      }))
+    };
+  };
+
+  // 누적 합계 계산
+  const calculateSums = (orders) => {
+    let sum = 0;
+    return orders.map(order => {
+      sum += order.total;
+      return { ...order, sum };
+    });
+  };
+  
   // 샘플 호가 데이터 생성 함수
-  const generateOrderBookData = (symbol) => {
+  const generateOrderBookData = (symbol = 'BTC/USDT') => {
     // 중심가격 설정 (BTC/USDT는 약 67000, ETH/USDT는 약 3500 등)
     let centerPrice;
-    if (symbol.startsWith('BTC')) {
+    if (!symbol) {
+      centerPrice = 100 + (Math.random() * 10 - 5);
+    } else if (symbol.startsWith('BTC')) {
       centerPrice = 67500 + (Math.random() * 200 - 100);
     } else if (symbol.startsWith('ETH')) {
       centerPrice = 3500 + (Math.random() * 20 - 10);
@@ -81,29 +113,26 @@ const OrderBook = ({ symbol }) => {
   
   // API에서 호가 데이터 가져오기
   useEffect(() => {
-    // 실제 앱에서는 API를 통해 호가 데이터를 가져옵니다
-    // const fetchOrderBook = async () => {
-    //   try {
-    //     const response = await fetch(`/api/orderbook/${symbol}`);
-    //     const data = await response.json();
-    //     setOrderBookData(data);
-    //   } catch (error) {
-    //     console.error('호가 데이터 가져오기 오류:', error);
-    //   }
-    // };
-    
-    // 샘플 데이터 생성
-    const data = generateOrderBookData(symbol);
-    setOrderBookData(data);
-    
-    // 실시간 데이터 업데이트 (2초마다 갱신)
-    const interval = setInterval(() => {
-      const newData = generateOrderBookData(symbol);
-      setOrderBookData(newData);
-    }, 2000);
-    
-    return () => clearInterval(interval);
-  }, [symbol]);
+    if (data) {
+      // 외부에서 전달받은 데이터 사용
+      const validatedData = validateOrderBookData(data);
+      validatedData.asks = calculateSums(validatedData.asks);
+      validatedData.bids = calculateSums(validatedData.bids);
+      setOrderBookData(validatedData);
+    } else {
+      // 샘플 데이터 생성
+      const generatedData = generateOrderBookData(symbol);
+      setOrderBookData(generatedData);
+      
+      // 실시간 데이터 업데이트 (2초마다 갱신)
+      const interval = setInterval(() => {
+        const newData = generateOrderBookData(symbol);
+        setOrderBookData(newData);
+      }, 2000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [data, symbol]);
   
   // 가격 포맷팅 함수
   const formatPrice = (price) => {

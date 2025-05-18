@@ -1,0 +1,140 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+nav a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 0.5rem 0;
+  position: relative;
+}
+
+nav a:hover {
+  color: #00ff88;
+}
+
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #00ff88;
+  transition: width 0.3s ease;
+}
+
+nav a:hover::after {
+  width: 100%;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-email {
+  color: #00ff88;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  background-color: rgba(0, 255, 136, 0.1);
+  border-radius: 4px;
+}
+
+.login-button,
+.register-button,
+.logout-button {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.login-button {
+  color: #ffffff;
+  background-color: transparent;
+  border: 1px solid #00ff88;
+}
+
+.login-button:hover {
+  background-color: rgba(0, 255, 136, 0.1);
+}
+
+.register-button {
+  color: #1a1a1a;
+  background-color: #00ff88;
+  border: 1px solid #00ff88;
+}
+
+.register-button:hover {
+  background-color: #00cc6a;
+  border-color: #00cc6a;
+}
+
+.logout-button {
+  color: #ffffff;
+  background-color: transparent;
+  border: 1px solid #ff4444;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 68, 68, 0.1);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem;
+  }
+
+  .header-left {
+    gap: 1rem;
+  }
+
+  nav {
+    gap: 1rem;
+  }
+
+  .header-right {
+    gap: 0.5rem;
+  }
+
+  .user-email {
+    display: none;
+  }
+
+  .login-button,
+  .register-button,
+  .logout-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+} 

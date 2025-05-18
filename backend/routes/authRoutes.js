@@ -1,60 +1,64 @@
-const express = require('express');
-const router = express.Router();
+   // backend/routes/authRoutes.js
+   const express = require('express');
+   const router = express.Router();
+   const bcrypt = require('bcryptjs');
+   const { User } = require('../models');
 
-// 컨트롤러 불러오기
-let authController;
-try {
-  authController = require('../controllers/authController');
-  console.log('라우터: authController 모듈 로드 성공');
-} catch (error) {
-  console.error('라우터: authController 모듈 로드 실패:', error.message);
-  
-  // 컨트롤러 로드 실패 시 기본 구현 제공
-  authController = {
-    login: (req, res) => {
-      const { username, password } = req.body;
-      console.log('라우터 기본 login 처리:', username);
-      
-      if (username === 'test' && password === 'test123') {
-        return res.json({
-          success: true,
-          message: '로그인 성공 (라우터)',
-          userId: '123',
-          username
-        });
-      } else {
-        return res.status(401).json({
-          success: false,
-          message: '잘못된 인증 정보 (라우터)'
-        });
-      }
-    },
-    
-    register: (req, res) => {
-      const { username, password } = req.body;
-      console.log('라우터 기본 register 처리:', username);
-      
-      const userId = Date.now().toString();
-      return res.json({
-        success: true,
-        message: '회원가입 성공 (라우터)',
-        userId,
-        username
-      });
-    }
-  };
-}
+   // 회원가입
+   router.post('/register', async (req, res) => {
+     try {
+       const { email, password, username } = req.body;
 
-// 로그인 라우트
-router.post('/login', (req, res) => {
-  console.log('로그인 라우트 호출됨');
-  return authController.login(req, res);
-});
+       // 이메일 중복 체크
+       const existingUser = await User.findOne({ where: { email } });
+       if (existingUser) {
+         return res.status(400).json({ message: '이미 등록된 이메일입니다.' });
+       }
 
-// 회원가입 라우트
-router.post('/register', (req, res) => {
-  console.log('회원가입 라우트 호출됨');
-  return authController.register(req, res);
-});
+       // 비밀번호 해시화
+       const hashedPassword = await bcrypt.hash(password, 10);
 
-module.exports = router;
+       // 사용자 생성
+       const user = await User.create({
+         email,
+         password: hashedPassword,
+         username
+       });
+
+       // 비밀번호 제외하고 응답
+       const { password: _, ...userWithoutPassword } = user.toJSON();
+       res.status(201).json(userWithoutPassword);
+     } catch (error) {
+       console.error('회원가입 오류:', error);
+       res.status(500).json({ message: '회원가입 중 오류가 발생했습니다.' });
+     }
+   });
+
+   // 로그인
+   router.post('/login', async (req, res) => {
+     try {
+       const { email, password } = req.body;
+
+       // 사용자 찾기
+       const user = await User.findOne({ where: { email } });
+       if (!user) {
+         return res.status(401).json({ message: '이메일 또는 비밀번호가 올바르지 않습니다.' });
+       }
+
+       // 비밀번호 확인
+       const isValidPassword = await bcrypt.compare(password, user.password);
+       if (!isValidPassword) {
+         return res.status(401).json({ message: '이메일 또는 비밀번호가 올바르지 않습니다.' });
+       }
+
+       // 비밀번호 제외하고 응답
+       const { password: _, ...userWithoutPassword } = user.toJSON();
+       res.json(userWithoutPassword);
+     } catch (error) {
+       console.error('로그인 오류:', error);
+       res.status(500).json({ message: '로그인 중 오류가 발생했습니다.' });
+     }
+   });
+
+   module.exports = router;
+   

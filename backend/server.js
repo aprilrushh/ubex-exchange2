@@ -1,67 +1,67 @@
 // backend/server.js
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const websocketService = require('./services/websocketService');
+const authMiddleware = require('./middlewares/authMiddleware');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+const authRoutes = require('./routes/authRoutes');
+const tradeRoutes = require('./routes/tradeRoutes');
+const walletRoutes = require('./routes/walletRoutes');
+
+console.log('[BE Server] typeof websocketService:', typeof websocketService);
+if (websocketService) {
+  console.log('[BE Server] websocketService.initWebSocket exists:', typeof websocketService.initWebSocket === 'function');
+} else {
+  console.log('[BE Server] websocketService is null or undefined');
+}
+
 const app = express();
-const PORT = 3001; // 백엔드 서버 포트
+const server = http.createServer(app);
+const PORT = process.env.PORT || 3035; // 포트를 3035로 변경
+const JWT_SECRET = 'mySuperSecretKeyForUbexExchange2025!'; // 중앙 설정 권장
 
-app.use(cors()); // 모든 출처에서의 요청을 허용 (개발 중)
-app.use(express.json()); // JSON 요청 본문을 파싱하기 위함
+app.set('port', PORT);
+app.use(cors());
+app.use(express.json());
 
-// --- 기존 포트폴리오 샘플 API ---
-app.get('/api/portfolio/summary/:userId', (req, res) => {
-  console.log(`GET /api/portfolio/summary/${req.params.userId} 요청 받음`);
-  res.json({
-    krw: 1000000,
-    totalValue: 1500000,
-    available: 900000,
-    profit: 500000,
-    profitRate: 50.0,
-  });
+// API 라우트 설정
+app.use('/api/auth', authRoutes);
+app.use('/api/orders', tradeRoutes);
+app.use('/api/wallet', walletRoutes);
+
+// 임시 포트폴리오 및 관리자 API (라우트 파일로 분리 권장)
+app.get('/api/portfolio/summary', authMiddleware, (req, res) => {
+  const userId = req.user.id;
+  res.json({ krw: 1000000 + userId, totalValue: 1500000 + userId });
+});
+app.get('/api/portfolio/assets', authMiddleware, (req, res) => {
+  const userId = req.user.id;
+  res.json([ { id: 1, symbol: 'BTC', amount: 0.1 * userId }, { id: 2, symbol: 'ETH', amount: 2 * userId } ]);
+});
+app.get('/api/admin/coins', (req, res) => { res.json([]); });
+app.get('/api/admin/pairs', (req, res) => { res.json([]); });
+
+console.log(`[${PORT}] WebSocket 초기화 시도...`);
+if (websocketService && typeof websocketService.initWebSocket === 'function') {
+  try {
+    websocketService.initWebSocket(server);
+    console.log(`[${PORT}] websocketService.initWebSocket 호출 성공`);
+  } catch (error) {
+    console.error(`[${PORT}] websocketService.initWebSocket 호출 중 오류:`, error);
+  }
+} else {
+  console.error(`[${PORT}] backend/services/websocketService 또는 initWebSocket 함수를 찾을 수 없습니다.`);
+}
+
+server.listen(PORT, () => {
+  console.log(`Backend HTTP and WebSocket server is running on http://localhost:${PORT}`);
+}).on('error', (err) => {
+  console.error(`[${PORT}] 서버 시작 오류:`, err.message);
+  if (err.code === 'EADDRINUSE') {
+    console.error(`[${PORT}] 포트 ${PORT}가 이미 사용 중입니다.`);
+  }
 });
 
-app.get('/api/portfolio/assets/:userId', (req, res) => {
-  console.log(`GET /api/portfolio/assets/${req.params.userId} 요청 받음`);
-  res.json([
-    { id: 1, symbol: 'BTC', name: '비트코인', amount: 0.1, value: 900000, profit: 200000, profitRate: 28.6 },
-    { id: 2, symbol: 'ETH', name: '이더리움', amount: 2, value: 600000, profit: 300000, profitRate: 100.0 },
-  ]);
-});
-
-// --- 관리자 코인 목록 API ---
-app.get('/api/admin/coins', (req, res) => {
-  console.log('GET /api/admin/coins 요청 받음'); // 요청 수신 로그 추가
-  // 실제로는 데이터베이스에서 코인 목록을 조회해야 합니다.
-  // 여기서는 샘플 데이터를 반환합니다.
-  const sampleCoins = [
-    { id: 1, symbol: 'BTC', name: 'Bitcoin', market_cap: '1000B USD', current_price: '50000 USD', status: 'active' },
-    { id: 2, symbol: 'ETH', name: 'Ethereum', market_cap: '500B USD', current_price: '3000 USD', status: 'active' },
-    { id: 3, symbol: 'SOL', name: 'Solana', market_cap: '80B USD', current_price: '150 USD', status: 'inactive' },
-  ];
-  res.json(sampleCoins); // JSON 형태로 코인 목록 응답
-});
-
-// --- 관리자 거래쌍 목록 API (새로 추가된 부분) ---
-app.get('/api/admin/pairs', (req, res) => {
-  console.log('GET /api/admin/pairs 요청 받음'); // 요청 수신 로그 추가
-  // 실제로는 데이터베이스에서 거래쌍 목록을 조회해야 합니다.
-  // 여기서는 샘플 데이터를 반환합니다.
-  const samplePairs = [
-    { id: 1, base_currency: 'BTC', quote_currency: 'KRW', symbol: 'BTC/KRW', status: 'active', min_trade_amount: 0.0001 },
-    { id: 2, base_currency: 'ETH', quote_currency: 'KRW', symbol: 'ETH/KRW', status: 'active', min_trade_amount: 0.001 },
-    { id: 3, base_currency: 'SOL', quote_currency: 'KRW', symbol: 'SOL/KRW', status: 'inactive', min_trade_amount: 0.1 },
-    { id: 4, base_currency: 'ETH', quote_currency: 'BTC', symbol: 'ETH/BTC', status: 'active', min_trade_amount: 0.001 },
-  ];
-  res.json(samplePairs); // JSON 형태로 거래쌍 목록 응답
-});
-
-
-// 여기에 다른 /api/admin/ 관련 라우트들을 추가할 수 있습니다.
-// 예: app.get('/api/admin/coins/:id', ...);
-// 예: app.post('/api/admin/coins', ...);
-// 예: app.put('/api/admin/coins/:id', ...);
-// 예: app.get('/api/admin/pairs/:id', ...); 등등
-
-// 서버 시작
-app.listen(PORT, () => {
-  console.log(`Backend server is running on http://localhost:${PORT}`);
-});
