@@ -115,11 +115,15 @@
                 return;
             }
 
-            webSocketService.connect(symbol, handleMessage);
+            webSocketService.connect();
+            webSocketService.subscribe(symbol);
+            webSocketService.on('marketDataUpdate', handleMessage);
             updateStatus(true);
         });
 
         disconnectBtn.addEventListener('click', () => {
+            webSocketService.off('marketDataUpdate', handleMessage);
+            webSocketService.unsubscribe(symbolInput.value.trim().toUpperCase());
             webSocketService.disconnect();
             updateStatus(false);
             outputDiv.textContent = '';
