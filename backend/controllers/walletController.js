@@ -38,23 +38,40 @@ let userWallets = {
   };
   
   
+  // DB 및 블록체인 서비스 불러오기
+  const db = require('../models');
+  const blockchainService = require('../services/blockchainService')();
+
   // 입금 주소 조회 로직
   exports.getDepositAddress = async (req, res) => {
     try {
       const { coin } = req.params;
+      const coinSymbol = coin.toUpperCase();
       const userId = req.user.id; // authMiddleware에서 설정
       const currentPort = req.app.get('port') || process.env.PORT || 3006;
-  
-      // TODO: 실제 코인별 입금 주소 생성/조회 로직 구현 (DB 연동 등)
-      // 여기서는 임시 주소를 생성합니다.
-      const depositAddress = `0x${coin.toUpperCase()}_${userId}_${Math.random().toString(36).substring(2, 15)}`;
-  
-      console.log(`[Port:${currentPort}] 사용자 ID ${userId}의 ${coin.toUpperCase()} 입금 주소 조회 요청.`);
+
+      // 지갑이 이미 존재하면 재사용
+      let wallet = await db.Wallet.findOne({
+        where: { user_id: userId, coin_symbol: coinSymbol }
+      });
+
+      if (!wallet) {
+        // 새 주소 생성 후 DB에 저장
+        const { address, privateKey } = await blockchainService.generateAddress(coinSymbol);
+        wallet = await db.Wallet.create({
+          user_id: userId,
+          coin_symbol: coinSymbol,
+          address,
+          private_key: privateKey
+        });
+      }
+
+      console.log(`[Port:${currentPort}] 사용자 ID ${userId}의 ${coinSymbol} 입금 주소 조회 요청.`);
       res.json({
         success: true,
         data: {
-          coin: coin.toUpperCase(),
-          address: depositAddress,
+          coin: coinSymbol,
+          address: wallet.address,
         }
       });
     } catch (error) {
@@ -89,20 +106,42 @@ let userWallets = {
         return res.status(400).json({ success: false, message: `${coinSymbol} 출금 가능 잔액이 부족합니다. (보유: ${availableBalance})` });
       }
   
-      // TODO: 실제 출금 처리 로직 (OTP 검증, 블록체인 연동, DB 업데이트 등)
-      // 가상 잔액 차감
+      // 실제 출금 처리 로직 (블록체인 트랜잭션 생성 및 DB 기록)
       userWallets[userId][coinSymbol].available -= withdrawalAmount;
       userWallets[userId][coinSymbol].total -= withdrawalAmount; // total도 함께 차감
-  
+
+      const wallet = await db.Wallet.findOne({
+        where: { user_id: userId, coin_symbol: coinSymbol }
+      });
+      if (!wallet) {
+        return res.status(400).json({ success: false, message: `${coinSymbol} 지갑이 존재하지 않습니다.` });
+      }
+
+      const tx = await blockchainService.sendTransaction(
+        coinSymbol,
+        wallet.address,
+        address,
+        withdrawalAmount.toString()
+      );
+
+      const withdrawal = await db.Withdrawal.create({
+        wallet_id: wallet.id,
+        to_address: address,
+        amount: withdrawalAmount,
+        tx_hash: tx.txHash,
+        status: 'PENDING'
+      });
+
       const withdrawRequest = {
-        id: nextTransactionId++,
+        id: withdrawal.id,
         userId,
         type: 'WITHDRAWAL',
         coin: coinSymbol,
         amount: withdrawalAmount,
         address,
-        status: 'PENDING', // 실제 처리 후 'COMPLETED' 또는 'FAILED'로 변경
-        createdAt: new Date()
+        status: withdrawal.status,
+        txHash: tx.txHash,
+        createdAt: withdrawal.created_at
       };
       transactionHistory.push(withdrawRequest);
   
@@ -130,14 +169,17 @@ let userWallets = {
       // const { coin, startDate, endDate, page = 1, limit = 20 } = req.query; // 페이징 및 필터링은 추후 구현
       const currentPort = req.app.get('port') || process.env.PORT || 3006;
   
-      // TODO: 실제 입금 내역 조회 로직 (DB 연동)
-      const userDeposits = transactionHistory.filter(tx => tx.userId === userId && tx.type === 'DEPOSIT');
+      // DB에서 입금 기록 조회
+      const userDeposits = await db.Deposit.findAll({
+        include: [{ model: db.Wallet, where: { user_id: userId } }],
+        order: [['id', 'DESC']]
+      });
   
       console.log(`[Port:${currentPort}] 사용자 ID ${userId}의 입금 내역 조회 요청. ${userDeposits.length}건 발견.`);
       res.json({
         success: true,
         data: {
-          deposits: userDeposits, // 현재는 빈 배열 반환 (입금 로직 미구현)
+          deposits: userDeposits,
           pagination: { /* page: parseInt(page), limit: parseInt(limit), total: userDeposits.length */ }
         }
       });
@@ -157,8 +199,11 @@ let userWallets = {
       // const { coin, startDate, endDate, page = 1, limit = 20 } = req.query; // 페이징 및 필터링은 추후 구현
       const currentPort = req.app.get('port') || process.env.PORT || 3006;
   
-      // TODO: 실제 출금 내역 조회 로직 (DB 연동)
-      const userWithdrawals = transactionHistory.filter(tx => tx.userId === userId && tx.type === 'WITHDRAWAL');
+      // DB에서 출금 기록 조회
+      const userWithdrawals = await db.Withdrawal.findAll({
+        include: [{ model: db.Wallet, where: { user_id: userId } }],
+        order: [['id', 'DESC']]
+      });
       
       console.log(`[Port:${currentPort}] 사용자 ID ${userId}의 출금 내역 조회 요청. ${userWithdrawals.length}건 발견.`);
       res.json({
