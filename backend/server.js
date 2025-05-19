@@ -66,7 +66,7 @@ const authenticateToken = (req, res, next) => {
 // API 라우트 설정
 app.use('/api/v1', authenticateToken, walletRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/auth', authRoutes);
+app.use('/auth', authRoutes); // 이 라우트는 제거
 
 // 임시 포트폴리오 및 관리자 API (라우트 파일로 분리 권장)
 app.get('/api/portfolio/summary', authMiddleware, (req, res) => {

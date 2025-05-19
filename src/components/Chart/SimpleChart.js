@@ -1,4 +1,4 @@
-// src/components/Chart/SimpleChart.js - 업데이트된 버전
+// src/components/Chart/SimpleChart.js
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType } from 'lightweight-charts';
 import IndicatorSelector from './Indicators/IndicatorSelector';
@@ -248,138 +248,134 @@ const SimpleChart = ({
 
     ['ma5', 'ma10', 'ma20', 'ma60', 'ma120'].forEach(key => {
       if (indicators[key]) {
-        const period = parseInt(key.slice(2));
-        const ma = calculateMA(prices, period);
-
-        const lineData = data.map((candle, i) => ({
-          time: candle.time,
-          value: ma[i] || null
-        })).filter(point => point.value !== null);
-
-        const color = getMAColor(key);
-        const lineSeries = chartRef.current.addLineSeries({
-          color: color,
+        const period = parseInt(key.replace('ma', ''));
+        const maData = calculateMA(prices, period);
+        const series = chartRef.current.addLineSeries({
+          color: getMAColor(key),
           lineWidth: 2,
-          title: `MA ${period}`
         });
-
-        lineSeries.setData(lineData);
-        lineSeriesRefs.current[key] = lineSeries;
+        series.setData(maData.map((value, index) => ({
+          time: data[index].time,
+          value: value
+        })));
+        lineSeriesRefs.current[key] = series;
       }
     });
 
     if (indicators.rsi) {
-      const rsi = calculateRSI(prices, 14);
-      // RSI는 별도 차트로 표시하거나 별도 처리 필요
+      const rsiData = calculateRSI(prices);
+      const series = chartRef.current.addLineSeries({
+        color: '#FF6B6B',
+        lineWidth: 2,
+        priceScaleId: 'right',
+      });
+      series.setData(rsiData.map((value, index) => ({
+        time: data[index].time,
+        value: value
+      })));
+      lineSeriesRefs.current.rsi = series;
     }
 
     if (indicators.macd) {
-      const macd = calculateMACD(prices);
-      // MACD도 별도 차트로 표시하거나 별도 처리 필요
+      const { macdLine, signalLine, histogram } = calculateMACD(prices);
+      const macdSeries = chartRef.current.addLineSeries({
+        color: '#2196F3',
+        lineWidth: 2,
+        priceScaleId: 'right',
+      });
+      const signalSeries = chartRef.current.addLineSeries({
+        color: '#FF9800',
+        lineWidth: 2,
+        priceScaleId: 'right',
+      });
+      const histogramSeries = chartRef.current.addHistogramSeries({
+        color: '#4CAF50',
+        priceScaleId: 'right',
+      });
+
+      macdSeries.setData(macdLine.map((value, index) => ({
+        time: data[index].time,
+        value: value
+      })));
+      signalSeries.setData(signalLine.map((value, index) => ({
+        time: data[index].time,
+        value: value
+      })));
+      histogramSeries.setData(histogram.map((value, index) => ({
+        time: data[index].time,
+        value: value,
+        color: value >= 0 ? '#4CAF50' : '#F44336'
+      })));
+
+      lineSeriesRefs.current.macd = macdSeries;
+      lineSeriesRefs.current.signal = signalSeries;
+      lineSeriesRefs.current.histogram = histogramSeries;
     }
   };
 
-  // 이동평균선 색상 반환
   const getMAColor = (key) => {
     const colors = {
-      ma5: '#ff5722',
-      ma10: '#2196f3',
-      ma20: '#4caf50',
-      ma60: '#9c27b0',
-      ma120: '#795548'
+      ma5: '#FF6B6B',
+      ma10: '#4ECDC4',
+      ma20: '#45B7D1',
+      ma60: '#96CEB4',
+      ma120: '#FFEEAD'
     };
-    return colors[key] || '#666';
+    return colors[key] || '#FF6B6B';
   };
 
-  // 타임프레임 변경 처리
   const handleTimeframeChange = (newTimeframe) => {
-    setTimeframe(newTimeframe.id);
-    setIsLoading(true);
-
-    if (wsRef.current) {
-      wsRef.current.emit('changeInterval', { symbol, interval: newTimeframe.id });
-    }
-
+    setTimeframe(newTimeframe);
     if (onTimeframeChange) {
       onTimeframeChange(newTimeframe);
     }
+    if (wsRef.current) {
+      wsRef.current.emit('subscribe', { symbol, interval: newTimeframe });
+    }
   };
 
-  // 지표 변경 처리
   const handleIndicatorChange = (newIndicators) => {
     setIndicators(newIndicators);
     updateIndicators(chartData);
   };
 
-  // 심볼 변경 효과
-  useEffect(() => {
-    if (wsRef.current) {
-      wsRef.current.emit('subscribe', { symbol, interval: timeframe });
-    }
-  }, [symbol]);
-
-  // 컴포넌트 마운트 시 초기화
   useEffect(() => {
     initChart();
     connectWebSocket();
 
     return () => {
+      if (wsRef.current && wsRef.current.__handlers) {
+        const { handleConnect, handleDisconnect, handleError, handleCandles, handleCandlestick } = wsRef.current.__handlers;
+        wsRef.current.off('connect', handleConnect);
+        wsRef.current.off('disconnect', handleDisconnect);
+        wsRef.current.off('connect_error', handleError);
+        wsRef.current.off('error', handleError);
+        wsRef.current.off('candles', handleCandles);
+        wsRef.current.off('candlestick', handleCandlestick);
+      }
       if (chartRef.current) {
         chartRef.current.remove();
-      }
-      if (wsRef.current) {
-        const s = wsRef.current;
-        const h = s.__handlers || {};
-        s.off('connect', h.handleConnect);
-        s.off('disconnect', h.handleDisconnect);
-        s.off('connect_error', h.handleError);
-        s.off('error', h.handleError);
-        s.off('candles', h.handleCandles);
-        s.off('candlestick', h.handleCandlestick);
       }
     };
   }, []);
 
-  // 타임프레임 변경 시 웹소켓 구독 업데이트
-  useEffect(() => {
-    if (wsRef.current) {
-      wsRef.current.emit('subscribe', { symbol, interval: timeframe });
-    }
-  }, [timeframe]);
-
   return (
     <div className="chart-container">
-      <div className="chart-controls">
+      <div className="chart-header">
         <TimeframeSelector
+          timeframe={timeframe}
           onTimeframeChange={handleTimeframeChange}
-          defaultTimeframe={timeframe}
         />
         <IndicatorSelector
+          indicators={indicators}
           onIndicatorChange={handleIndicatorChange}
-          activeIndicators={indicators}
         />
       </div>
-
-      <div className="chart-header">
-        <div className="chart-info">
-          <span className="chart-symbol">{symbol}</span>
-          <span className="chart-timeframe">{timeframe}</span>
-          <span className={`connection-status ${connectionStatus}`}>
-            {connectionStatus === 'connected' ? '● 연결됨' :
-             connectionStatus === 'disconnected' ? '○ 연결 끊김' :
-             '! 오류'}
-          </span>
-        </div>
+      <div className="chart-status">
+        {connectionStatus === 'connected' ? '연결됨' : '연결 끊김'}
       </div>
-
       <div ref={chartContainerRef} className="chart" />
-
-      {isLoading && (
-        <div className="chart-loading">
-          <div className="loading-spinner"></div>
-          데이터 로딩 중...
-        </div>
-      )}
+      {isLoading && <div className="chart-loading">로딩 중...</div>}
     </div>
   );
 };
