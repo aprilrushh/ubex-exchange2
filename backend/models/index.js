@@ -8,6 +8,9 @@ const basename = path.basename(__filename);
 const env      = process.env.NODE_ENV || 'development';
 const config   = require('../config/config.json')[env];
 
+// 명시적으로 User 모델을 불러와 초기화합니다.
+const UserModel = require('./User');
+
 const db = {};
 let sequelize;
 
@@ -22,8 +25,12 @@ if (config.use_env_variable) {
   );
 }
 
+<<<<<<< HEAD
 // User 모델 로드
 const UserModel = require('./User');
+=======
+// User 모델 초기화
+>>>>>>> 02baeac7f0d49ae77a4b7a924f12edef507b42a2
 db.User = UserModel(sequelize, Sequelize.DataTypes);
 
 // 현재 폴더의 모델 파일들 모두 읽어서 초기화

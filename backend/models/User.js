@@ -9,7 +9,10 @@ module.exports = (sequelize, DataTypes) => {
     username: {
       type: DataTypes.STRING(50),
       allowNull: false,
+<<<<<<< HEAD
       unique: true,
+=======
+>>>>>>> 02baeac7f0d49ae77a4b7a924f12edef507b42a2
     },
     email: {
       type: DataTypes.STRING(100),
@@ -27,4 +30,8 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'updated_at',
   });
   return User;
+<<<<<<< HEAD
 }; 
+=======
+};
+>>>>>>> 02baeac7f0d49ae77a4b7a924f12edef507b42a2
