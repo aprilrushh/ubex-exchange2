@@ -22,25 +22,17 @@ function App() {
   useEffect(() => {
     // console.log('[App.js] useEffect - WebSocket 연결 시도');
     try {
-      if (webSocketServiceInstance && typeof webSocketServiceInstance.connect === 'function') {
-        webSocketServiceInstance.connect(null, null);
-      } else {
-        // console.error('[App.js] webSocketServiceInstance 또는 connect 함수를 찾을 수 없습니다.');
-      }
+      webSocketServiceInstance.connect();
     } catch (error) {
-      // console.error("[App.js] WebSocket 연결 중 오류:", error);
+      // console.error('[App.js] WebSocket 연결 중 오류:', error);
     }
 
     return () => {
       // console.log('[App.js] useEffect - WebSocket 연결 해제 시도');
       try {
-        if (webSocketServiceInstance && typeof webSocketServiceInstance.disconnect === 'function') {
-          webSocketServiceInstance.disconnect();
-        } else {
-          // console.error('[App.js] webSocketServiceInstance 또는 disconnect 함수를 찾을 수 없습니다.');
-        }
+        webSocketServiceInstance.disconnect();
       } catch (error) {
-        // console.error("[App.js] WebSocket 연결 해제 중 오류:", error);
+        // console.error('[App.js] WebSocket 연결 해제 중 오류:', error);
       }
     };
   }, []);

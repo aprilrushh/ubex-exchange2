@@ -17,9 +17,10 @@ const CoinList = () => {
     // 실제로는 API로 초기 목록을 받고, WebSocket으로 업데이트를 받는 것이 일반적입니다.
     // 지금은 간결함을 위해 초기 로딩 상태만 표시하고 WebSocket 데이터로 채웁니다.
     
-    // WebSocket 리스너 등록
-    const listenerId = 'CoinList_TickerUpdate';
-    webSocketServiceInstance.addListener('tickerUpdate', listenerId, (tickersArray) => {
+    // WebSocket 연결 및 리스너 등록
+    webSocketServiceInstance.connect();
+
+    const handleTickerUpdate = (tickersArray) => {
       // console.log('[CoinList] tickerUpdate 수신:', tickersArray);
       if (Array.isArray(tickersArray)) {
         // 배열로 받은 티커 데이터를 symbol을 키로 하는 객체로 변환하여 상태 업데이트
@@ -41,11 +42,15 @@ const CoinList = () => {
       } else {
         console.warn('[CoinList] tickerUpdate: 유효하지 않은 데이터 형식 (배열이 아님)');
       }
-    });
+    };
+
+    webSocketServiceInstance.on('tickerUpdate', handleTickerUpdate);
+    webSocketServiceInstance.subscribe('ticker');
 
     // 컴포넌트 언마운트 시 리스너 제거
     return () => {
-      webSocketServiceInstance.removeListener('tickerUpdate', listenerId);
+      webSocketServiceInstance.off('tickerUpdate', handleTickerUpdate);
+      webSocketServiceInstance.unsubscribe('ticker');
       console.log('[CoinList] tickerUpdate 리스너 제거됨');
     };
   }, [isLoading]); // isLoading을 의존성 배열에 추가하여 로딩 완료 후 재실행 방지 (또는 빈 배열 사용)

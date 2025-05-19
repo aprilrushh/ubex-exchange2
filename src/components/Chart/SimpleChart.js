@@ -110,16 +110,11 @@ const SimpleChart = ({
 
   // 웹소켓 연결 및 이벤트 설정
   const connectWebSocket = () => {
-    const socket = webSocketService.socket;
-    if (!socket) {
-      console.warn('WebSocket service unavailable');
-      return;
-    }
-
+    const socket = webSocketService.connect();
     wsRef.current = socket;
 
     const subscribe = () => {
-      socket.emit('subscribe', { symbol, interval: timeframe });
+      webSocketService.subscribe({ symbol, interval: timeframe });
     };
 
     const handleConnect = () => {
@@ -146,12 +141,11 @@ const SimpleChart = ({
       updateCandle(data);
     };
 
-    socket.on('connect', handleConnect);
-    socket.on('disconnect', handleDisconnect);
-    socket.on('connect_error', handleError);
-    socket.on('error', handleError);
-    socket.on('candles', handleCandles);
-    socket.on('candlestick', handleCandlestick);
+    webSocketService.on('connect', handleConnect);
+    webSocketService.on('disconnect', handleDisconnect);
+    webSocketService.on('error', handleError);
+    webSocketService.on('candles', handleCandles);
+    webSocketService.on('candlestick', handleCandlestick);
 
     wsRef.current.__handlers = {
       handleConnect,
@@ -325,12 +319,13 @@ const SimpleChart = ({
   };
 
   const handleTimeframeChange = (newTimeframe) => {
+    if (wsRef.current) {
+      webSocketService.unsubscribe({ symbol, interval: timeframe });
+      webSocketService.subscribe({ symbol, interval: newTimeframe });
+    }
     setTimeframe(newTimeframe);
     if (onTimeframeChange) {
       onTimeframeChange(newTimeframe);
-    }
-    if (wsRef.current) {
-      wsRef.current.emit('subscribe', { symbol, interval: newTimeframe });
     }
   };
 
@@ -346,12 +341,12 @@ const SimpleChart = ({
     return () => {
       if (wsRef.current && wsRef.current.__handlers) {
         const { handleConnect, handleDisconnect, handleError, handleCandles, handleCandlestick } = wsRef.current.__handlers;
-        wsRef.current.off('connect', handleConnect);
-        wsRef.current.off('disconnect', handleDisconnect);
-        wsRef.current.off('connect_error', handleError);
-        wsRef.current.off('error', handleError);
-        wsRef.current.off('candles', handleCandles);
-        wsRef.current.off('candlestick', handleCandlestick);
+        webSocketService.off('connect', handleConnect);
+        webSocketService.off('disconnect', handleDisconnect);
+        webSocketService.off('error', handleError);
+        webSocketService.off('candles', handleCandles);
+        webSocketService.off('candlestick', handleCandlestick);
+        webSocketService.unsubscribe({ symbol, interval: timeframe });
       }
       if (chartRef.current) {
         chartRef.current.remove();
