@@ -3,7 +3,8 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const PORT = 3035;  // 백엔드 서버 포트를 3035로 수정
+// Allow overriding the port via environment variable for flexibility
+const PORT = process.env.PORT || 3035;
 
 // CORS 설정
 app.use(cors({
