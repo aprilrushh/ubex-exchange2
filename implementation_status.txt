@@ -38,22 +38,24 @@ src/components/TradingView/TradingView.js
 src/components/common/Header.js
 
 ### 2.2 컴포넌트 디렉토리별 구현 현황
-- Chart: JS 파일 ��, CSS 파일 ��
-- CoinList: JS 파일 ��, CSS 파일 ��
-- OrderBook: JS 파일 ��, CSS 파일 ��
-- TradeHistory: JS 파일 ��, CSS 파일 ��
-- TradingPanel: JS 파일 ��, CSS 파일 ��
-- TradingView: JS 파일 ��, CSS 파일 ��
-- common: JS 파일 ��, CSS 파일 ��
+- Chart: JS 파일 ��, CSS 파일 ��
+- CoinList: JS 파일 ��, CSS 파일 ��
+- OrderBook: JS 파일 ��, CSS 파일 ��
+- TradeHistory: JS 파일 ��, CSS 파일 ��
+- TradingPanel: JS 파일 ��, CSS 파일 ��
+- TradingView: JS 파일 ��, CSS 파일 ��
+- common: JS 파일 ��, CSS 파일 ��
 
 ## 3. 백엔드 구현 분석
 
 ### 3.1 백엔드 디렉토리별 구현 현황
-- controllers: JS 파일 ��
-- engines: JS 파일 ��
-- middlewares: JS 파일 ��
-- routes: JS 파일 ��
-- services: JS 파일 ��
+    - ✅ 차트에 MA 선 표시 UI 구현 완료
+    - ✅ 타임프레임 선택 UI 구현 완료
+- 차트 통합: 기본 구현 완료 (MA UI 및 타임프레임 선택 기능 포함)
+- engines: JS 파일 ��
+- middlewares: JS 파일 ��
+- routes: JS 파일 ��
+- services: JS 파일 ��
 
 ### 3.2 구현된 API 엔드포인트 목록 (추정)
 backend/routes/authRoutes.js:router.post('/login', (req, res) => {
