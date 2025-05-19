@@ -1,6 +1,6 @@
 // src/index.js
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import './index.css';      // 전역 CSS 임포트
 import './App.css';        // App 전역 스타일
 import App from './App';
@@ -14,8 +14,7 @@ import { OrderProvider } from './context/OrderContext';   // 기존 OrderContext
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider>
       <AuthProvider>
@@ -26,5 +25,6 @@ root.render(
         </MarketProvider>
       </AuthProvider>
     </ThemeProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
+  document.getElementById('root')
 );
