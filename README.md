@@ -50,6 +50,8 @@ ubex-exchange/
 └── public/           # Static files
 ```
 
+For styling guidelines see [docs/design-guide.md](docs/design-guide.md).
+
 ## Error Handling
 The application includes error boundaries to gracefully handle runtime errors. If you encounter any issues:
 1. Check the browser console for error messages
