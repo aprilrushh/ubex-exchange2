@@ -1,5 +1,5 @@
 import React from 'react';
-import CoinList from '../CoinList/CoinList.js';
+import CoinList from '../CoinList/CoinList.jsx';
 import TradingChart from '../Chart/TradingChart.jsx';
 import OrderBook from '../OrderBook/OrderBook.jsx';
 import OrderForm from '../OrderForm/OrderForm.jsx';
