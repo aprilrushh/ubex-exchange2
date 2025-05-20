@@ -13,7 +13,7 @@ import ExchangePage from './components/Exchange/ExchangePage';
 import PortfolioPage from './pages/PortfolioPage';
 import DepositWithdrawPage from './pages/DepositWithdrawPage';
 import TradingPage from './pages/TradingPage'; // 주문 관련 컴포넌트가 이 페이지 내에 있음
-import LoginPage from './components/auth/Login';
+import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/Register';
 import AdminApp from './admin/AdminApp';
 import Header from './components/layout/Header'; // Header도 Context를 사용할 수 있음
