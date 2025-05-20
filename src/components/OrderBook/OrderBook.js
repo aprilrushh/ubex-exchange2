@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './OrderBook.css';
+import DepthChart from './DepthChart';
 
 const OrderBook = ({ data, symbol }) => {
   const [orderBookData, setOrderBookData] = useState({
@@ -251,6 +252,7 @@ const OrderBook = ({ data, symbol }) => {
           </div>
         </div>
       </div>
+      <DepthChart symbol={symbol} />
     </div>
   );
 };
