@@ -1,0 +1,21 @@
+.investment-page {
+  padding: 20px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  min-height: 100vh;
+}
+
+.summary-section {
+  margin: 24px 0;
+}
+
+.loading {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.error-message {
+  text-align: center;
+  color: var(--sell-color);
+}
