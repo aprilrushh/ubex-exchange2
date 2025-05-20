@@ -31,3 +31,28 @@
   cursor: pointer;
   font-size: 18px;
 }
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .header {
+    padding: 0 15px;
+  }
+
+  .header-left {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 10px;
+  }
+
+  .header-left {
+    gap: 10px;
+  }
+
+  .header-right {
+    gap: 5px;
+  }
+}
