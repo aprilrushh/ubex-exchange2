@@ -1,0 +1,13 @@
+:root {
+  --bg-primary: #10131a;
+  --bg-secondary: #1a1e29;
+  --bg-tertiary: #2a2e42;
+  --text-primary: #ffffff;
+  --text-secondary: #8a95aa;
+  --border-color: #3a4158;
+  --accent-color: #1b9cfc;
+  --buy-color: #1261e4;
+  --sell-color: #d9304e;
+  --hover-overlay: rgba(255, 255, 255, 0.05);
+  --font-family-base: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
