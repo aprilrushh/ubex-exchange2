@@ -1,0 +1,77 @@
+.my-order-list {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.my-order-list h3 {
+  margin: 0 0 20px 0;
+  color: #212529;
+}
+
+.no-orders {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+tr:hover {
+  background: #f8f9fa;
+}
+
+.buy {
+  color: #28a745;
+}
+
+.sell {
+  color: #dc3545;
+}
+
+.status-open {
+  color: #007bff;
+}
+
+.status-filled {
+  color: #28a745;
+}
+
+.status-canceled {
+  color: #6c757d;
+}
+
+.status-partial {
+  color: #ffc107;
+}
+
+.cancel-button {
+  padding: 4px 8px;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  background: transparent;
+  color: #dc3545;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-button:hover {
+  background: #dc3545;
+  color: white;
+} 

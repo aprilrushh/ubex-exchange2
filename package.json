@@ -2,6 +2,7 @@
   "name": "ubex-exchange",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:3035",
   "dependencies": {
     "@babel/runtime": "^7.27.1",
     "@truffle/hdwallet-provider": "^1.7.0",

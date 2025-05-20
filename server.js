@@ -2,8 +2,11 @@
 
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
 const app = express();
-const PORT = 3035;  // 백엔드 서버 포트를 3035로 수정
+const server = http.createServer(app);
+// Allow overriding the port via environment variable for flexibility
+const PORT = process.env.PORT || 3035;
 
 // CORS 설정
 app.use(cors({
@@ -29,12 +32,18 @@ db.sequelize.authenticate()
 // 라우트 연결
 const walletRoutes = require('./backend/routes/walletRoutes');
 const authRoutes = require('./backend/routes/authRoutes');
+const tradeRoutes = require('./backend/routes/tradeRoutes');
+const websocketService = require('./backend/services/websocketService');
 
 app.use('/api/v1', walletRoutes);
 app.use('/api/auth', authRoutes);  // /api/auth 경로로 수정
 app.use('/auth', authRoutes);      // 기존 /auth 경로도 유지
+app.use('/api/orders', tradeRoutes);
+
+websocketService.initWebSocket(server);
 
 // 서버 시작
 app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`[Server] Listening on port ${PORT}`);
 });

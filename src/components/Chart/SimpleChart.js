@@ -111,10 +111,15 @@ const SimpleChart = ({
   // 웹소켓 연결 및 이벤트 설정
   const connectWebSocket = () => {
     const socket = webSocketService.connect();
+    if (!socket || typeof socket !== 'object') {
+      console.error('WebSocket initialization failed', socket);
+      return;
+    }
     wsRef.current = socket;
 
     const subscribe = () => {
-      webSocketService.subscribe({ symbol, interval: timeframe });
+      const channel = `candlestick:${symbol}:${timeframe}`;
+      webSocketService.emit('subscribe', { channel });
     };
 
     const handleConnect = () => {
@@ -339,20 +344,31 @@ const SimpleChart = ({
     connectWebSocket();
 
     return () => {
-      if (wsRef.current && wsRef.current.__handlers) {
+      if (wsRef.current?.__handlers) {
         const { handleConnect, handleDisconnect, handleError, handleCandles, handleCandlestick } = wsRef.current.__handlers;
         webSocketService.off('connect', handleConnect);
         webSocketService.off('disconnect', handleDisconnect);
         webSocketService.off('error', handleError);
         webSocketService.off('candles', handleCandles);
         webSocketService.off('candlestick', handleCandlestick);
-        webSocketService.unsubscribe({ symbol, interval: timeframe });
       }
       if (chartRef.current) {
         chartRef.current.remove();
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (wsRef.current?.__handlers) {
+      const { handleConnect, handleDisconnect, handleError, handleCandles, handleCandlestick } = wsRef.current.__handlers;
+      webSocketService.off('connect', handleConnect);
+      webSocketService.off('disconnect', handleDisconnect);
+      webSocketService.off('error', handleError);
+      webSocketService.off('candles', handleCandles);
+      webSocketService.off('candlestick', handleCandlestick);
+    }
+    connectWebSocket();
+  }, [symbol, timeframe]);
 
   return (
     <div className="chart-container">

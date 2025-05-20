@@ -9,7 +9,7 @@ const MARKET_CONFIGS = {
     stepSize: 0.0001,
     minPrice: 0.01,
     maxPrice: 1000000,
-    tickSize: 0.01Í
+    tickSize: 0.01
   },
   'ETH/USDT': {
     minQuantity: 0.001,
@@ -46,7 +46,7 @@ export const validateQuantity = (symbol, quantity) => {
     throw new Error(`최대 주문 수량은 ${config.maxQuantity}입니다.`);
   }
 
-    // step size 검증 - floating point tolerance 사용
+  // step size 검증 - floating point tolerance 사용
   const ratio = quantity / config.stepSize;
   const diff = Math.abs(ratio - Math.round(ratio));
   if (diff > 1e-8) {

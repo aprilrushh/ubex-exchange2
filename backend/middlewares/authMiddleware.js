@@ -1,6 +1,6 @@
 // backend/middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../config/jwtConfig');
+const jwtConfig = require('../config/jwtConfig');
 
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -14,10 +14,10 @@ module.exports = (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    // 토큰 검증 시 동일한 JWT_SECRET 사용
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // payload에 id, email 등이 포함되어 있어야 함
-    console.log(`[Port:${currentPort}] JWT 검증: 성공 - 사용자 ID: ${req.user.id}, 이메일: ${req.user.email}`);
+    // 토큰 검증 시 jwtConfig.secret 사용
+    const decoded = jwt.verify(token, jwtConfig.secret);
+    req.user = decoded;
+    console.log(`[Port:${currentPort}] JWT 검증: 성공 - 사용자 ID: ${decoded.userId}`);
     next();
   } catch (error) {
     console.error(`[Port:${currentPort}] JWT 검증 실패: ${error.name} - ${error.message}`);

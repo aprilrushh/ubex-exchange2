@@ -1,5 +1,7 @@
 // backend/services/websocketService.js
 const socketIo = require('socket.io');
+const jwt = require('jsonwebtoken');
+const jwtConfig = require('../config/jwtConfig');
 const createExchangeService = require('./ExchangeService');
 const createMarketDataService = require('./marketDataService');
 
@@ -49,19 +51,44 @@ class WebSocketService {
     try {
       this.io = socketIo(httpServerInstance, {
         cors: {
-          origin: "http://localhost:3002", // 프론트엔드 포트
+          origin: ["http://localhost:3002", "http://localhost:3000"],
           methods: ["GET", "POST"],
+          credentials: true
         },
-        transports: ['websocket', 'polling']
+        transports: ['websocket', 'polling'],
+        allowEIO3: true,
+        pingTimeout: 60000,
+        pingInterval: 25000
       });
 
       console.log('[BE WS] Socket.IO 서버 초기화 완료. 클라이언트 연결 대기 중...');
 
+      this.io.use((socket, next) => {
+        const token = socket.handshake.auth.token;
+        
+        if (!token) {
+          console.log('[BE WS] 토큰 없음');
+          return next(new Error('Authentication error'));
+        }
+
+        try {
+          const decoded = jwt.verify(token, jwtConfig.secret);
+          socket.user = decoded;
+          console.log('[BE WS] 토큰 검증 성공:', decoded);
+          next();
+        } catch (error) {
+          console.error('[BE WS] 토큰 검증 실패:', error);
+          return next(new Error('Authentication error'));
+        }
+      });
+
       this.io.on('connection', (socket) => {
-        console.log(`[BE WS] 새 클라이언트 연결 성공: ${socket.id}`);
+        console.log(`[BE WS] 새 클라이언트 연결 성공: ${socket.id}, 사용자 ID: ${socket.user?.userId}`);
+        
         socket.on('disconnect', (reason) => {
           console.log(`[BE WS] 클라이언트 연결 해제: ${socket.id}, 이유: ${reason}`);
         });
+
         socket.on('getCandles', async ({ symbol, interval }) => {
           try {
             const intervalMs = INTERVAL_MS[interval] || INTERVAL_MS['1m'];
@@ -107,8 +134,9 @@ class WebSocketService {
             }
           }
         });
+
         socket.on('error', (error) => {
-            console.error(`[BE WS] 소켓 오류 (ID: ${socket.id}):`, error);
+          console.error(`[BE WS] 소켓 오류 (ID: ${socket.id}):`, error);
         });
       });
 

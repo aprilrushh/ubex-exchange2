@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useOrder } from '../../context/OrderContext';
 import SimpleChart from '../Chart/SimpleChart';
+import ErrorBoundary from '../common/ErrorBoundary';
 import OrderBook from '../OrderBook/OrderBook';
 import OrderForm from '../OrderForm/OrderForm';
 import MyOrderList from '../OrderList/MyOrderList';
@@ -35,7 +36,9 @@ const TradingLayout = () => {
     <div className="trading-layout">
       <div className="trading-main">
         <div className="chart-section">
-          <SimpleChart symbol={symbol} />
+          <ErrorBoundary>
+            <SimpleChart symbol={symbol} />
+          </ErrorBoundary>
         </div>
         <div className="order-section">
           <OrderForm onSubmit={handleOrderSubmit} />

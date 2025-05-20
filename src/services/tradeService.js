@@ -1,16 +1,79 @@
 // src/services/tradeService.js
 import axios from 'axios';
 
-const API_BASE_URL = '/api'; // 백엔드 API 주소 (포트 3035)
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+// 더미 주문 데이터
+const DUMMY_ORDERS = [
+  {
+    id: 1,
+    symbol: 'BTC/USDT',
+    type: 'LIMIT',
+    side: 'BUY',
+    price: 50000,
+    quantity: 0.1,
+    status: 'OPEN',
+    timestamp: Date.now() - 3600000
+  },
+  {
+    id: 2,
+    symbol: 'ETH/USDT',
+    type: 'MARKET',
+    side: 'SELL',
+    price: null,
+    quantity: 1.5,
+    status: 'FILLED',
+    timestamp: Date.now() - 7200000
   }
-  // 인증이 필요 없는 요청의 경우 또는 토큰이 없을 경우
-  return { 'Content-Type': 'application/json' };
-};
+];
+
+const API_BASE_URL = 'http://localhost:3035/api';
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  withCredentials: true
+});
+
+// 요청 인터셉터 추가
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    console.error('Request interceptor error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// 응답 인터셉터 추가
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout');
+      return Promise.reject(new Error('Request timeout. Please try again.'));
+    }
+
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      return Promise.reject(new Error('Session expired. Please login again.'));
+    }
+
+    if (error.response?.status === 504) {
+      console.error('Gateway timeout');
+      return Promise.reject(new Error('Server is taking too long to respond. Please try again.'));
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 /**
  * 새 주문을 생성합니다.
@@ -19,15 +82,11 @@ const getAuthHeaders = () => {
  */
 export const createOrder = async (orderData) => {
   try {
-    // 백엔드의 /api/orders 경로로 POST 요청
-    const response = await axios.post(`${API_BASE_URL}/orders`, orderData, {
-      headers: getAuthHeaders(),
-    });
-    return response.data; // 성공 시 { message: '...', order: { ... } } 형태의 객체 반환
+    const response = await api.post('/orders', orderData);
+    return response.data;
   } catch (error) {
-    console.error('주문 생성 서비스 실패:', error.response ? error.response.data : error.message);
-    const errorMessage = error.response?.data?.message || error.message || '주문 생성에 실패했습니다.';
-    throw new Error(errorMessage);
+    console.error('주문 생성 서비스 실패:', error.message);
+    throw error;
   }
 };
 
@@ -37,15 +96,41 @@ export const createOrder = async (orderData) => {
  */
 export const getMyOrders = async () => {
   try {
-    // 백엔드의 /api/orders 경로로 GET 요청
-    const response = await axios.get(`${API_BASE_URL}/orders`, {
-      headers: getAuthHeaders(),
-    });
-    return response.data; // 주문 객체들의 배열 반환
+    const response = await api.get('/orders');
+    return response.data;
   } catch (error) {
-    console.error('내 주문 목록 조회 서비스 실패:', error.response ? error.response.data : error.message);
-    const errorMessage = error.response?.data?.message || error.message || '주문 목록 조회에 실패했습니다.';
-    throw new Error(errorMessage);
+    console.error('내 주문 목록 조회 서비스 실패:', error.message);
+    throw error;
+  }
+};
+
+export const cancelOrder = async (orderId) => {
+  try {
+    const response = await api.delete(`/orders/${orderId}`);
+    return response.data;
+  } catch (error) {
+    console.error('주문 취소 서비스 실패:', error.message);
+    throw error;
+  }
+};
+
+export const getOrderBook = async (symbol) => {
+  try {
+    const response = await api.get(`/orderbook/${symbol}`);
+    return response.data;
+  } catch (error) {
+    console.error('호가창 조회 서비스 실패:', error.message);
+    throw error;
+  }
+};
+
+export const getRecentTrades = async (symbol) => {
+  try {
+    const response = await api.get(`/trades/${symbol}`);
+    return response.data;
+  } catch (error) {
+    console.error('최근 체결 내역 조회 서비스 실패:', error.message);
+    throw error;
   }
 };
 

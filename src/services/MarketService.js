@@ -26,7 +26,7 @@ export const connectWebSocket = (symbols, onMessage) => {
     console.error('WebSocket 오류:', err);
   };
   return ws;
-};
+}; 
 
 // 코인 목록 조회
 export async function fetchCoinList() {

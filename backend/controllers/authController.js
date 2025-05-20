@@ -1,13 +1,16 @@
    // backend/controllers/authController.js
-   const bcrypt = require('bcryptjs');
+   const bcrypt = require('bcrypt');
    const jwt = require('jsonwebtoken');
-   const { User } = require('../models');
    const jwtConfig = require('../config/jwtConfig');
 
-   // 임시 사용자 데이터 저장소 (실제 프로덕션에서는 데이터베이스 사용)
+   // 임시 사용자 데이터 저장소
    let users = [
-     // 초기 테스트 사용자가 필요하다면 여기에 추가
-     // 예: { id: 1, username: 'test', email: 'test@example.com', passwordHash: bcrypt.hashSync('password123', 10) }
+     {
+       id: 1,
+       username: 'test',
+       email: 'test@example.com',
+       password: bcrypt.hashSync('test123', 10)
+     }
    ];
    let nextUserId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
 
@@ -19,64 +22,19 @@
    }
 
    // JWT 토큰 생성 함수
-   const generateToken = (user) => {
-     return jwt.sign(
-       { 
-         id: user.id,
-         email: user.email,
-         username: user.username
-       },
-       jwtConfig.secret,
-       { 
-         expiresIn: jwtConfig.expiresIn,
-         algorithm: jwtConfig.algorithm
-       }
-     );
-   };
-
-   // 회원가입 로직
-   exports.register = async (req, res) => {
+   const generateToken = (userId) => {
      try {
-       const { username, email, password } = req.body;
-
-       // 이메일 중복 체크
-       const existingEmail = await User.findOne({ where: { email } });
-       if (existingEmail) {
-         return res.status(400).json({ message: '이미 등록된 이메일입니다.' });
+       if (!jwtConfig.secret) {
+         throw new Error('JWT_SECRET is not configured');
        }
-
-       // 사용자명 중복 체크
-       const existingUsername = await User.findOne({ where: { username } });
-       if (existingUsername) {
-         return res.status(400).json({ message: '이미 사용 중인 사용자명입니다.' });
-       }
-
-       // 비밀번호 해시화
-       const hashedPassword = await bcrypt.hash(password, 10);
-
-       // 사용자 생성
-       const user = await User.create({
-         username,
-         email,
-         password: hashedPassword
+       const token = jwt.sign({ userId }, jwtConfig.secret, {
+         expiresIn: '24h'
        });
-
-       // 비밀번호 제외하고 JWT 발급
-       const { password: _, ...userWithoutPassword } = user.toJSON();
-       const token = generateToken(user);
-
-       res.status(201).json({ 
-         success: true,
-         message: '회원가입이 완료되었습니다.',
-         token, 
-         user: userWithoutPassword 
-       });
+       console.log('[authController] 토큰 생성 성공:', { userId });
+       return token;
      } catch (error) {
-       console.error('회원가입 오류:', error);
-       res.status(500).json({ 
-         success: false,
-         message: '회원가입 중 오류가 발생했습니다.' 
-       });
+       console.error('[authController] 토큰 생성 실패:', error);
+       throw error;
      }
    };
 
@@ -84,40 +42,93 @@
    exports.login = async (req, res) => {
      try {
        const { email, password } = req.body;
+       console.log('[authController] 로그인 시도:', { email });
 
-       // 사용자 찾기
-       const user = await User.findOne({ where: { email } });
+       // 사용자 조회
+       const user = users.find(u => u.email === email);
        if (!user) {
-         return res.status(401).json({ 
+         console.log('[authController] 사용자를 찾을 수 없음:', email);
+         return res.status(401).json({
            success: false,
-           message: '이메일 또는 비밀번호가 올바르지 않습니다.' 
+           message: '이메일 또는 비밀번호가 올바르지 않습니다.'
          });
        }
 
        // 비밀번호 확인
-       const isValidPassword = await bcrypt.compare(password, user.password);
-       if (!isValidPassword) {
-         return res.status(401).json({ 
+       const isMatch = await bcrypt.compare(password, user.password);
+       if (!isMatch) {
+         console.log('[authController] 비밀번호 불일치:', email);
+         return res.status(401).json({
            success: false,
-           message: '이메일 또는 비밀번호가 올바르지 않습니다.' 
+           message: '이메일 또는 비밀번호가 올바르지 않습니다.'
          });
        }
 
-       // 비밀번호 제외하고 JWT 발급
-       const { password: _, ...userWithoutPassword } = user.toJSON();
-       const token = generateToken(user);
+       // 토큰 생성
+       const token = generateToken(user.id);
+       console.log('[authController] 로그인 성공:', { userId: user.id, email: user.email });
 
-       res.json({ 
+       // 비밀번호 제외하고 사용자 정보 반환
+       const { password: _, ...userWithoutPassword } = user;
+
+       res.json({
          success: true,
-         message: '로그인 성공',
-         token, 
-         user: userWithoutPassword 
+         token,
+         user: userWithoutPassword
        });
      } catch (error) {
-       console.error('로그인 오류:', error);
-       res.status(500).json({ 
+       console.error('[authController] 로그인 실패:', error);
+       res.status(500).json({
          success: false,
-         message: '로그인 중 오류가 발생했습니다.' 
+         message: '로그인 중 오류가 발생했습니다.'
+       });
+     }
+   };
+
+   // 회원가입 로직
+   exports.register = async (req, res) => {
+     try {
+       const { username, email, password } = req.body;
+       console.log('[authController] 회원가입 시도:', { username, email });
+
+       // 이메일 중복 확인
+       if (users.some(u => u.email === email)) {
+         console.log('[authController] 이메일 중복:', email);
+         return res.status(400).json({
+           success: false,
+           message: '이미 등록된 이메일입니다.'
+         });
+       }
+
+       // 비밀번호 해시화
+       const hashedPassword = await bcrypt.hash(password, 10);
+
+       // 새 사용자 생성
+       const newUser = {
+         id: nextUserId++,
+         username,
+         email,
+         password: hashedPassword
+       };
+       users.push(newUser);
+
+       // 토큰 생성
+       const token = generateToken(newUser.id);
+       console.log('[authController] 회원가입 성공:', { userId: newUser.id, email: newUser.email });
+
+       // 비밀번호 제외하고 사용자 정보 반환
+       const { password: _, ...userWithoutPassword } = newUser;
+
+       res.status(201).json({
+         success: true,
+         token,
+         user: userWithoutPassword
+       });
+     } catch (error) {
+       console.error('[authController] 회원가입 실패:', error);
+       res.status(500).json({
+         success: false,
+         message: '회원가입 중 오류가 발생했습니다.'
        });
      }
    };
@@ -125,25 +136,19 @@
    // 토큰 갱신 로직
    exports.refreshToken = async (req, res) => {
      try {
-       const user = await User.findByPk(req.user.id);
-       if (!user) {
-         return res.status(404).json({ 
-           success: false,
-           message: '사용자를 찾을 수 없습니다.' 
-         });
-       }
+       const userId = req.user.userId;
+       const token = generateToken(userId);
+       console.log('[authController] 토큰 갱신 성공:', { userId });
 
-       const token = generateToken(user);
-       res.json({ 
+       res.json({
          success: true,
-         message: '토큰이 갱신되었습니다.',
-         token 
+         token
        });
      } catch (error) {
-       console.error('토큰 갱신 오류:', error);
-       res.status(500).json({ 
+       console.error('[authController] 토큰 갱신 실패:', error);
+       res.status(500).json({
          success: false,
-         message: '토큰 갱신 중 오류가 발생했습니다.' 
+         message: '토큰 갱신 중 오류가 발생했습니다.'
        });
      }
    };
