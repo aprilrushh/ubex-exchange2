@@ -175,3 +175,20 @@
   color: var(--sell-color);
   font-size: 13px;
 }
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .order-form-container {
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .order-type-selector {
+    flex-direction: column;
+  }
+
+  .percent-selector {
+    flex-wrap: wrap;
+  }
+}

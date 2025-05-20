@@ -43,3 +43,20 @@
 .coin-change.negative {
   color: var(--sell-color);
 }
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .coin-item {
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .coin-item {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .coin-change {
+    display: none;
+  }
+}
