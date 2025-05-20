@@ -1,4 +1,5 @@
 import React from 'react';
+import Tabs from '../common/Tabs';
 import './PortfolioTabs.css';
 
 const TABS = [
@@ -11,17 +12,12 @@ const TABS = [
 
 const PortfolioTabs = ({ activeTab, onTabChange }) => {
   return (
-    <nav className="portfolio-tabs">
-      {TABS.map(tab => (
-        <button
-          key={tab.key}
-          className={activeTab === tab.key ? 'active' : ''}
-          onClick={() => onTabChange(tab.key)}
-        >
-          {tab.label}
-        </button>
-      ))}
-    </nav>
+    <Tabs
+      tabs={TABS}
+      activeTab={activeTab}
+      onChange={onTabChange}
+      className="portfolio-tabs"
+    />
   );
 };
 

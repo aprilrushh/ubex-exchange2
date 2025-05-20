@@ -1,0 +1,25 @@
+.button {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 4px;
+  font: inherit;
+}
+
+.button:hover {
+  background-color: var(--hover-overlay);
+}
+
+.buy {
+  background-color: var(--buy-color);
+  border-color: var(--buy-color);
+  color: #fff;
+}
+
+.sell {
+  background-color: var(--sell-color);
+  border-color: var(--sell-color);
+  color: #fff;
+}

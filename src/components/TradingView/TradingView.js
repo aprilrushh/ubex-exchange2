@@ -3,6 +3,7 @@ import SimpleChart from '../Chart/SimpleChart';
 import OrderBook from '../OrderBook/OrderBook';
 import TradingPanel from '../TradingPanel/TradingPanel';
 import TradeHistory from '../TradeHistory/TradeHistory';
+import Tabs from '../common/Tabs';
 import './TradingView.css';
 
 const TradingView = () => {
@@ -104,32 +105,17 @@ const TradingView = () => {
         </div>
       </div>
       
-      <div className="trading-tabs">
-        <div 
-          className={`tab ${activeTab === 'chart' ? 'active' : ''}`}
-          onClick={() => setActiveTab('chart')}
-        >
-          차트
-        </div>
-        <div 
-          className={`tab ${activeTab === 'orderbook' ? 'active' : ''}`}
-          onClick={() => setActiveTab('orderbook')}
-        >
-          호가
-        </div>
-        <div 
-          className={`tab ${activeTab === 'trades' ? 'active' : ''}`}
-          onClick={() => setActiveTab('trades')}
-        >
-          체결
-        </div>
-        <div 
-          className={`tab ${activeTab === 'info' ? 'active' : ''}`}
-          onClick={() => setActiveTab('info')}
-        >
-          정보
-        </div>
-      </div>
+      <Tabs
+        tabs={[
+          { key: 'chart', label: '차트' },
+          { key: 'orderbook', label: '호가' },
+          { key: 'trades', label: '체결' },
+          { key: 'info', label: '정보' }
+        ]}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        className="trading-tabs"
+      />
       
       <div className="trading-content">
         {activeTab === 'chart' && (
