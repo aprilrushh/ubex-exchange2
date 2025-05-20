@@ -1,0 +1,21 @@
+.depth-chart {
+  width: 100%;
+  height: 150px;
+}
+
+.depth-chart svg {
+  width: 100%;
+  height: 100%;
+}
+
+.bids-area {
+  fill: rgba(0, 81, 199, 0.3);
+  stroke: #0051c7;
+  stroke-width: 2;
+}
+
+.asks-area {
+  fill: rgba(214, 0, 0, 0.3);
+  stroke: #d60000;
+  stroke-width: 2;
+}
