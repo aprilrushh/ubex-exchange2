@@ -16,8 +16,8 @@ module.exports = (req, res, next) => {
   try {
     // 토큰 검증 시 jwtConfig.secret 사용
     const decoded = jwt.verify(token, jwtConfig.secret);
-    req.user = decoded;
-    console.log(`[Port:${currentPort}] JWT 검증: 성공 - 사용자 ID: ${decoded.userId}`);
+    req.user = { id: decoded.userId || decoded.id };
+    console.log(`[Port:${currentPort}] JWT 검증: 성공 - 사용자 ID: ${req.user.id}`);
     next();
   } catch (error) {
     console.error(`[Port:${currentPort}] JWT 검증 실패: ${error.name} - ${error.message}`);
