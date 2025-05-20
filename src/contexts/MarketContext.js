@@ -1,53 +1,30 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 
-const MarketContext = createContext(null);
+export const MarketContext = createContext();
 
 export const MarketProvider = ({ children }) => {
-  const [markets, setMarkets] = useState([]);
-  const [selectedMarket, setSelectedMarket] = useState('BTC/USDT');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [coins, setCoins] = useState([]);
 
-  const fetchMarkets = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('http://localhost:3035/api/markets');
-      if (!response.ok) {
-        throw new Error('Failed to fetch markets');
-      }
-
-      const data = await response.json();
-      setMarkets(data);
-    } catch (error) {
-      console.error('Fetch markets error:', error);
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
+  // 샘플 코인 데이터 로드
+  useEffect(() => {
+    const data = [
+      { symbol: 'BIT', name: '비트',       price: 2500,    change: 0.25,  volume: 12345 },
+      { symbol: 'ETH', name: '이더리움',   price: 1700000, change: -1.2,  volume: 67890 },
+      { symbol: 'USDT', name: '테더',      price: 1350,    change: 0.05,  volume: 54321 },
+      { symbol: 'DOGE', name: '도지코인',  price: 85,      change: 3.2,   volume: 234567 },
+      { symbol: 'SOL', name: '솔라나',     price: 25000,   change: -0.8,  volume: 98765 },
+      { symbol: 'ADA', name: '에이다',     price: 500,     change: 1.5,   volume: 45678 },
+      { symbol: 'XRP', name: '리플',       price: 750,     change: -0.3,  volume: 123456 },
+      { symbol: 'BNB', name: '바이낸스',   price: 420000,  change: 0.7,   volume: 98765 },
+      { symbol: 'LTC', name: '라이트코인', price: 95000,   change: -2.1,  volume: 22222 },
+      { symbol: 'DOT', name: '폴카닷',     price: 15000,   change: 0.9,   volume: 33333 }
+    ];
+    setCoins(data);
   }, []);
 
-  const value = {
-    markets,
-    selectedMarket,
-    isLoading,
-    error,
-    setSelectedMarket,
-    fetchMarkets
-  };
-
   return (
-    <MarketContext.Provider value={value}>
+    <MarketContext.Provider value={{ coins }}>
       {children}
     </MarketContext.Provider>
   );
 };
-
-export const useMarket = () => {
-  const context = useContext(MarketContext);
-  if (!context) {
-    throw new Error('useMarket must be used within a MarketProvider');
-  }
-  return context;
-}; 
