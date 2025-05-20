@@ -59,3 +59,20 @@
   flex: 1;
   overflow-y: auto;
 }
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .coin-list-table-header {
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .coin-list-table-header {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .coin-list-table-header div:last-child {
+    display: none;
+  }
+}

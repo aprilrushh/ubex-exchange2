@@ -30,3 +30,14 @@
   height: 2px;
   background-color: var(--accent-color);
 }
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .order-tabs {
+    flex-direction: column;
+  }
+
+  .order-tab {
+    padding: 10px 0;
+  }
+}

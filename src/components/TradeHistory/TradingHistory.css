@@ -131,6 +131,29 @@
   100% { background-color: transparent; }
 }
 
+/* Responsive design */
+@media (max-width: 1024px) {
+  .trade-history-header {
+    padding: 12px;
+  }
+
+  .trade-history-table-header {
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .trade-history-filters {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .trade-history-table-header,
+  .trade-row {
+    font-size: 12px;
+  }
+}
+
 /* 다크 모드 지원 */
 @media (prefers-color-scheme: dark) {
   .trade-history-container {
