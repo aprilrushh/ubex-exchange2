@@ -30,12 +30,10 @@ const CoinList = ({ onSelect }) => {
       }
     };
 
-    webSocketServiceInstance.on('tickerUpdate', handleTickerUpdate);
-    webSocketServiceInstance.subscribe('ticker');
+    const unsubscribe = webSocketServiceInstance.subscribe('ticker', handleTickerUpdate);
 
     return () => {
-      webSocketServiceInstance.off('tickerUpdate', handleTickerUpdate);
-      webSocketServiceInstance.unsubscribe('ticker');
+      unsubscribe();
     };
   }, [isLoading]);
 

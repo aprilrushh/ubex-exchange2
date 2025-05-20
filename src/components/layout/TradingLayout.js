@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useOrder } from '../../contexts/OrderContext';
+import { useOrders } from '../../contexts/OrderContext';
 import SimpleChart from '../Chart/SimpleChart';
 import ErrorBoundary from '../common/ErrorBoundary';
 import OrderBook from '../OrderBook/OrderBook';
@@ -14,7 +14,7 @@ const TradingLayout = () => {
   const { symbol = 'BTC/USDT' } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { orderBook, myOrders, createOrder, cancelOrder } = useOrder();
+  const { orderBook, myOrders, createOrder, cancelOrder } = useOrders();
 
   const handleOrderSubmit = async (orderData) => {
     if (!isAuthenticated) {

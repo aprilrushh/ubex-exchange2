@@ -1,5 +1,4 @@
 // src/App.js
-// src/App.js
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import webSocketServiceInstance from './services/websocketService'; // WebSocket 서비스
@@ -8,17 +7,15 @@ import { OrderProvider } from './contexts/OrderContext'; // 주문 컨텍스트 
 import { MarketProvider } from './contexts/MarketContext';
 
 // 페이지 및 레이아웃 컴포넌트 import
-import TradingLayout from './components/layout/TradingLayout';
 import ExchangePage from './components/Exchange/ExchangePage';
 import PortfolioPage from './pages/PortfolioPage';
 import InvestmentPage from './pages/InvestmentPage';
-import DepositWithdrawPage from './pages/DepositWithdrawPage';
+import WalletPage from './pages/WalletPage';
 import TradingPage from './pages/TradingPage'; // 주문 관련 컴포넌트가 이 페이지 내에 있음
 import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/Register';
 import AdminApp from './admin/AdminApp';
 import Header from './components/Header/Header'; // Header도 Context를 사용할 수 있음
-import WalletPage from './pages/WalletPage';
 
 import './App.css';
 
@@ -57,7 +54,7 @@ function App() {
                     <Route path="/trade/:symbol" element={<TradingPage />} />
                     <Route path="/portfolio" element={<PortfolioPage />} />
                     <Route path="/investment" element={<InvestmentPage />} />
-                    <Route path="/wallet" element={<DepositWithdrawPage />} />
+                    <Route path="/wallet" element={<WalletPage />} />
                     <Route path="/wallet/:coin" element={<WalletPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />

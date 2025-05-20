@@ -160,6 +160,24 @@ class WebSocketService {
       this.connect();
     }
   }
+
+  subscribe(channel, callback) {
+    if (!this.socket?.connected) {
+      this.connect();
+    }
+    
+    this.on(channel, callback);
+    this.emit('subscribe', { channel });
+    
+    return () => {
+      this.off(channel, callback);
+      this.emit('unsubscribe', { channel });
+    };
+  }
+
+  unsubscribe(channel) {
+    this.emit('unsubscribe', { channel });
+  }
 }
 
 const websocketService = new WebSocketService();
