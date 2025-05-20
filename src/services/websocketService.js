@@ -54,7 +54,7 @@ class WebSocketService {
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: this.reconnectDelay,
         timeout: 10000,
-        forceNew: true,
+        forceNew: false,
         path: '/socket.io/',
         autoConnect: true,
         withCredentials: true,
@@ -63,8 +63,13 @@ class WebSocketService {
         }
       };
 
-      console.log('[WS] Connecting with options:', options);
-      this.socket = io('http://localhost:3035', options);
+      if (!this.socket) {
+        console.log('[WS] Creating new socket connection');
+        this.socket = io('http://localhost:3035', options);
+      } else {
+        console.log('[WS] Reusing existing socket connection');
+        this.socket.connect();
+      }
 
       this.socket.on('connect', () => {
         console.log('[WS] Connected successfully');
