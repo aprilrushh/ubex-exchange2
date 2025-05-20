@@ -1,0 +1,21 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.table th,
+.table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+  text-align: left;
+  font-weight: 500;
+}
+
+.table tbody tr:hover {
+  background-color: var(--hover-overlay);
+}
