@@ -259,7 +259,7 @@ let userWallets = {
   };
   
   // 전체 사용자 잔액 조회 로직 (이전 버전과의 호환성 또는 요약용)
-  exports.getUserBalances = async (req, res) => {
+exports.getUserBalances = async (req, res) => {
     const userId = req.user.id;
     const currentPort = req.app.get('port') || process.env.PORT || 3006;
   
@@ -278,5 +278,95 @@ let userWallets = {
       success: true,
       data: responseBalances // 예: { BTC: "0.1", ETH: "2", KRW: "1000000" }
     });
+  };
+
+  // 화이트리스트 주소 목록 조회
+  exports.listWhitelist = async (req, res) => {
+    try {
+      const { coin } = req.params;
+      const userId = req.user.id;
+      const coinSymbol = coin.toUpperCase();
+      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+
+      const addresses = await db.WhitelistAddress.findAll({
+        where: { user_id: userId, coin_symbol: coinSymbol },
+        order: [['id', 'DESC']]
+      });
+
+      console.log(
+        `[Port:${currentPort}] 사용자 ID ${userId}의 ${coinSymbol} 화이트리스트 조회 요청.`
+      );
+      res.json({ success: true, data: addresses });
+    } catch (error) {
+      console.error('[WalletController] 화이트리스트 조회 오류:', error);
+      res.status(500).json({
+        success: false,
+        message: '화이트리스트 조회 중 오류가 발생했습니다.'
+      });
+    }
+  };
+
+  // 화이트리스트 주소 추가
+  exports.addWhitelist = async (req, res) => {
+    try {
+      const { coin } = req.params;
+      const { address, label } = req.body;
+      const userId = req.user.id;
+      const coinSymbol = coin.toUpperCase();
+      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+
+      if (!address) {
+        return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
+      }
+
+      const entry = await db.WhitelistAddress.create({
+        user_id: userId,
+        coin_symbol: coinSymbol,
+        address,
+        label
+      });
+
+      console.log(
+        `[Port:${currentPort}] 사용자 ID ${userId} ${coinSymbol} 화이트리스트 추가: ${address}`
+      );
+      res.status(201).json({ success: true, data: entry });
+    } catch (error) {
+      console.error('[WalletController] 화이트리스트 추가 오류:', error);
+      res.status(500).json({
+        success: false,
+        message: '화이트리스트 추가 중 오류가 발생했습니다.'
+      });
+    }
+  };
+
+  // 화이트리스트 주소 삭제
+  exports.deleteWhitelist = async (req, res) => {
+    try {
+      const { coin, id } = req.params;
+      const userId = req.user.id;
+      const coinSymbol = coin.toUpperCase();
+      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+
+      const deleted = await db.WhitelistAddress.destroy({
+        where: { id, user_id: userId, coin_symbol: coinSymbol }
+      });
+
+      if (!deleted) {
+        return res
+          .status(404)
+          .json({ success: false, message: '화이트리스트 항목을 찾을 수 없습니다.' });
+      }
+
+      console.log(
+        `[Port:${currentPort}] 사용자 ID ${userId}의 화이트리스트 항목 삭제: ${id}`
+      );
+      res.json({ success: true });
+    } catch (error) {
+      console.error('[WalletController] 화이트리스트 삭제 오류:', error);
+      res.status(500).json({
+        success: false,
+        message: '화이트리스트 삭제 중 오류가 발생했습니다.'
+      });
+    }
   };
   
