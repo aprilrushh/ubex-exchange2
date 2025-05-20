@@ -1,4 +1,5 @@
 // src/App.js
+// src/App.js
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import webSocketServiceInstance from './services/websocketService'; // WebSocket 서비스
@@ -14,7 +15,7 @@ import PortfolioPage from './pages/PortfolioPage';
 import InvestmentPage from './pages/InvestmentPage';
 import DepositWithdrawPage from './pages/DepositWithdrawPage';
 import TradingPage from './pages/TradingPage'; // 주문 관련 컴포넌트가 이 페이지 내에 있음
-import LoginPage from './components/auth/Login';
+import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/Register';
 import AdminApp from './admin/AdminApp';
 import Header from './components/layout/Header'; // Header도 Context를 사용할 수 있음
@@ -30,7 +31,7 @@ function App() {
     } catch (error) {
       console.error('WebSocket connection error:', error);
     }
-
+    
     return () => {
       // console.log('[App.js] useEffect - WebSocket 연결 해제 시도');
       try {
@@ -71,8 +72,3 @@ function App() {
           </OrderProvider>
         </MarketProvider>
       </AuthProvider>
-    </ThemeProvider>
-  );
-}
-
-export default App;
