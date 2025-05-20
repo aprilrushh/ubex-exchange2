@@ -1,0 +1,61 @@
+@import '../../styles/variables.css';
+
+.coin-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.coin-list-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.coin-list-table-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 10px 16px;
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.coin-list-table-header .sortable {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.coin-list-table-header .sortable::after {
+  content: '\2195';
+  margin-left: 4px;
+  font-size: 10px;
+}
+
+.coin-list-table-header .sortable.sort-asc::after {
+  content: '\2191';
+}
+
+.coin-list-table-header .sortable.sort-desc::after {
+  content: '\2193';
+}
+
+.coin-list-body {
+  flex: 1;
+  overflow-y: auto;
+}
