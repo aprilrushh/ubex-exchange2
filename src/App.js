@@ -9,6 +9,7 @@ import { MarketProvider } from './contexts/MarketContext';
 
 // 페이지 및 레이아웃 컴포넌트 import
 import TradingLayout from './components/layout/TradingLayout';
+import ExchangePage from './components/Exchange/ExchangePage';
 import PortfolioPage from './pages/PortfolioPage';
 import DepositWithdrawPage from './pages/DepositWithdrawPage';
 import TradingPage from './pages/TradingPage'; // 주문 관련 컴포넌트가 이 페이지 내에 있음
@@ -51,7 +52,8 @@ function App() {
                   <Routes>
                     {/* TradingPage 내부에 TradingPanel과 MyOrderList가 있으므로, 
                         TradingPage가 OrderProvider의 하위에 위치해야 함 */}
-                    <Route path="/" element={<TradingLayout />} />
+                    <Route path="/" element={<ExchangePage />} />
+                    <Route path="/exchange" element={<ExchangePage />} />
                     <Route path="/trade/:symbol" element={<TradingPage />} />
                     <Route path="/portfolio" element={<PortfolioPage />} />
                     <Route path="/wallet" element={<DepositWithdrawPage />} />
