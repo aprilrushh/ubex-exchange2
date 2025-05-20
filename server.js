@@ -45,7 +45,6 @@ app.use('/api/markets', marketRoutes);
 websocketService.initWebSocket(server);
 
 // 서버 시작
-app.listen(PORT, () => {
 server.listen(PORT, () => {
   console.log(`[Server] Listening on port ${PORT}`);
 });
