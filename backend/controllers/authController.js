@@ -136,9 +136,9 @@
    // 토큰 갱신 로직
    exports.refreshToken = async (req, res) => {
      try {
-       const userId = req.user.userId;
-       const token = generateToken(userId);
-       console.log('[authController] 토큰 갱신 성공:', { userId });
+      const userId = req.user.id;
+      const token = generateToken(userId);
+      console.log('[authController] 토큰 갱신 성공:', { userId });
 
        res.json({
          success: true,

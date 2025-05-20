@@ -19,14 +19,14 @@ const authMiddleware = (req, res, next) => {
 
     // JWT 검증
     const decoded = jwt.verify(token, jwtConfig.secret);
-    if (!decoded || !decoded.userId) {
+    if (!decoded || (!decoded.userId && !decoded.id)) {
       console.log('[authMiddleware] 토큰 디코딩 실패');
       return res.status(401).json({ message: '유효하지 않은 토큰입니다.' });
     }
 
     // 사용자 ID를 요청 객체에 추가
-    req.user = { userId: decoded.userId };
-    console.log('[authMiddleware] 인증 성공:', { userId: decoded.userId });
+    req.user = { id: decoded.userId || decoded.id };
+    console.log('[authMiddleware] 인증 성공:', { id: req.user.id });
     next();
   } catch (error) {
     console.error('[authMiddleware] 인증 실패:', error.message);
