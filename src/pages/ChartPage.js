@@ -3,7 +3,6 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '../components/common/Header';
 import SimpleChart from '../components/Chart/SimpleChart';
-import './ChartPage.css';
 
 const ChartPage = () => {
   const { symbol } = useParams();
