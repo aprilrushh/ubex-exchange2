@@ -9,7 +9,7 @@ const ExchangePage = () => {
   const handleOrderSubmit = (order) => {
     console.log('Order submitted:', order);
   };
-
+  
   return (
     <div className="exchange-page">
       <div className="left-column">
