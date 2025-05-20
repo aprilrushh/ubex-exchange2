@@ -6,7 +6,7 @@
 
 .tabs {
   margin-bottom: 20px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
 }
 
@@ -25,29 +25,29 @@
 }
 
 .tab-button.active {
-  border-bottom-color: var(--primary-blue);
-  color: var(--primary-blue);
+  border-bottom-color: var(--accent-color);
+  color: var(--accent-color);
   font-weight: bold;
 }
 
 .coin-selection {
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .coin-button {
   padding: 8px 12px;
   margin: 5px;
   cursor: pointer;
-  border: 1px solid var(--border);
-  background-color: var(--panel);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-tertiary);
   border-radius: 4px;
 }
 
 .coin-button.active {
-  border-color: var(--primary-blue);
-  background-color: #e7f3ff;
+  border-color: var(--accent-color);
+  background-color: var(--bg-secondary);
 }
 
 .select-coin-msg {
