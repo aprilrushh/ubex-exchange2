@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import CoinItem from './CoinItem';
 import webSocketServiceInstance from '../../services/websocketService'; // WebSocket 서비스 import
+import Table from '../common/Table';
 // import './CoinList.css'; // 필요시 스타일 파일
 
 const CoinList = () => {
@@ -85,7 +86,7 @@ const CoinList = () => {
   return (
     <div className="coin-list-container" style={{ margin: '20px 0' }}>
       <h4>주요 코인 시세</h4>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <Table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ borderBottom: '2px solid #ddd', backgroundColor: '#f8f8f8' }}>
             <th style={{ padding: '10px 8px', textAlign: 'left' }}>코인</th>
@@ -99,7 +100,7 @@ const CoinList = () => {
             <CoinItem key={ticker.symbol} coin={ticker} />
           ))}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
 };

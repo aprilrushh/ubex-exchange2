@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { validateQuantity } from '../../../utils/validation';
+import Button from '../../common/Button';
 import '../../OrderForm/OrderForm.css';
 
 export default function MarketOrder({ symbol, onSubmit }) {
@@ -26,20 +27,22 @@ export default function MarketOrder({ symbol, onSubmit }) {
     <div className="order-form">
       <form onSubmit={handleSubmit}>
         <div className="order-side-selector">
-          <button
+          <Button
             type="button"
-            className={`buy ${side === 'BUY' ? 'active' : ''}`}
+            variant="buy"
+            className={side === 'BUY' ? 'active' : ''}
             onClick={() => setSide('BUY')}
           >
             매수
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className={`sell ${side === 'SELL' ? 'active' : ''}`}
+            variant="sell"
+            className={side === 'SELL' ? 'active' : ''}
             onClick={() => setSide('SELL')}
           >
             매도
-          </button>
+          </Button>
         </div>
         <div className="form-group">
           <label>수량</label>
@@ -53,9 +56,9 @@ export default function MarketOrder({ symbol, onSubmit }) {
           />
         </div>
         {error && <div className="error-message">{error}</div>}
-        <button type="submit" className="submit-button">
+        <Button type="submit" variant={side === 'BUY' ? 'buy' : 'sell'} className="submit-button">
           {side === 'BUY' ? '매수하기' : '매도하기'}
-        </button>
+        </Button>
       </form>
     </div>
   );

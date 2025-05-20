@@ -1,0 +1,22 @@
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tabButton {
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+}
+
+.tabButton:hover {
+  background-color: var(--hover-overlay);
+}
+
+.active {
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--accent-color);
+}

@@ -1,10 +1,11 @@
 import React from 'react';
+import Table from '../common/Table';
 import './AssetList.css';
 
 const AssetList = ({ assets }) => {
   return (
     <div className="asset-list">
-      <table>
+      <Table>
         <thead>
           <tr>
             <th>자산명</th>
@@ -35,7 +36,7 @@ const AssetList = ({ assets }) => {
             </tr>
           )}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
 };

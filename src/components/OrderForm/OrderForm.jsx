@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { validateQuantity, validatePrice } from '../../utils/validation';
 import OrderTabs from './OrderTabs';
+import Button from '../common/Button';
 import './OrderForm.css';
 
 export default function OrderForm({ symbol = 'BTC/USDT', onSubmit }) {
@@ -114,9 +115,13 @@ export default function OrderForm({ symbol = 'BTC/USDT', onSubmit }) {
           <span className="total-value">{total}</span>
         </div>
         {error && <div className="error-message">{error}</div>}
-        <button type="submit" className={`order-button ${side === 'BUY' ? 'buy' : 'sell'}`}>
+        <Button
+          type="submit"
+          variant={side === 'BUY' ? 'buy' : 'sell'}
+          className="order-button"
+        >
           {side === 'BUY' ? '매수하기' : '매도하기'}
-        </button>
+        </Button>
         <div className="balance-info">
           <div className="balance-row">
             <span className="balance-label">사용 가능</span>

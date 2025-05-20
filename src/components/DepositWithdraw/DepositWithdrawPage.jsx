@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import WithdrawForm from '../Wallet/WithdrawForm';
 import DepositForm from '../Wallet/DepositForm';
+import Tabs from '../common/Tabs';
+import Button from '../common/Button';
 import './DepositWithdrawPage.css';
 
 const DepositWithdrawPage = () => {
@@ -29,34 +31,30 @@ const DepositWithdrawPage = () => {
     return <p className="login-required">입출금 기능을 사용하려면 로그인이 필요합니다.</p>;
   }
 
+  const tabItems = [
+    { key: 'deposit', label: '입금' },
+    { key: 'withdraw', label: '출금' },
+  ];
+
   return (
     <div className="deposit-withdraw-page">
       <h2>입출금</h2>
-      <div className="tabs">
-        <button
-          className={`tab-button ${activeTab === 'deposit' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('deposit'); setSelectedCoinSymbol(null); }}
-        >
-          입금
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'withdraw' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('withdraw'); setSelectedCoinSymbol(null); }}
-        >
-          출금
-        </button>
-      </div>
+      <Tabs
+        tabs={tabItems}
+        activeTab={activeTab}
+        onChange={(key) => { setActiveTab(key); setSelectedCoinSymbol(null); }}
+      />
 
       <div className="coin-selection">
         <h4>코인 선택:</h4>
         {availableCoins.map(coin => (
-          <button
+          <Button
             key={coin.symbol}
             className={`coin-button ${selectedCoinSymbol === coin.symbol ? 'active' : ''}`}
             onClick={() => handleCoinSelection(coin.symbol)}
           >
             {coin.name} ({coin.symbol})
-          </button>
+          </Button>
         ))}
       </div>
 
