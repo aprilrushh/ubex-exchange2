@@ -103,7 +103,7 @@
 .percent-button.active {
   background-color: var(--accent-color);
   border-color: var(--accent-color);
-  color: white;
+  color: var(--text-primary);
 }
 
 .total-info {
@@ -136,12 +136,12 @@
 
 .order-button.buy {
   background-color: var(--buy-color);
-  color: white;
+  color: var(--text-primary);
 }
 
 .order-button.sell {
   background-color: var(--sell-color);
-  color: white;
+  color: var(--text-primary);
 }
 
 .order-button:hover {
