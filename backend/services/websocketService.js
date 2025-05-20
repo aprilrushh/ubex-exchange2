@@ -51,7 +51,7 @@ class WebSocketService {
     try {
       this.io = socketIo(httpServerInstance, {
         cors: {
-          origin: ["http://localhost:3002", "http://localhost:3000"],
+          origin: ["http://localhost:3002", "http://localhost:3000", "http://localhost:3005"],
           methods: ["GET", "POST"],
           credentials: true
         },
@@ -67,8 +67,8 @@ class WebSocketService {
         const token = socket.handshake.auth.token;
         
         if (!token) {
-          console.log('[BE WS] 토큰 없음');
-          return next(new Error('Authentication error'));
+          console.log('[BE WS] 토큰 없음 - 비인증 연결 허용');
+          return next();
         }
 
         try {
