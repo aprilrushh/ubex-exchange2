@@ -59,6 +59,7 @@ const walletRoutes = require('./routes/walletRoutes');
 const authRoutes = require('./routes/authRoutes');
 const tradeRoutes = require('./routes/tradeRoutes');
 const portfolioRoutes = require('./routes/portfolioRoutes');
+const marketRoutes = require('./routes/marketRoutes');
 const websocketService = require('./services/websocketService');
 
 app.use('/api/v1', walletRoutes);
@@ -66,6 +67,7 @@ app.use('/api/auth', authRoutes);  // /api/auth 경로로 수정
 app.use('/auth', authRoutes);      // 기존 /auth 경로도 유지
 app.use('/api/orders', tradeRoutes);
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/markets', marketRoutes);
 
 // WebSocket 초기화
 websocketService.initWebSocket(server);
