@@ -11,7 +11,7 @@ import { MarketProvider } from './contexts/MarketContext';
 import TradingLayout from './components/layout/TradingLayout';
 import ExchangePage from './components/Exchange/ExchangePage';
 import PortfolioPage from './pages/PortfolioPage';
-import DepositWithdrawPage from './pages/DepositWithdrawPage';
+import DepositWithdrawPage from './components/DepositWithdraw/DepositWithdrawPage';
 import TradingPage from './pages/TradingPage'; // 주문 관련 컴포넌트가 이 페이지 내에 있음
 import LoginPage from './components/auth/Login';
 import RegisterPage from './components/auth/Register';
