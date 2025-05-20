@@ -18,3 +18,24 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* Responsive typography and spacing */
+@media (max-width: 1024px) {
+  body {
+    font-size: 13px;
+  }
+
+  .container {
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 12px;
+  }
+
+  .container {
+    padding: 0 10px;
+  }
+}
