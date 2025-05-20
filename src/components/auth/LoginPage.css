@@ -1,0 +1,10 @@
+/* Styling for LoginPage component using dark mode palette */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 60px);
+}
+
