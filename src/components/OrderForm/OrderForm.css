@@ -1,87 +1,177 @@
-.order-form {
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.order-type-selector,
-.order-side-selector {
+.order-form-container {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  flex-direction: column;
+  height: 100%;
 }
 
-.order-type-selector button,
-.order-side-selector button {
+.order-type-selector {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-type-button {
   flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #f8f9fa;
+  padding: 12px 0;
+  text-align: center;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
+  font: inherit;
 }
 
-.order-type-selector button.active,
-.order-side-selector button.active {
-  background: #007bff;
-  color: white;
-  border-color: #0056b3;
+.order-type-button.active {
+  color: var(--text-primary);
+  font-weight: 500;
+  position: relative;
 }
 
-.order-side-selector button.buy.active {
-  background: #28a745;
-  border-color: #1e7e34;
+.order-type-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--accent-color);
 }
 
-.order-side-selector button.sell.active {
-  background: #dc3545;
-  border-color: #bd2130;
+.order-form-body {
+  padding: 0 16px 16px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
-  color: #495057;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
 }
 
-.form-group input {
+.price-input-group,
+.amount-input-group {
+  position: relative;
+}
+
+.price-input,
+.amount-input {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ced4da;
+  padding: 10px 12px;
+  padding-right: 60px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  font-size: 14px;
+  color: var(--text-primary);
 }
 
-.form-group input:focus {
-  border-color: #80bdff;
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+.input-suffix {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.percent-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.percent-button {
+  flex: 1;
+  padding: 8px 0;
+  text-align: center;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 12px;
+}
+
+.percent-button:hover {
+  background-color: var(--border-color);
+}
+
+.percent-button.active {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.total-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+.total-label {
+  color: var(--text-secondary);
+}
+
+.total-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.order-button {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.order-button.buy {
+  background-color: var(--buy-color);
+  color: white;
+}
+
+.order-button.sell {
+  background-color: var(--sell-color);
+  color: white;
+}
+
+.order-button:hover {
+  opacity: 0.9;
+}
+
+.balance-info {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+.balance-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.balance-label {
+  color: var(--text-secondary);
+}
+
+.balance-value {
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 .error-message {
-  color: #dc3545;
-  margin-bottom: 15px;
-  font-size: 14px;
+  margin-bottom: 8px;
+  color: var(--sell-color);
+  font-size: 13px;
 }
-
-.submit-button {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 4px;
-  background: #007bff;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.submit-button:hover {
-  background: #0056b3;
-} 
