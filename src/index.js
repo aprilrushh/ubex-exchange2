@@ -1,7 +1,6 @@
 // src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';      // 전역 CSS 임포트
 import './App.css';        // App 전역 스타일
 import App from './App';
 import { ThemeProvider } from './contexts/ThemeContext'; // 생성된 ThemeContext 사용

@@ -73,7 +73,8 @@ ubex-exchange/
 │   ├── hooks/                  # [PLANNED] Custom React hooks
 │   ├── App.js                  # Main application component
 │   ├── App.css                 # Main application styles
-│   ├── index.css               # [PLANNED] Global styles (with Tailwind)
+│   ├── variables.css           # [PLANNED] Theme variables
+│   ├── global.css              # [PLANNED] Base global styles
 │   ├── routes.js               # Application routes
 │   └── index.js                # Entry point
 ├── backend/                    # Backend directory

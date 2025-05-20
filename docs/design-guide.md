@@ -4,7 +4,7 @@ This document describes the main color variables used in the project and how the
 
 ## Color Variables
 
-The global CSS variables are declared in [`src/styles/index.css`](../src/styles/index.css). They mirror Upbit's palette, using blue tones for primary actions and the Korean convention of red for upward price movement and blue for downward.
+The global CSS variables are defined in [`src/styles/variables.css`](../src/styles/variables.css) and applied via [`src/styles/global.css`](../src/styles/global.css). They mirror Upbit's palette, using blue tones for primary actions and the Korean convention of red for upward price movement and blue for downward.
 
 | Variable | Hex | Purpose |
 |----------|-----|---------|
