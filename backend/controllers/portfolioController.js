@@ -1,4 +1,3 @@
-const { pool } = require('../config/database');
 const { getCurrentPrices } = require('../services/marketDataService');
 
 // 포트폴리오 요약 정보 조회
