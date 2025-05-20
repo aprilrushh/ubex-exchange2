@@ -1,0 +1,35 @@
+.exchange-page {
+  display: grid;
+  grid-template-columns: 250px 1fr 320px;
+  grid-template-rows: 1fr 300px;
+  gap: 1rem;
+  height: calc(100vh - 60px);
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.left-column {
+  grid-column: 1;
+  grid-row: 1;
+  overflow-y: auto;
+}
+
+.center-column {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.right-column {
+  grid-column: 3;
+  grid-row: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.trade-history-section {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  overflow-y: auto;
+}
