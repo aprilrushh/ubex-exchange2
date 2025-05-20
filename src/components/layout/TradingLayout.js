@@ -1,8 +1,8 @@
 // src/components/layout/TradingLayout.js
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useOrder } from '../../context/OrderContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useOrder } from '../../contexts/OrderContext';
 import SimpleChart from '../Chart/SimpleChart';
 import ErrorBoundary from '../common/ErrorBoundary';
 import OrderBook from '../OrderBook/OrderBook';

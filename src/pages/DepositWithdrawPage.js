@@ -1,6 +1,6 @@
 // src/pages/DepositWithdrawPage.js
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 // import { getUserBalances } from '../services/PortfolioService';
 import './DepositWithdrawPage.css';
 import WithdrawForm from '../components/Wallet/WithdrawForm';

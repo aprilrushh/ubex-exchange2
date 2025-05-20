@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import MiniChart from '../Chart/MiniChart';
-import { MarketContext } from '../../context/MarketContext';
+import { MarketContext } from '../../contexts/MarketContext';
 import './CoinHeader.css';
 
 /**

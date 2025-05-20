@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { createOrder } from '../../services/tradeService'; // 주문 생성 서비스
-import { useAuth } from '../../context/AuthContext'; // 인증 Context
-import { useOrders } from '../../context/OrderContext'; // 주문 Context
+import { useAuth } from '../../contexts/AuthContext'; // 인증 Context
+import { useOrders } from '../../contexts/OrderContext'; // 주문 Context
 
 // import './TradingPanel.css'; // 필요시 스타일 파일
 

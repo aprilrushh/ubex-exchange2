@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { connectWebSocket, disconnectWebSocket } from './services/websocketService';
-import { AuthProvider } from './context/AuthContext'; // AuthProvider import
+import { AuthProvider } from './contexts/AuthContext'; // AuthProvider import
 
 // --- 사용자 페이지 컴포넌트 import (경로는 실제 구조에 맞게 조정 필요) ---
 import HomePage from './pages/HomePage';
