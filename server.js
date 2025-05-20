@@ -33,12 +33,14 @@ db.sequelize.authenticate()
 const walletRoutes = require('./backend/routes/walletRoutes');
 const authRoutes = require('./backend/routes/authRoutes');
 const tradeRoutes = require('./backend/routes/tradeRoutes');
+const marketRoutes = require('./backend/routes/marketRoutes');
 const websocketService = require('./backend/services/websocketService');
 
 app.use('/api/v1', walletRoutes);
 app.use('/api/auth', authRoutes);  // /api/auth 경로로 수정
 app.use('/auth', authRoutes);      // 기존 /auth 경로도 유지
 app.use('/api/orders', tradeRoutes);
+app.use('/api/markets', marketRoutes);
 
 websocketService.initWebSocket(server);
 
