@@ -5,7 +5,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import webSocketServiceInstance from './services/websocketService'; // WebSocket 서비스
 import { AuthProvider } from './contexts/AuthContext'; // 인증 컨텍스트
 import { OrderProvider } from './contexts/OrderContext'; // 주문 컨텍스트 import 확인!
-import { ThemeProvider } from './contexts/ThemeContext';
 import { MarketProvider } from './contexts/MarketContext';
 
 // 페이지 및 레이아웃 컴포넌트 import
@@ -43,7 +42,6 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider>
       <AuthProvider>
         <MarketProvider>
           <OrderProvider>
@@ -72,3 +70,7 @@ function App() {
           </OrderProvider>
         </MarketProvider>
       </AuthProvider>
+  );
+}
+
+export default App;

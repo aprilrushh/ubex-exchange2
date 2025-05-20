@@ -1,5 +1,13 @@
 @import './variables.css';
 
+:root {
+  color-scheme: dark;
+}
+
+.light :root {
+  color-scheme: light;
+}
+
 * {
   margin: 0;
   padding: 0;
