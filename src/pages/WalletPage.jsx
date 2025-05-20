@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import DepositForm from '../components/Wallet/DepositForm';
-import WithdrawForm from '../components/Wallet/WithdrawForm';
+import DepositForm from '../components/Wallet/DepositForm.jsx';
+import WithdrawForm from '../components/Wallet/WithdrawForm.jsx';
 
 export default function WalletPage() {
   // URL에 /wallet/:coin 형태로 coin 파라미터 사용

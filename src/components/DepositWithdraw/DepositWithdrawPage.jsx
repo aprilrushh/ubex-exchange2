@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import WithdrawForm from '../Wallet/WithdrawForm';
-import DepositForm from '../Wallet/DepositForm';
+import WithdrawForm from '../Wallet/WithdrawForm.jsx';
+import DepositForm from '../Wallet/DepositForm.jsx';
 import Tabs from '../common/Tabs';
 import Button from '../common/Button';
 import './DepositWithdrawPage.css';
