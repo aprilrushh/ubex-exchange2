@@ -5,7 +5,7 @@ import axios from 'axios';
  * 입금 주소 생성/조회
  */
 export async function getDepositAddress(coin) {
-  const res = await axios.get(`/api/v1/${coin}/deposit-address`);
+  const res = await axios.get(`/api/v1/deposit-address/${coin}`);
   return res.data.data;  // { address }
 }
 
@@ -31,6 +31,10 @@ export async function deleteWhitelist(coin, id) {
  * 출금 요청
  */
 export async function requestWithdrawal(coin, toAddress, amount) {
-  const res = await axios.post(`/api/v1/${coin}/withdraw`, { toAddress, amount });
+  const res = await axios.post('/api/v1/withdraw', {
+    coin,
+    address: toAddress,
+    amount,
+  });
   return res.data.data; // { txHash }
 }
