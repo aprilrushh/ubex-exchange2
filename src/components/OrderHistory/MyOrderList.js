@@ -1,7 +1,7 @@
 // src/components/OrderHistory/MyOrderList.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { getMyOrders } from '../../services/tradeService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 // import './MyOrderList.css'; // 필요시 스타일 파일
 
 const MyOrderList = () => {

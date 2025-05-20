@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MarketContext } from '../context/MarketContext';
+import { MarketContext } from '../contexts/MarketContext';
 import Header from '../components/common/Header';
 import CoinItem from '../components/CoinList/CoinItem';
 import './CoinListPage.css';
