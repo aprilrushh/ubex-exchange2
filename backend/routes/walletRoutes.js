@@ -8,7 +8,10 @@ const {
   getDeposits,
   getWithdrawals,
   getCoinBalance,
-  getUserBalances // 이전 버전과의 호환성 또는 전체 잔액 조회를 위해 유지
+  getUserBalances,
+  listWhitelist,
+  addWhitelist,
+  deleteWhitelist // 화이트리스트 관리
 } = require('../controllers/walletController');
 // const authMiddleware = require('../middlewares/authMiddleware'); // 인증 미들웨어 주석 처리
 // const { validateWithdraw } = require('../middleware/validation'); // 유효성 검사 미들웨어 (추후 구현 시 사용)
@@ -31,5 +34,10 @@ router.get('/balance/:coin', getCoinBalance);
 
 // GET /api/wallet/balances - 전체 코인 잔액 조회 (이전 버전에서 사용)
 router.get('/balances', getUserBalances);
+
+// 화이트리스트 관리
+router.get('/:coin/whitelist', listWhitelist);
+router.post('/:coin/whitelist', addWhitelist);
+router.delete('/:coin/whitelist/:id', deleteWhitelist);
 
 module.exports = router;
