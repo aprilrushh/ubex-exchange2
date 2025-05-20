@@ -17,7 +17,7 @@ import TradingPage from './pages/TradingPage'; // 주문 관련 컴포넌트가 
 import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/Register';
 import AdminApp from './admin/AdminApp';
-import Header from './components/layout/Header'; // Header도 Context를 사용할 수 있음
+import Header from './components/Header/Header'; // Header도 Context를 사용할 수 있음
 import WalletPage from './pages/WalletPage';
 
 import './App.css';
