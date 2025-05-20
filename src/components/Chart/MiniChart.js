@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType } from 'lightweight-charts';
-import './MiniChart.css';
 
 /**
  * MiniChart 컴포넌트 - 업비트 스타일의 상단 미니 차트
