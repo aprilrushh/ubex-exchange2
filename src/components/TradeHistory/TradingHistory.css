@@ -116,6 +116,10 @@
   color: #dc3545;
 }
 
+.user-trade {
+  background-color: rgba(255, 193, 7, 0.15);
+}
+
 .no-trades {
   padding: 30px;
   text-align: center;
