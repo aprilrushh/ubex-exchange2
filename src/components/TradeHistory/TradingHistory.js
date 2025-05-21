@@ -112,7 +112,7 @@ const TradeHistory = ({ symbol }) => {
     <div className="trade-history-container">
       <div className="trade-history-header">
         <div className="trade-history-title">체결 내역</div>
-        <div className="trade-history-filters">
+        <div className="filter-bar">
           <div className="filter-group">
             <button
               className={`filter-btn ${viewOption === 'all' ? 'active' : ''}`}
@@ -156,7 +156,7 @@ const TradeHistory = ({ symbol }) => {
         </div>
       </div>
       
-      <div className="trade-history-table">
+      <div className="transaction-table">
         <div className="trade-history-table-header">
           <div className="col time">시간</div>
           <div className="col price">가격</div>

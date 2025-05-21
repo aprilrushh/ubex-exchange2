@@ -10,6 +10,14 @@
   --sell-color: #d9304e;
   --hover-overlay: rgba(255, 255, 255, 0.05);
   --font-family-base: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --page-background: #f5f7fa;
+  --text-body: #333333;
+  --text-heading: #222222;
+  --button-primary: #007aff;
+  --button-primary-hover: #005fcc;
+  --nav-background: #003eff;
+  --up-color: red;
+  --down-color: blue;
 }
 
 .light :root {
@@ -24,4 +32,12 @@
   --sell-color: #d9304e;
   --hover-overlay: rgba(0, 0, 0, 0.05);
   --font-family-base: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --page-background: #f5f7fa;
+  --text-body: #333333;
+  --text-heading: #222222;
+  --button-primary: #007aff;
+  --button-primary-hover: #005fcc;
+  --nav-background: #003eff;
+  --up-color: red;
+  --down-color: blue;
 }

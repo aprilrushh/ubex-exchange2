@@ -8,9 +8,13 @@ export default function WalletPage() {
   const { coin } = useParams();
 
   return (
-    <div className="wallet-page">
-      <DepositForm coin={coin.toUpperCase()} />
-      <WithdrawForm coin={coin.toUpperCase()} />
+    <div className="wallet-layout">
+      <div className="wallet-sidebar">
+        <DepositForm coin={coin.toUpperCase()} />
+      </div>
+      <div className="wallet-detail">
+        <WithdrawForm coin={coin.toUpperCase()} />
+      </div>
     </div>
   );
-} 
+}

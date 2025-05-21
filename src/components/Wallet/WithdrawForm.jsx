@@ -60,12 +60,14 @@ export default function WithdrawForm({ coin }) {
       <div className="whitelist-add">
         <input
           type="text"
+          className="input-field"
           placeholder="새 주소"
           value={toAddress}
           onChange={e => setToAddress(e.target.value)}
         />
         <input
           type="text"
+          className="input-field"
           placeholder="레이블 (선택)"
           value={label}
           onChange={e => setLabel(e.target.value)}
@@ -76,6 +78,7 @@ export default function WithdrawForm({ coin }) {
       <div className="withdraw-action" style={{ marginTop: 16 }}>
         <input
           type="number"
+          className="input-field"
           placeholder="수량"
           value={amount}
           onChange={e => setAmount(e.target.value)}

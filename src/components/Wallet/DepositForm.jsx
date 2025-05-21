@@ -20,7 +20,7 @@ export default function DepositForm({ coin }) {
     <div className="deposit-form">
       <h2>{coin} 입금</h2>
       <label>입금 주소</label>
-      <input type="text" value={address} readOnly />
+      <input type="text" className="input-field" value={address} readOnly />
       {address && (
         <div style={{ marginTop: 16 }}>
           <img
