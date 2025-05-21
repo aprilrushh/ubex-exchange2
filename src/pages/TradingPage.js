@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import TradingPanel from '../components/TradingView/TradingPanel';
 import MyOrderList from '../components/OrderHistory/MyOrderList';
 import SimpleChart from '../components/Chart/SimpleChart'; // SimpleChart import
+import MarketSidebar from '../components/MarketSidebar';
 // import OrderBook from '../components/OrderBook/OrderBook';
 // import RecentTrades from '../components/TradeHistory/TradingHistory';
 
@@ -17,7 +18,7 @@ const TradingPage = () => {
   const displaySymbol = chartSymbol || '코인 선택 안됨';
 
   return (
-    <div className="trading-page-container" style={{ padding: '0 20px' }}>
+    <div className="trading-page-container" style={{ padding: '0 20px', marginRight: '260px' }}>
       <h2>거래 :: {displaySymbol}</h2>
       <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
         {/* 왼쪽 영역: 차트, 호가창 등 */}
@@ -43,9 +44,12 @@ const TradingPage = () => {
       <div style={{ marginTop: '30px' }}>
         <MyOrderList />
       </div>
+      </div>
+      <MarketSidebar />
     </div>
   );
 };
 
 export default TradingPage;
+
 
