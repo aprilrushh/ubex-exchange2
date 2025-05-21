@@ -52,6 +52,7 @@
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
     "http-proxy-middleware": "^3.0.5",
     "jest": "^29.7.0",
     "nodemon": "^3.1.10",
@@ -67,8 +68,8 @@
     "test:unit": "jest",
     "eject": "react-scripts eject",
     "server": "node server.js",
-    "start:frontend": "NODE_OPTIONS=--openssl-legacy-provider PORT=3000 craco start",
-    "start:backend": "PORT=3035 node backend/server.js",
+    "start:frontend": "cross-env NODE_OPTIONS=--openssl-legacy-provider PORT=3000 craco start",
+    "start:backend": "cross-env PORT=3035 node backend/server.js",
     "dev": "concurrently \"npm run start:frontend\" \"npm run start:backend\""
   },
   "eslintConfig": {
