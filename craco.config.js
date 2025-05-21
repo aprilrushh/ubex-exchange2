@@ -26,7 +26,7 @@ module.exports = {
     },
   },
   devServer: {
-    port: 3002,
+    port: 3000,
     proxy: {
       // REST API 호출은 /api/... → http://localhost:3035/api/...
       '/api': {

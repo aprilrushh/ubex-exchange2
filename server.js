@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3035;
 
 // CORS 설정
 app.use(cors({
-  origin: 'http://localhost:3002',  // React 개발 서버 포트를 3002로 수정
+  origin: 'http://localhost:3000',  // React 개발 서버 포트를 3000으로 수정
   credentials: true
 }));
 

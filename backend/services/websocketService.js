@@ -49,9 +49,9 @@ class WebSocketService {
     }
     console.log('[BE WS] initWebSocket 메소드 실행됨');
     try {
-      this.io = socketIo(httpServerInstance, {
+        this.io = socketIo(httpServerInstance, {
         cors: {
-          origin: ["http://localhost:3002", "http://localhost:3000", "http://localhost:3005"],
+          origin: ["http://localhost:3000"],
           methods: ["GET", "POST"],
           credentials: true
         },

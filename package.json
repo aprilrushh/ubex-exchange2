@@ -67,7 +67,7 @@
     "test:unit": "jest",
     "eject": "react-scripts eject",
     "server": "node server.js",
-    "start:frontend": "NODE_OPTIONS=--openssl-legacy-provider PORT=3002 craco start",
+    "start:frontend": "NODE_OPTIONS=--openssl-legacy-provider PORT=3000 craco start",
     "start:backend": "PORT=3035 node backend/server.js",
     "dev": "concurrently \"npm run start:frontend\" \"npm run start:backend\""
   },
