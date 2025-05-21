@@ -36,8 +36,8 @@ router.get('/balance/:coin', authMiddleware, getCoinBalance);
 router.get('/balances', authMiddleware, getUserBalances);
 
 // 화이트리스트 관리
-router.get('/:coin/whitelist', listWhitelist);
-router.post('/:coin/whitelist', addWhitelist);
-router.delete('/:coin/whitelist/:id', deleteWhitelist);
+router.get('/:coin/whitelist', authMiddleware, listWhitelist);
+router.post('/:coin/whitelist', authMiddleware, addWhitelist);
+router.delete('/:coin/whitelist/:id', authMiddleware, deleteWhitelist);
 
 module.exports = router;
