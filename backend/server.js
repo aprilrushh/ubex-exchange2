@@ -67,7 +67,7 @@ const adminCoinRoutes = require('./routes/adminCoinRoutes');
 const adminPairRoutes = require('./routes/adminPairRoutes');
 const websocketService = require('./services/websocketService');
 
-app.use('/api/v1', walletRoutes);
+app.use('/api/v1/wallet', walletRoutes);
 app.use('/api/auth', authRoutes);  // /api/auth 경로로 수정
 app.use('/auth', authRoutes);      // 기존 /auth 경로도 유지
 app.use('/api/orders', tradeRoutes);
