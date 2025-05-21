@@ -2,19 +2,17 @@ import React from 'react';
 import Table from '../common/Table';
 import './AssetList.css';
 
-const AssetList = ({ assets }) => {
+const AssetList = ({ assets, tableClassName = 'asset-table' }) => {
   return (
     <div className="asset-list">
-      <Table className="asset-table">
-        <thead>
-          <tr>
-            <th>자산명</th>
-            <th>보유수량</th>
-            <th>평가금액</th>
-            <th>평가손익</th>
-            <th>수익률</th>
-          </tr>
-        </thead>
+      <div className="asset-header">
+        <div>자산명</div>
+        <div>보유수량</div>
+        <div>평가금액</div>
+        <div>평가손익</div>
+        <div>수익률</div>
+      </div>
+      <Table className={tableClassName}>
         <tbody>
           {assets && assets.length > 0 ? (
             assets.map((asset) => (

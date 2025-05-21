@@ -40,7 +40,7 @@ const InvestmentPage = () => {
       <PortfolioTabs activeTab={activeTab} onTabChange={setActiveTab} />
       {activeTab === 'portfolio' && (
         <>
-          <section className="summary-section">
+          <section className="profit-summary">
             {loading ? (
               <div className="loading">로딩 중...</div>
             ) : error ? (
@@ -49,8 +49,11 @@ const InvestmentPage = () => {
               <AssetSummary summary={summary} />
             )}
           </section>
-          <section className="list-section">
-            {loading ? null : <AssetList assets={assets} />}
+          <section className="chart-section">
+            <div className="chart">
+              {/* TODO: 투자 손익 차트 */}
+            </div>
+            <AssetList assets={assets} tableClassName="detail-table" />
           </section>
         </>
       )}
