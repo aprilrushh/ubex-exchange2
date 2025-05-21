@@ -8,6 +8,7 @@ import ErrorBoundary from '../common/ErrorBoundary';
 import OrderBook from '../OrderBook/OrderBook';
 import OrderForm from '../OrderForm/OrderForm';
 import MyOrderList from '../OrderList/MyOrderList';
+import MarketSidebar from '../MarketSidebar';
 import './TradingLayout.css';
 
 const TradingLayout = () => {
@@ -49,11 +50,12 @@ const TradingLayout = () => {
         </div>
       </div>
       <div className="trading-sidebar">
-        <OrderBook 
+        <OrderBook
           orderBook={orderBook}
           symbol={symbol}
         />
       </div>
+      <MarketSidebar />
     </div>
   );
 };
