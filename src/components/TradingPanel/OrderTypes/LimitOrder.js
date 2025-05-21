@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { validateQuantity, validatePrice } from '../../../utils/validation';
 import Button from '../../common/Button';
 import '../../OrderForm/OrderForm.css';
 
-export default function LimitOrder({ symbol, onSubmit }) {
+export default function LimitOrder({ symbol, selectedPrice, onSubmit }) {
   const [side, setSide] = useState('BUY');
   const [quantity, setQuantity] = useState('');
   const [price, setPrice] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (selectedPrice !== null && selectedPrice !== undefined) {
+      setPrice(selectedPrice);
+    }
+  }, [selectedPrice]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

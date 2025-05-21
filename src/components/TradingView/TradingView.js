@@ -25,6 +25,7 @@ const TradingView = () => {
     ma60: false,
     ma120: false
   });
+  const [selectedPrice, setSelectedPrice] = useState(null);
   
   // 선택된 심볼에 대한 시장 정보 가져오기
   useEffect(() => {
@@ -220,7 +221,7 @@ const TradingView = () => {
                 </div>
               </div>
               <div className="sidebar">
-                <TradingPanel symbol={activeSymbol} />
+                <TradingPanel symbol={activeSymbol} selectedPrice={selectedPrice} />
               </div>
             </div>
           </div>
@@ -229,10 +230,10 @@ const TradingView = () => {
         {activeTab === 'orderbook' && (
           <div className="orderbook-trade-layout">
             <div className="orderbook-container">
-              <OrderBook symbol={activeSymbol} />
+              <OrderBook symbol={activeSymbol} onPriceSelect={setSelectedPrice} />
             </div>
             <div className="tradepanel-container">
-              <TradingPanel symbol={activeSymbol} />
+              <TradingPanel symbol={activeSymbol} selectedPrice={selectedPrice} />
             </div>
           </div>
         )}
