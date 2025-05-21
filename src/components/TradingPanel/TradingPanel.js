@@ -3,7 +3,7 @@ import LimitOrder from './OrderTypes/LimitOrder';
 import MarketOrder from './OrderTypes/MarketOrder';
 import './TradingPanel.css';
 
-export default function TradingPanel({ symbol }) {
+export default function TradingPanel({ symbol, selectedPrice }) {
   const [orderType, setOrderType] = useState('LIMIT');
 
   const handleOrderSubmit = (order) => {
@@ -29,7 +29,7 @@ export default function TradingPanel({ symbol }) {
         </button>
       </div>
       {orderType === 'LIMIT' ? (
-        <LimitOrder symbol={symbol} onSubmit={handleOrderSubmit} />
+        <LimitOrder symbol={symbol} selectedPrice={selectedPrice} onSubmit={handleOrderSubmit} />
       ) : (
         <MarketOrder symbol={symbol} onSubmit={handleOrderSubmit} />
       )}

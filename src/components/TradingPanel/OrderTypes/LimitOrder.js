@@ -4,7 +4,7 @@ import Button from '../../common/Button';
 import '../../OrderForm/OrderForm.css';
 import { getAssetSummary } from '../../../services/PortfolioService';
 
-export default function LimitOrder({ symbol, onSubmit }) {
+export default function LimitOrder({ symbol, selectedPrice, onSubmit }) {
   const [side, setSide] = useState('BUY');
   const [quantity, setQuantity] = useState('');
   const [price, setPrice] = useState('');
@@ -35,6 +35,12 @@ export default function LimitOrder({ symbol, onSubmit }) {
       setQuantity((balance / priceNum).toString());
     }
   };
+
+  useEffect(() => {
+    if (selectedPrice !== null && selectedPrice !== undefined) {
+      setPrice(selectedPrice);
+    }
+  }, [selectedPrice]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

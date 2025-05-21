@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './OrderBook.css';
 import DepthChart from './DepthChart';
 
-const OrderBook = ({ data, symbol }) => {
+const OrderBook = ({ data, symbol, onPriceSelect }) => {
   const [orderBookData, setOrderBookData] = useState({
     asks: [], // 매도 주문
     bids: [], // 매수 주문
@@ -201,8 +201,11 @@ const OrderBook = ({ data, symbol }) => {
           </div>
           <div className="orderbook-table-body">
             {orderBookData.asks.map((ask, index) => (
-              <div className="orderbook-row" key={`ask-${index}`}>
-                <div className={`col price ${getPriceColor(ask.price, index, true)}`}>
+              <div className="orderbook-row" key={`ask-${index}`}> 
+                <div
+                  className={`col price ${getPriceColor(ask.price, index, true)}`}
+                  onClick={() => onPriceSelect && onPriceSelect(parseFloat(ask.price))}
+                >
                   {formatPrice(ask.price)}
                 </div>
                 <div className="col amount">{parseFloat(ask.amount).toFixed(6)}</div>
@@ -238,7 +241,10 @@ const OrderBook = ({ data, symbol }) => {
           <div className="orderbook-table-body">
             {orderBookData.bids.map((bid, index) => (
               <div className="orderbook-row" key={`bid-${index}`}>
-                <div className={`col price ${getPriceColor(bid.price, index, false)}`}>
+                <div
+                  className={`col price ${getPriceColor(bid.price, index, false)}`}
+                  onClick={() => onPriceSelect && onPriceSelect(parseFloat(bid.price))}
+                >
                   {formatPrice(bid.price)}
                 </div>
                 <div className="col amount">{parseFloat(bid.amount).toFixed(6)}</div>
