@@ -8,7 +8,7 @@ let nextOrderId = 1;
 exports.createOrder = async (req, res) => {
   const userId = req.user.id; // authMiddleware에서 설정된 사용자 ID
   const { symbol, type, side, price, quantity } = req.body;
-  const currentPort = req.app.get('port') || process.env.PORT || 3030;
+  const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
   if (!symbol || !type || !side || !quantity) {
     return res.status(400).json({ message: '필수 주문 정보가 누락되었습니다.' });
@@ -38,7 +38,7 @@ exports.createOrder = async (req, res) => {
 // 현재 사용자의 주문 목록 조회 로직
 exports.getUserOrders = async (req, res) => {
   const userId = parseInt(req.user.id, 10); // 토큰에서 가져온 userId도 숫자로 변환
-  const currentPort = req.app.get('port') || process.env.PORT || 3030;
+  const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
   console.log(`[Port:${currentPort}] getUserOrders 호출됨. 조회 요청 사용자 ID: ${userId} (타입: ${typeof userId})`);
   console.log(`[Port:${currentPort}] 필터링 전 전체 주문 목록 (${orders.length}건):`, JSON.stringify(orders, null, 2)); // 전체 주문 목록과 각 주문의 userId 타입 확인

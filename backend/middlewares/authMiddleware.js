@@ -4,7 +4,7 @@ const jwtConfig = require('../config/jwtConfig');
 
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  const currentPort = req.app ? (req.app.get('port') || process.env.PORT || 3030) : (process.env.PORT || 3030);
+  const currentPort = req.app ? (req.app.get('port') || process.env.PORT || 3035) : (process.env.PORT || 3035);
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     console.log(`[Port:${currentPort}] JWT 검증: 실패 - 토큰 없음 또는 형식 오류`);

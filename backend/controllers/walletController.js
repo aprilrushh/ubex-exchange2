@@ -53,7 +53,7 @@ let userWallets = {
       const { coin } = req.params;
       const coinSymbol = coin.toUpperCase();
       const userId = req.user.id; // authMiddleware에서 설정
-      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+      const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
       // 지갑이 이미 존재하면 재사용
       let wallet = await db.Wallet.findOne({
@@ -93,7 +93,7 @@ let userWallets = {
     try {
       const { coin, amount, address } = req.body; // coin은 coinSymbol과 동일하게 취급
       const userId = req.user.id;
-      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+      const currentPort = req.app.get('port') || process.env.PORT || 3035;
       const coinSymbol = coin.toUpperCase();
       const withdrawalAmount = parseFloat(amount);
   
@@ -172,7 +172,7 @@ let userWallets = {
     try {
       const userId = req.user.id;
       // const { coin, startDate, endDate, page = 1, limit = 20 } = req.query; // 페이징 및 필터링은 추후 구현
-      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+      const currentPort = req.app.get('port') || process.env.PORT || 3035;
   
       // DB에서 입금 기록 조회
       const userDeposits = await db.Deposit.findAll({
@@ -202,7 +202,7 @@ let userWallets = {
     try {
       const userId = req.user.id;
       // const { coin, startDate, endDate, page = 1, limit = 20 } = req.query; // 페이징 및 필터링은 추후 구현
-      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+      const currentPort = req.app.get('port') || process.env.PORT || 3035;
   
       // DB에서 출금 기록 조회
       const userWithdrawals = await db.Withdrawal.findAll({
@@ -232,7 +232,7 @@ let userWallets = {
     try {
       const { coin } = req.params;
       const userId = req.user.id;
-      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+      const currentPort = req.app.get('port') || process.env.PORT || 3035;
       const coinSymbol = coin.toUpperCase();
   
       ensureUserWallet(userId); // 사용자 지갑 존재 확인 및 초기화
@@ -261,7 +261,7 @@ let userWallets = {
   // 전체 사용자 잔액 조회 로직 (이전 버전과의 호환성 또는 요약용)
 exports.getUserBalances = async (req, res) => {
     const userId = req.user.id;
-    const currentPort = req.app.get('port') || process.env.PORT || 3006;
+    const currentPort = req.app.get('port') || process.env.PORT || 3035;
   
     ensureUserWallet(userId);
     const balances = userWallets[userId];
@@ -286,7 +286,7 @@ exports.getUserBalances = async (req, res) => {
       const { coin } = req.params;
       const userId = req.user.id;
       const coinSymbol = coin.toUpperCase();
-      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+      const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
       const addresses = await db.WhitelistAddress.findAll({
         where: { user_id: userId, coin_symbol: coinSymbol },
@@ -313,7 +313,7 @@ exports.getUserBalances = async (req, res) => {
       const { address, label } = req.body;
       const userId = req.user.id;
       const coinSymbol = coin.toUpperCase();
-      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+      const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
       if (!address) {
         return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
@@ -345,7 +345,7 @@ exports.getUserBalances = async (req, res) => {
       const { coin, id } = req.params;
       const userId = req.user.id;
       const coinSymbol = coin.toUpperCase();
-      const currentPort = req.app.get('port') || process.env.PORT || 3006;
+      const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
       const deleted = await db.WhitelistAddress.destroy({
         where: { id, user_id: userId, coin_symbol: coinSymbol }

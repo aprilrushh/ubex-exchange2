@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3035;
 // CORS 설정
 app.use(cors({
   origin: function(origin, callback) {
-    const allowedOrigins = ['http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'http://localhost:3005'];
+    const allowedOrigins = ['http://localhost:3000'];
     // 개발 환경에서는 모든 origin 허용
     if (process.env.NODE_ENV === 'development') {
       callback(null, true);
