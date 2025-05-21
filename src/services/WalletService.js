@@ -38,3 +38,19 @@ export async function requestWithdrawal(coin, toAddress, amount) {
   });
   return res.data.data; // { txHash }
 }
+
+/**
+ * 잔액 조회
+ */
+export async function getBalance(coin) {
+  const res = await axios.get(`/api/v1/balance/${coin}`);
+  return res.data.data;
+}
+
+/**
+ * 전체 잔액 조회
+ */
+export async function getAllBalances() {
+  const res = await axios.get('/api/v1/balances');
+  return res.data.data;
+}

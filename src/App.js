@@ -18,6 +18,9 @@ import AdminApp from './admin/AdminApp';
 import Header from './components/Header/Header'; // Header도 Context를 사용할 수 있음
 
 import './App.css';
+import './styles/global.css';
+import './styles/variables.css';
+import './styles/upbit-screens.css';
 
 function App() {
   useEffect(() => {

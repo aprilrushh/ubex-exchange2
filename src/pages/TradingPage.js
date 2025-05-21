@@ -18,32 +18,33 @@ const TradingPage = () => {
   const displaySymbol = chartSymbol || '코인 선택 안됨';
 
   return (
-    <div className="trading-page-container" style={{ padding: '0 20px', marginRight: '260px' }}>
-      <h2>거래 :: {displaySymbol}</h2>
-      <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
-        {/* 왼쪽 영역: 차트, 호가창 등 */}
-        <div style={{ flex: 2, minWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* SimpleChart 컴포넌트 추가 및 symbol prop 전달 */}
-          {/* SimpleChart는 현재 자체 샘플 데이터를 사용합니다. */}
-          <SimpleChart symbol={chartSymbol} timeframe="1d" /> {/* timeframe 기본값 예시 */}
-          
-          {/* <OrderBook symbol={chartSymbol} /> */}
-          <p style={{padding: '20px', border: '1px dashed #ccc', textAlign:'center'}}> (호가창 영역) </p>
+    <div className="trading-page-container">
+      <div style={{ padding: '0 20px', marginRight: '260px' }}>
+        <h2>거래 :: {displaySymbol}</h2>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
+          {/* 왼쪽 영역: 차트, 호가창 등 */}
+          <div style={{ flex: 2, minWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* SimpleChart 컴포넌트 추가 및 symbol prop 전달 */}
+            {/* SimpleChart는 현재 자체 샘플 데이터를 사용합니다. */}
+            <SimpleChart symbol={chartSymbol} timeframe="1d" /> {/* timeframe 기본값 예시 */}
+            
+            {/* <OrderBook symbol={chartSymbol} /> */}
+            <p style={{padding: '20px', border: '1px dashed #ccc', textAlign:'center'}}> (호가창 영역) </p>
+          </div>
+
+          {/* 오른쪽 영역: 주문 패널, 최근 체결 등 */}
+          <div style={{ flex: 1, minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <TradingPanel /> {/* TradingPanel은 useParams를 통해 symbol을 내부적으로 가져옴 */}
+            
+            {/* <RecentTrades symbol={chartSymbol} /> */}
+            <p style={{padding: '10px', border: '1px dashed #ccc', textAlign:'center'}}> (최근 체결 내역 영역) </p>
+          </div>
         </div>
 
-        {/* 오른쪽 영역: 주문 패널, 최근 체결 등 */}
-        <div style={{ flex: 1, minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <TradingPanel /> {/* TradingPanel은 useParams를 통해 symbol을 내부적으로 가져옴 */}
-          
-          {/* <RecentTrades symbol={chartSymbol} /> */}
-          <p style={{padding: '10px', border: '1px dashed #ccc', textAlign:'center'}}> (최근 체결 내역 영역) </p>
+        {/* 하단 영역: 나의 주문 내역 */}
+        <div style={{ marginTop: '30px' }}>
+          <MyOrderList />
         </div>
-      </div>
-
-      {/* 하단 영역: 나의 주문 내역 */}
-      <div style={{ marginTop: '30px' }}>
-        <MyOrderList />
-      </div>
       </div>
       <MarketSidebar />
     </div>
