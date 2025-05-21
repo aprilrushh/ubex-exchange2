@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3001/api/admin';
+const API_BASE_URL = 'http://localhost:3035/api/admin';
 
 export const listCoins = async () => {
   try {
