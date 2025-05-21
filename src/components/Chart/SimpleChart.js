@@ -57,7 +57,19 @@ const SimpleChart = ({
         },
       },
       crosshair: {
-        mode: 0,
+        mode: 1,
+        vertLine: {
+          width: 1,
+          color: '#758696',
+          style: 3,
+          labelBackgroundColor: '#e1ecf2',
+        },
+        horzLine: {
+          width: 1,
+          color: '#758696',
+          style: 3,
+          labelBackgroundColor: '#e1ecf2',
+        },
       },
       rightPriceScale: {
         borderColor: 'rgba(197, 203, 206, 0.8)',
@@ -66,6 +78,19 @@ const SimpleChart = ({
         borderColor: 'rgba(197, 203, 206, 0.8)',
         timeVisible: true,
         secondsVisible: false,
+      },
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+        vertTouchDrag: true,
+      },
+      handleScale: {
+        axisPressedMouseMove: true,
+        axisDoubleClickReset: true,
+        mouseWheel: true,
+        pinch: true,
+        shiftMouseWheel: true,
       },
     });
 
@@ -96,6 +121,33 @@ const SimpleChart = ({
 
     volumeSeriesRef.current = volumeSeries;
 
+    const tooltip = document.createElement('div');
+    tooltip.className = 'chart-tooltip';
+    chartContainerRef.current.appendChild(tooltip);
+
+    const handleCrosshairMove = (param) => {
+      if (!param.point || !param.time || !candleSeriesRef.current) {
+        tooltip.style.display = 'none';
+        return;
+      }
+
+      const data = param.seriesPrices.get(candleSeriesRef.current);
+      if (!data) {
+        tooltip.style.display = 'none';
+        return;
+      }
+
+      const price = data.close !== undefined ? data.close : data;
+      const dateStr = new Date(param.time).toLocaleString();
+
+      tooltip.style.display = 'block';
+      tooltip.innerHTML = `${dateStr}<br/>${price}`;
+      tooltip.style.left = `${param.point.x + 15}px`;
+      tooltip.style.top = `${param.point.y + 15}px`;
+    };
+
+    chart.subscribeCrosshairMove(handleCrosshairMove);
+
     const handleResize = () => {
       if (chart && chartContainerRef.current) {
         chart.applyOptions({
@@ -105,7 +157,13 @@ const SimpleChart = ({
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    chart._cleanup = () => {
+      chart.unsubscribeCrosshairMove(handleCrosshairMove);
+      window.removeEventListener('resize', handleResize);
+      if (tooltip.parentNode) {
+        tooltip.parentNode.removeChild(tooltip);
+      }
+    };
   };
 
   // 웹소켓 연결 및 이벤트 설정
@@ -353,6 +411,9 @@ const SimpleChart = ({
         webSocketService.off('candlestick', handleCandlestick);
       }
       if (chartRef.current) {
+        if (chartRef.current._cleanup) {
+          chartRef.current._cleanup();
+        }
         chartRef.current.remove();
       }
     };
