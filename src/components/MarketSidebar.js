@@ -30,7 +30,7 @@ const MarketSidebar = () => {
   );
 
   return (
-    <aside className="market-sidebar">
+    <aside className="market-ticker">
       <div className="sidebar-header">
         <input
           className="search-input"
@@ -51,7 +51,7 @@ const MarketSidebar = () => {
           </thead>
           <tbody>
             {filtered.map(ticker => (
-              <tr key={ticker.symbol}>
+              <tr key={ticker.symbol} className="market-row">
                 <td className="coin-name">
                   <span className="symbol">{ticker.symbol}</span> {ticker.name}
                 </td>

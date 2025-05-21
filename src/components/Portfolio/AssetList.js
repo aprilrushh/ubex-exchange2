@@ -5,7 +5,7 @@ import './AssetList.css';
 const AssetList = ({ assets }) => {
   return (
     <div className="asset-list">
-      <Table>
+      <Table className="asset-table">
         <thead>
           <tr>
             <th>자산명</th>

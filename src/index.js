@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './App.css';        // App 전역 스타일
+import './styles/upbit-screens.css';
 import App from './App';
 import { ThemeProvider } from './contexts/ThemeContext'; // 생성된 ThemeContext 사용
 import { AuthProvider } from './contexts/AuthContext';   // 기존 AuthContext 사용
