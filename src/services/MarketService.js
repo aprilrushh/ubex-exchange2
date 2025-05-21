@@ -31,11 +31,12 @@ export const connectWebSocket = (symbols, onMessage) => {
 // 코인 목록 조회
 export async function fetchCoinList() {
   try {
-    const response = await fetch(`${API_BASE_URL}/market/coins`);
+    // 관리자 혹은 공개 API 엔드포인트에서 코인 목록을 조회합니다.
+    const response = await fetch(`${API_BASE_URL}/admin/coins`);
     if (!response.ok) {
       throw new Error('Failed to fetch coin list');
     }
-    return response.json();
+    return await response.json();
   } catch (error) {
     console.error('코인 목록 조회 실패:', error);
     // 실제 API가 없을 경우 샘플 데이터 반환
