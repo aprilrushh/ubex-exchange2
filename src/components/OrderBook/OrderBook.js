@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './OrderBook.css';
 import DepthChart from './DepthChart';
+import webSocketService from '../../services/websocketService';
 
 const OrderBook = ({ data, symbol, onPriceSelect }) => {
   const [orderBookData, setOrderBookData] = useState({
@@ -40,99 +41,30 @@ const OrderBook = ({ data, symbol, onPriceSelect }) => {
     });
   };
   
-  // 샘플 호가 데이터 생성 함수
-  const generateOrderBookData = (symbol = 'BTC/USDT') => {
-    // 중심가격 설정 (BTC/USDT는 약 67000, ETH/USDT는 약 3500 등)
-    let centerPrice;
-    if (!symbol) {
-      centerPrice = 100 + (Math.random() * 10 - 5);
-    } else if (symbol.startsWith('BTC')) {
-      centerPrice = 67500 + (Math.random() * 200 - 100);
-    } else if (symbol.startsWith('ETH')) {
-      centerPrice = 3500 + (Math.random() * 20 - 10);
-    } else if (symbol.startsWith('XRP')) {
-      centerPrice = 0.55 + (Math.random() * 0.02 - 0.01);
-    } else if (symbol.startsWith('SOL')) {
-      centerPrice = 125 + (Math.random() * 5 - 2.5);
-    } else if (symbol.startsWith('ADA')) {
-      centerPrice = 0.43 + (Math.random() * 0.01 - 0.005);
-    } else {
-      centerPrice = 100 + (Math.random() * 10 - 5);
-    }
-    
-    // 소수점 자릿수 설정 (BTC는 1, ETH는 2, 기타 코인은 더 자세히)
-    let pricePrecision;
-    if (symbol.startsWith('BTC')) {
-      pricePrecision = 1;
-    } else if (symbol.startsWith('ETH')) {
-      pricePrecision = 2;
-    } else if (centerPrice < 1) {
-      pricePrecision = 6;
-    } else if (centerPrice < 10) {
-      pricePrecision = 4;
-    } else {
-      pricePrecision = 2;
-    }
-    
-    // 호가 간격 설정
-    const priceStep = Math.pow(10, -pricePrecision) * Math.max(1, Math.floor(centerPrice / 10000));
-    
-    // 매도 주문(asks) 생성 (높은 가격 -> 낮은 가격 순)
-    const asks = [];
-    for (let i = 0; i < 15; i++) {
-      const price = (centerPrice + priceStep * (i + 1)).toFixed(pricePrecision);
-      const amount = (Math.random() * 2 + 0.1).toFixed(6);
-      const total = (parseFloat(price) * parseFloat(amount)).toFixed(2);
-      const sum = i === 0 ? total : (parseFloat(total) + parseFloat(asks[i-1].sum)).toFixed(2);
-      
-      asks.push({
-        price,
-        amount,
-        total,
-        sum
-      });
-    }
-    
-    // 매수 주문(bids) 생성 (높은 가격 -> 낮은 가격 순)
-    const bids = [];
-    for (let i = 0; i < 15; i++) {
-      const price = (centerPrice - priceStep * i).toFixed(pricePrecision);
-      const amount = (Math.random() * 2 + 0.1).toFixed(6);
-      const total = (parseFloat(price) * parseFloat(amount)).toFixed(2);
-      const sum = i === 0 ? total : (parseFloat(total) + parseFloat(bids[i-1].sum)).toFixed(2);
-      
-      bids.push({
-        price,
-        amount,
-        total,
-        sum
-      });
-    }
-    
-    return { asks, bids };
-  };
-  
-  // API에서 호가 데이터 가져오기
+  // WebSocket을 통해 호가 데이터 구독
   useEffect(() => {
     if (data) {
-      // 외부에서 전달받은 데이터 사용
-      const validatedData = validateOrderBookData(data);
-      validatedData.asks = calculateSums(validatedData.asks);
-      validatedData.bids = calculateSums(validatedData.bids);
-      setOrderBookData(validatedData);
-    } else {
-      // 샘플 데이터 생성
-      const generatedData = generateOrderBookData(symbol);
-      setOrderBookData(generatedData);
-      
-      // 실시간 데이터 업데이트 (2초마다 갱신)
-      const interval = setInterval(() => {
-        const newData = generateOrderBookData(symbol);
-        setOrderBookData(newData);
-      }, 2000);
-      
-      return () => clearInterval(interval);
+      const validated = validateOrderBookData(data);
+      validated.asks = calculateSums(validated.asks);
+      validated.bids = calculateSums(validated.bids);
+      setOrderBookData(validated);
     }
+
+    const handleUpdate = (payload) => {
+      if (!payload || payload.symbol !== symbol) return;
+      const validated = validateOrderBookData(payload);
+      validated.asks = calculateSums(validated.asks);
+      validated.bids = calculateSums(validated.bids);
+      setOrderBookData(validated);
+    };
+
+    webSocketService.on('orderbook-update', handleUpdate);
+    webSocketService.emit('subscribe', { channel: `market-${symbol}` });
+
+    return () => {
+      webSocketService.off('orderbook-update', handleUpdate);
+      webSocketService.emit('unsubscribe', { channel: `market-${symbol}` });
+    };
   }, [data, symbol]);
   
   // 가격 포맷팅 함수
