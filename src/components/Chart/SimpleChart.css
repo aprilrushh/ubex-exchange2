@@ -90,3 +90,17 @@
     font-size: 14px;
   }
 }
+
+.chart-tooltip {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+  border: 1px solid #666;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  display: none;
+}
