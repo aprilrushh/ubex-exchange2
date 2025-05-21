@@ -381,14 +381,25 @@ const SimpleChart = ({
     return colors[key] || '#FF6B6B';
   };
 
-  const handleTimeframeChange = (newTimeframe) => {
-    if (wsRef.current) {
-      webSocketService.unsubscribe({ symbol, interval: timeframe });
-      webSocketService.subscribe({ symbol, interval: newTimeframe });
+  const handleTimeframeChange = (timeframeInfo) => {
+    const newTimeframe = typeof timeframeInfo === 'string'
+      ? timeframeInfo
+      : timeframeInfo?.id;
+
+    if (wsRef.current && newTimeframe) {
+      webSocketService.emit('unsubscribe', {
+        channel: `candlestick:${symbol}:${timeframe}`,
+      });
+      webSocketService.emit('subscribe', {
+        channel: `candlestick:${symbol}:${newTimeframe}`,
+      });
     }
-    setTimeframe(newTimeframe);
-    if (onTimeframeChange) {
-      onTimeframeChange(newTimeframe);
+
+    if (newTimeframe) {
+      setTimeframe(newTimeframe);
+      if (onTimeframeChange) {
+        onTimeframeChange(newTimeframe);
+      }
     }
   };
 
