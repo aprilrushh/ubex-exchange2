@@ -1,136 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import './TradeHistory.css';
+import websocketService from '../../services/websocketService';
+import { getRecentTrades } from '../../services/tradeService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TradeHistory = ({ symbol }) => {
   const [trades, setTrades] = useState([]);
   const [viewOption, setViewOption] = useState('all'); // all, buy, sell
   const [timeOption, setTimeOption] = useState('today'); // today, week, month
 
-  // 거래 내역 샘플 데이터 생성
-  const generateTradeHistory = (symbol) => {
-    const now = new Date();
-    const tradeCount = 30;
-    const result = [];
-    
-    // 중심가격 설정 (BTC/USDT는 약 67000, ETH/USDT는 약 3500 등)
-    let centerPrice;
-    if (symbol.startsWith('BTC')) {
-      centerPrice = 67500;
-    } else if (symbol.startsWith('ETH')) {
-      centerPrice = 3500;
-    } else if (symbol.startsWith('XRP')) {
-      centerPrice = 0.55;
-    } else if (symbol.startsWith('SOL')) {
-      centerPrice = 125;
-    } else if (symbol.startsWith('ADA')) {
-      centerPrice = 0.43;
-    } else {
-      centerPrice = 100;
-    }
-    
-    // 소수점 자릿수 설정 (BTC는 1, ETH는 2, 기타 코인은 더 자세히)
-    let pricePrecision;
-    if (symbol.startsWith('BTC')) {
-      pricePrecision = 1;
-    } else if (symbol.startsWith('ETH')) {
-      pricePrecision = 2;
-    } else if (centerPrice < 1) {
-      pricePrecision = 6;
-    } else if (centerPrice < 10) {
-      pricePrecision = 4;
-    } else {
-      pricePrecision = 2;
-    }
-    
-    const getPriceVariation = () => {
-      return (Math.random() * 200 - 100) / Math.pow(10, pricePrecision);
-    };
-    
-    for (let i = 0; i < tradeCount; i++) {
-      // 최근 거래일수록 더 최근 시간으로 설정
-      const timeDiff = Math.floor(Math.random() * (i + 1) * 5000) + 1000;
-      const timestamp = new Date(now.getTime() - timeDiff);
-      
-      // 매수/매도 랜덤 결정
-      const type = Math.random() > 0.5 ? 'buy' : 'sell';
-      
-      // 가격과 수량 설정 (매수/매도에 따라 약간 다르게)
-      const price = (centerPrice + getPriceVariation()).toFixed(pricePrecision);
-      const amount = (Math.random() * (type === 'buy' ? 0.5 : 0.3) + 0.01).toFixed(6);
-      
-      result.push({
-        id: `trade-${i}-${Date.now()}`,
-        timestamp,
-        type,
-        price,
-        amount,
-        total: (parseFloat(price) * parseFloat(amount)).toFixed(2),
-        symbol
-      });
-    }
-    
-    // 시간순 정렬 (최신 거래가 위로)
-    return result.sort((a, b) => b.timestamp - a.timestamp);
-  };
   
   // 거래 내역 데이터 가져오기
   useEffect(() => {
-    // 실제로는 API 호출
-    // const fetchTradeHistory = async () => {
-    //   try {
-    //     const response = await fetch(`/api/trades/${symbol}`);
-    //     const data = await response.json();
-    //     setTrades(data);
-    //   } catch (error) {
-    //     console.error('거래 내역 가져오기 오류:', error);
-    //   }
-    // };
-    
-    // 테스트 데이터 생성
-    const newTrades = generateTradeHistory(symbol);
-    setTrades(newTrades);
-    
-    // 실시간 거래 시뮬레이션 (5초마다 새 거래 추가)
-    const interval = setInterval(() => {
-      setTrades(prevTrades => {
-        // 새 거래 생성
-        const now = new Date();
-        const [baseCurrency, quoteCurrency] = symbol.split('/');
-        
-        // 랜덤 가격 생성
-        let price;
-        if (baseCurrency === 'BTC') {
-          price = (67500 + (Math.random() * 100 - 50)).toFixed(1);
-        } else if (baseCurrency === 'ETH') {
-          price = (3500 + (Math.random() * 10 - 5)).toFixed(2);
-        } else if (baseCurrency === 'XRP') {
-          price = (0.55 + (Math.random() * 0.02 - 0.01)).toFixed(6);
-        } else if (baseCurrency === 'SOL') {
-          price = (125 + (Math.random() * 2 - 1)).toFixed(2);
-        } else if (baseCurrency === 'ADA') {
-          price = (0.43 + (Math.random() * 0.01 - 0.005)).toFixed(6);
-        } else {
-          price = (100 + (Math.random() * 5 - 2.5)).toFixed(2);
+    let unsubscribe;
+
+    const init = async () => {
+      try {
+        const initial = await getRecentTrades(symbol);
+        if (Array.isArray(initial)) {
+          setTrades(initial);
         }
-        
-        const type = Math.random() > 0.5 ? 'buy' : 'sell';
-        const amount = (Math.random() * 0.5 + 0.01).toFixed(6);
-        
-        const newTrade = {
-          id: `trade-new-${Date.now()}`,
-          timestamp: now,
-          type,
-          price,
-          amount,
-          total: (parseFloat(price) * parseFloat(amount)).toFixed(2),
-          symbol
-        };
-        
-        return [newTrade, ...prevTrades.slice(0, 29)];
-      });
-    }, 5000);
-    
-    return () => clearInterval(interval);
+      } catch (err) {
+        console.error('Failed to fetch trades:', err);
+      }
+
+      const handleUpdate = (trade) => {
+        if (!trade || trade.symbol !== symbol) return;
+        setTrades(prev => [trade, ...prev].slice(0, 50));
+      };
+
+      websocketService.on('trade-update', handleUpdate);
+      websocketService.emit('subscribe', { channel: `trade-${symbol}` });
+
+      unsubscribe = () => {
+        websocketService.off('trade-update', handleUpdate);
+        websocketService.emit('unsubscribe', { channel: `trade-${symbol}` });
+      };
+    };
+
+    init();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [symbol]);
   
   // 필터링된 거래 내역
@@ -252,29 +164,33 @@ const TradeHistory = ({ symbol }) => {
         </div>
         <div className="trade-history-table-body">
           {filteredTrades.length > 0 ? (
-            filteredTrades.map((trade) => (
-              <div className="trade-row" key={trade.id}>
-                <div className="col time">{formatTime(trade.timestamp)}</div>
-                <div className={`col price ${trade.type === 'buy' ? 'buy-text' : 'sell-text'}`}>
-                  {parseFloat(trade.price).toLocaleString('ko-KR', { 
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 8
-                  })}
+            filteredTrades.map((trade) => {
+              const isUserTrade =
+                authState.user && (trade.buyerId === authState.user.id || trade.sellerId === authState.user.id);
+              return (
+                <div className={`trade-row ${isUserTrade ? 'user-trade' : ''}`} key={trade.id}>
+                  <div className="col time">{formatTime(trade.timestamp)}</div>
+                  <div className={`col price ${trade.type === 'buy' ? 'buy-text' : 'sell-text'}`}>
+                    {parseFloat(trade.price).toLocaleString('ko-KR', {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 8
+                    })}
+                  </div>
+                  <div className="col amount">
+                    {parseFloat(trade.amount).toLocaleString('ko-KR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 8
+                    })}
+                  </div>
+                  <div className="col total">
+                    {parseFloat(trade.total).toLocaleString('ko-KR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}
+                  </div>
                 </div>
-                <div className="col amount">
-                  {parseFloat(trade.amount).toLocaleString('ko-KR', { 
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 8
-                  })}
-                </div>
-                <div className="col total">
-                  {parseFloat(trade.total).toLocaleString('ko-KR', { 
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                  })}
-                </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="no-trades">
               <p>거래 내역이 없습니다.</p>
