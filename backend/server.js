@@ -65,6 +65,11 @@ const portfolioRoutes = require('./routes/portfolioRoutes');
 const marketRoutes = require('./routes/marketRoutes');
 const adminCoinRoutes = require('./routes/adminCoinRoutes');
 const adminPairRoutes = require('./routes/adminPairRoutes');
+const adminAuthRoutes = require('./routes/adminAuthRoutes');
+const adminUserRoutes = require('./routes/adminUserRoutes');
+const adminTransactionRoutes = require('./routes/adminTransactionRoutes');
+const adminStatsRoutes = require('./routes/adminStatsRoutes');
+const adminAuth = require('./middlewares/adminAuth');
 const websocketService = require('./services/websocketService');
 
 app.use('/api/v1/auth', authRoutes);
@@ -72,8 +77,14 @@ app.use('/api/v1/wallet', walletRoutes);
 app.use('/api/v1/market', marketRoutes);
 app.use('/api/orders', tradeRoutes);
 app.use('/api/portfolio', portfolioRoutes);
+
+app.use('/api/admin', adminAuthRoutes); // login
+app.use('/api/admin', adminAuth); // protect routes below
 app.use('/api/admin/coins', adminCoinRoutes);
 app.use('/api/admin/pairs', adminPairRoutes);
+app.use('/api/admin/users', adminUserRoutes);
+app.use('/api/admin/transactions', adminTransactionRoutes);
+app.use('/api/admin/stats', adminStatsRoutes);
 
 // WebSocket 초기화
 websocketService.initWebSocket(server);

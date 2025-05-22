@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBEX Exchange - 관리자</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="#" class="logo">UPbit Admin</a>
+            </div>
+            <nav class="main-nav">
+                <ul class="nav-menu">
+                    <li><a href="#" class="active" id="dashboard-link">대시보드</a></li>
+                    <li><a href="#" id="coins-link">코인 관리</a></li>
+                    <li><a href="#" id="users-link">회원 관리</a></li>
+                    <li><a href="#" id="deposits-link">입출금 관리</a></li>
+                </ul>
+            </nav>
+            <div class="user-menu">
+                <span class="admin-name">관리자</span>
+                <a href="#" class="logout-btn">로그아웃</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <div id="dashboard-page" class="admin-content active">
+            <h1>거래소 대시보드</h1>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h2>등록된 코인</h2>
+                    <p class="stat-value" id="coin-count">3</p>
+                </div>
+                <div class="stat-card">
+                    <h2>가입 회원수</h2>
+                    <p class="stat-value" id="user-count">42</p>
+                </div>
+                <div class="stat-card">
+                    <h2>거래량(24h)</h2>
+                    <p class="stat-value" id="trading-volume">0</p>
+                </div>
+                <div class="stat-card">
+                    <h2>거래 건수(24h)</h2>
+                    <p class="stat-value" id="order-count">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="coins-page" class="admin-content">
+            <h1>코인 관리</h1>
+            <div class="action-bar">
+                <button id="add-coin-btn" class="primary-btn">코인 추가</button>
+            </div>
+            <div class="coin-list-container">
+                <table class="data-table" id="coin-table">
+                    <thead>
+                        <tr>
+                            <th>이름</th>
+                            <th>심볼</th>
+                            <th>현재가</th>
+                            <th>상태</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="add-coin-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h2>새 코인 추가</h2>
+                    <form id="add-coin-form">
+                        <div class="form-group">
+                            <label for="coin-name">코인 이름</label>
+                            <input type="text" id="coin-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="coin-ticker">티커 심볼</label>
+                            <input type="text" id="coin-ticker" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="coin-price">초기 가격(KRW)</label>
+                            <input type="number" id="coin-price" required>
+                        </div>
+                        <button type="submit" class="primary-btn">추가</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="users-page" class="admin-content">
+            <h1>회원 관리</h1>
+            <div class="user-list-container">
+                <table class="data-table" id="user-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>이메일</th>
+                            <th>가입일</th>
+                            <th>상태</th>
+                            <th>보유자산(KRW)</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="deposits-page" class="admin-content">
+            <h1>입출금 관리</h1>
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="transaction-type">거래 유형</label>
+                    <select id="transaction-type">
+                        <option value="all">전체</option>
+                        <option value="deposit">입금</option>
+                        <option value="withdraw">출금</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="transaction-status">상태</label>
+                    <select id="transaction-status">
+                        <option value="all">전체</option>
+                        <option value="pending">대기중</option>
+                        <option value="completed">완료</option>
+                        <option value="failed">실패</option>
+                    </select>
+                </div>
+                <button id="apply-filter" class="secondary-btn">적용</button>
+            </div>
+            <div class="transaction-list-container">
+                <table class="data-table" id="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>회원</th>
+                            <th>유형</th>
+                            <th>코인</th>
+                            <th>금액</th>
+                            <th>상태</th>
+                            <th>시간</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
