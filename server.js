@@ -36,6 +36,11 @@ const tradeRoutes = require('./backend/routes/tradeRoutes');
 const marketRoutes = require('./backend/routes/marketRoutes');
 const adminCoinRoutes = require('./backend/routes/adminCoinRoutes');
 const adminPairRoutes = require('./backend/routes/adminPairRoutes');
+const adminAuthRoutes = require('./backend/routes/adminAuthRoutes');
+const adminUserRoutes = require('./backend/routes/adminUserRoutes');
+const adminTransactionRoutes = require('./backend/routes/adminTransactionRoutes');
+const adminStatsRoutes = require('./backend/routes/adminStatsRoutes');
+const adminAuth = require('./backend/middlewares/adminAuth');
 const websocketService = require('./backend/services/websocketService');
 
 app.use('/api/v1/wallet', walletRoutes);
@@ -43,8 +48,13 @@ app.use('/api/auth', authRoutes);  // /api/auth 경로로 수정
 app.use('/auth', authRoutes);      // 기존 /auth 경로도 유지
 app.use('/api/orders', tradeRoutes);
 app.use('/api/markets', marketRoutes);
+app.use('/api/admin', adminAuthRoutes);
+app.use('/api/admin', adminAuth);
 app.use('/api/admin/coins', adminCoinRoutes);
 app.use('/api/admin/pairs', adminPairRoutes);
+app.use('/api/admin/users', adminUserRoutes);
+app.use('/api/admin/transactions', adminTransactionRoutes);
+app.use('/api/admin/stats', adminStatsRoutes);
 
 websocketService.initWebSocket(server);
 
