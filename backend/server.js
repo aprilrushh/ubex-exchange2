@@ -78,13 +78,13 @@ app.use('/api/v1/market', marketRoutes);
 app.use('/api/orders', tradeRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 
-app.use('/api/admin', adminAuthRoutes); // login
-app.use('/api/admin', adminAuth); // protect routes below
-app.use('/api/admin/coins', adminCoinRoutes);
-app.use('/api/admin/pairs', adminPairRoutes);
-app.use('/api/admin/users', adminUserRoutes);
-app.use('/api/admin/transactions', adminTransactionRoutes);
-app.use('/api/admin/stats', adminStatsRoutes);
+app.use('/api/v1/admin', adminAuthRoutes); // login
+app.use('/api/v1/admin', adminAuth); // protect routes below
+app.use('/api/v1/admin/coins', adminCoinRoutes);
+app.use('/api/v1/admin/pairs', adminPairRoutes);
+app.use('/api/v1/admin/users', adminUserRoutes);
+app.use('/api/v1/admin/transactions', adminTransactionRoutes);
+app.use('/api/v1/admin/stats', adminStatsRoutes);
 
 // WebSocket 초기화
 websocketService.initWebSocket(server);
