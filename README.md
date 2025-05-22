@@ -22,6 +22,10 @@ npm install
 Run `npm run start:backend` (or `node server.js`) to launch the backend on port `3035`.
 If the backend is not running, the React frontend will encounter WebSocket and API timeout errors.
 
+### Database
+The backend uses **MySQL** with Sequelize. Configure credentials via environment variables (`DB_USER`, `DB_PASS`, `DB_NAME`, `DB_HOST`) or edit `mysqlconnect.ini`.
+Start MySQL before running the backend.
+
 ### Frontend
 Run `npm run start:frontend` to start the React app.
 

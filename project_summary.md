@@ -53,7 +53,7 @@ UBEX Exchange 프로젝트는 다음과 같은 주요 기능이 구현되어 있
 - **백엔드**: Node.js, Express
 - **실시간 통신**: Socket.io
 - **인증**: JWT
-- **데이터베이스**: MongoDB (예정)
+ - **데이터베이스**: MySQL
 - **배포**: AWS EC2
 
 ## 개발 방법론

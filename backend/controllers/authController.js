@@ -1,20 +1,10 @@
    // backend/controllers/authController.js
-   const bcrypt = require('bcrypt');
-   const jwt = require('jsonwebtoken');
-   const jwtConfig = require('../config/jwtConfig');
+  const bcrypt = require('bcrypt');
+  const jwt = require('jsonwebtoken');
+  const jwtConfig = require('../config/jwtConfig');
+  const { User } = require('../models');
 
-   // 임시 사용자 데이터 저장소
-   let users = [
-     {
-       id: 1,
-       username: 'test',
-       email: 'test@example.com',
-       password: bcrypt.hashSync('test123', 10)
-     }
-   ];
-   let nextUserId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-
-   console.log('[authController] 모듈 로드됨. 초기 사용자 수:', users.length, '다음 사용자 ID:', nextUserId);
+  console.log('[authController] authController 모듈 로드됨. DB 기반 인증 사용');
    if (jwtConfig.secret) {
      console.log('[authController] JWT_SECRET 로드 성공.');
    } else {
@@ -44,8 +34,8 @@
        const { email, password } = req.body;
        console.log('[authController] 로그인 시도:', { email });
 
-       // 사용자 조회
-       const user = users.find(u => u.email === email);
+       // 사용자 조회 (DB)
+       const user = await User.findOne({ where: { email } });
        if (!user) {
          console.log('[authController] 사용자를 찾을 수 없음:', email);
          return res.status(401).json({
@@ -69,7 +59,7 @@
        console.log('[authController] 로그인 성공:', { userId: user.id, email: user.email });
 
        // 비밀번호 제외하고 사용자 정보 반환
-       const { password: _, ...userWithoutPassword } = user;
+       const { password: _, ...userWithoutPassword } = user.toJSON();
 
        res.json({
          success: true,
@@ -92,7 +82,8 @@
        console.log('[authController] 회원가입 시도:', { username, email });
 
        // 이메일 중복 확인
-       if (users.some(u => u.email === email)) {
+       const existing = await User.findOne({ where: { email } });
+       if (existing) {
          console.log('[authController] 이메일 중복:', email);
          return res.status(400).json({
            success: false,
@@ -104,20 +95,18 @@
        const hashedPassword = await bcrypt.hash(password, 10);
 
        // 새 사용자 생성
-       const newUser = {
-         id: nextUserId++,
+       const newUser = await User.create({
          username,
          email,
          password: hashedPassword
-       };
-       users.push(newUser);
+       });
 
        // 토큰 생성
        const token = generateToken(newUser.id);
        console.log('[authController] 회원가입 성공:', { userId: newUser.id, email: newUser.email });
 
        // 비밀번호 제외하고 사용자 정보 반환
-       const { password: _, ...userWithoutPassword } = newUser;
+       const { password: _, ...userWithoutPassword } = newUser.toJSON();
 
        res.status(201).json({
          success: true,
