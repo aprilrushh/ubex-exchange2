@@ -1,26 +1,26 @@
 {
   "development": {
-    "username": "root",
-    "password": null,
-    "database": "ubex_exchange_dev",
+    "username": "mysql",
+    "password": "mysql",
+    "database": "ubex",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "logging": false
   },
   "test": {
-    "username": "root",
-    "password": null,
-    "database": "ubex_exchange_test",
+    "username": "mysql",
+    "password": "mysql",
+    "database": "ubex",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "logging": false
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "ubex_exchange_prod",
+    "username": "mysql",
+    "password": "mysql",
+    "database": "ubex",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "logging": false
   }
-} 
+}
