@@ -22,50 +22,63 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     async function loadStats() {
-        const res = await fetch('/api/admin/stats', { headers: authHeader() });
-        if (res.ok) {
-            const s = await res.json();
-            document.getElementById('coin-count').textContent = s.coinCount;
-            document.getElementById('user-count').textContent = s.userCount;
+        try {
+            const res = await fetch('http://localhost:3035/api/v1/admin/stats', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            });
+            if (!res.ok) throw new Error('Failed to load stats');
+            const data = await res.json();
+            updateStats(data);
+        } catch (error) {
+            console.error('Error loading stats:', error);
         }
     }
 
     async function loadCoinTable() {
-        const tbody = document.querySelector('#coin-table tbody');
-        tbody.innerHTML = '';
-        const res = await fetch('/api/admin/coins', { headers: authHeader() });
-        const coins = await res.json();
-        coins.forEach(c => {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>${c.name}</td><td>${c.symbol}</td><td>-</td><td><span class="status-tag status-active">활성</span></td><td></td>`;
-            tbody.appendChild(row);
-        });
+        try {
+            const res = await fetch('http://localhost:3035/api/v1/admin/coins', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            });
+            if (!res.ok) throw new Error('Failed to load coins');
+            const data = await res.json();
+            updateCoinTable(data);
+        } catch (error) {
+            console.error('Error loading coins:', error);
+        }
     }
 
     async function loadUserTable() {
-        const tbody = document.querySelector('#user-table tbody');
-        tbody.innerHTML = '';
-        const res = await fetch('/api/admin/users', { headers: authHeader() });
-        const users = await res.json();
-        users.forEach(u => {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>${u.id}</td><td>${u.email}</td><td>${u.created_at}</td><td><span class="status-tag status-active">활성</span></td><td>-</td><td></td>`;
-            tbody.appendChild(row);
-        });
+        try {
+            const res = await fetch('http://localhost:3035/api/v1/admin/users', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            });
+            if (!res.ok) throw new Error('Failed to load users');
+            const data = await res.json();
+            updateUserTable(data);
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
     }
 
     async function loadTransactionTable() {
-        const tbody = document.querySelector('#transaction-table tbody');
-        tbody.innerHTML = '';
-        const type = document.getElementById('transaction-type').value;
-        const status = document.getElementById('transaction-status').value;
-        const res = await fetch(`/api/admin/transactions?type=${type}&status=${status}`, { headers: authHeader() });
-        const txs = await res.json();
-        txs.forEach(t => {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>${t.id}</td><td>${t.userEmail}</td><td>${t.type}</td><td>${t.coin}</td><td>${t.amount}</td><td><span class="status-tag status-${t.status}">${t.status}</span></td><td>${t.created_at}</td><td></td>`;
-            tbody.appendChild(row);
-        });
+        try {
+            const res = await fetch('http://localhost:3035/api/v1/admin/transactions?type=all&status=all', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            });
+            if (!res.ok) throw new Error('Failed to load transactions');
+            const data = await res.json();
+            updateTransactionTable(data);
+        } catch (error) {
+            console.error('Error loading transactions:', error);
+        }
     }
 
     document.getElementById('apply-filter').addEventListener('click', loadTransactionTable);

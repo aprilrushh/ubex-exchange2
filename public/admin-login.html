@@ -30,9 +30,12 @@
         e.preventDefault();
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
-        const res = await fetch('/api/v1/admin/login', {
+        const res = await fetch('http://localhost:3035/api/v1/admin/login', {
             method:'POST',
-            headers:{'Content-Type':'application/json'},
+            headers:{
+                'Content-Type':'application/json',
+                'Accept': 'application/json'
+            },
             body: JSON.stringify({username,password})
         });
         if(res.ok){
