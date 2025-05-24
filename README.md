@@ -18,12 +18,17 @@ cd ubex-exchange
 npm install
 ```
 
+3. Copy `.env.example` to `.env` and update the values
+```bash
+cp .env.example .env
+```
+
 ### Backend
 Run `npm run start:backend` (or `node server.js`) to launch the backend on port `3035`.
 If the backend is not running, the React frontend will encounter WebSocket and API timeout errors.
 
 ### Database
-The backend uses **MySQL** with Sequelize. Configure credentials via environment variables (`DB_USER`, `DB_PASS`, `DB_NAME`, `DB_HOST`) or edit `mysqlconnect.ini`.
+The backend uses **MySQL** with Sequelize. Configure credentials in the `.env` file (`DB_USER`, `DB_PASS`, `DB_NAME`, `DB_HOST`).
 Start MySQL before running the backend.
 
 After running the database migrations you can seed some demo data:
