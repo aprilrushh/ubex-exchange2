@@ -10,6 +10,7 @@ const {
   getWithdrawals,
   getCoinBalance,
   getUserBalances,
+  listAllWhitelist,
   listWhitelist,
   addWhitelist,
   deleteWhitelist,
@@ -42,6 +43,7 @@ router.get('/balance/:coin', authMiddleware, getCoinBalance);
 router.get('/balances', authMiddleware, getUserBalances);
 
 // GET /api/v1/wallet/whitelist-addresses/:coin - 화이트리스트 주소 목록 조회
+router.get('/whitelist-addresses', authMiddleware, listAllWhitelist);
 router.get('/whitelist-addresses/:coin', authMiddleware, listWhitelist);
 
 // POST /api/v1/wallet/whitelist-address - 화이트리스트 주소 추가
