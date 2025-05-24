@@ -1,6 +1,6 @@
 // src/components/Chart/SimpleChart.js
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart, ColorType } from 'lightweight-charts';
+import { createChart } from 'lightweight-charts';
 import IndicatorSelector from './Indicators/IndicatorSelector';
 import TimeframeSelector from './TimeframeSelector';
 import { calculateMA, calculateRSI, calculateMACD } from '../../utils/chartIndicators';
@@ -246,6 +246,10 @@ const SimpleChart = ({
       handleCandles,
       handleCandlestick,
     };
+
+    if (socket.connected) {
+      handleConnect();
+    }
   };
 
   // 초기 데이터 처리
