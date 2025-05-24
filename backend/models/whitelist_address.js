@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     coin_symbol: { type: DataTypes.STRING(10), allowNull: false },
     address:     { type: DataTypes.STRING(128), allowNull: false },
     label:       { type: DataTypes.STRING(50) },
-    confirmed:   { type: DataTypes.BOOLEAN, defaultValue: false }
+
   }, {
     tableName: 'whitelist_addresses',
     timestamps: true,
