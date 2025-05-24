@@ -121,11 +121,8 @@ exports.setDepositAddress = async (req, res) => {
       return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
     }
 
-    if (address.startsWith('0x')) {
-      const { valid, message } = await validateEthereumAddress(address);
-      if (!valid) {
-        return res.status(400).json({ success: false, message });
-      }
+    if (address.startsWith('0x') && !validateEthereumAddress(address)) {
+      return res.status(400).json({ success: false, message: 'Invalid Ethereum address.' });
     }
 
     let wallet = await db.Wallet.findOne({
@@ -173,11 +170,8 @@ exports.setDepositAddress = async (req, res) => {
         return res.status(400).json({ success: false, message: '필수 출금 정보(코인, 주소, 유효한 수량)가 누락되었거나 잘못되었습니다.' });
       }
 
-      if (address.startsWith('0x')) {
-        const { valid, message } = await validateEthereumAddress(address);
-        if (!valid) {
-          return res.status(400).json({ success: false, message });
-        }
+      if (address.startsWith('0x') && !validateEthereumAddress(address)) {
+        return res.status(400).json({ success: false, message: 'Invalid Ethereum address.' });
       }
   
       ensureUserWallet(userId); // 사용자 지갑 존재 확인 및 초기화
@@ -427,6 +421,7 @@ exports.getUserBalances = async (req, res) => {
       if (!address) {
         return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
       }
+
 
 
       const entry = await db.WhitelistAddress.create({
