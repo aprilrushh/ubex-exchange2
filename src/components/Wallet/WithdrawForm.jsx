@@ -8,6 +8,7 @@ import AddWhitelistModal from './AddWhitelistModal.jsx';
 import './Wallet.css';
 
 const WithdrawForm = ({ coin }) => {
+  console.log('WithdrawForm mounted with coin:', coin);
   const [whitelist, setWhitelist] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [amount, setAmount] = useState('');
