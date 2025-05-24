@@ -149,7 +149,7 @@ const SimpleChart = ({
     chartContainerRef.current.appendChild(tooltip);
 
     const handleCrosshairMove = (param) => {
-      if (!param.point || !param.time || !candleSeriesRef.current) {
+      if (!param || !param.point || !param.time || !param.seriesPrices || !candleSeriesRef.current) {
         tooltip.style.display = 'none';
         return;
       }
@@ -169,7 +169,12 @@ const SimpleChart = ({
       tooltip.style.top = `${param.point.y + 15}px`;
     };
 
-    chart.subscribeCrosshairMove(handleCrosshairMove);
+    let crosshairSubscription;
+    try {
+      crosshairSubscription = chart.subscribeCrosshairMove(handleCrosshairMove);
+    } catch (error) {
+      console.warn('Failed to subscribe to crosshair move:', error);
+    }
 
     const handleResize = () => {
       if (chart && chartContainerRef.current) {
@@ -182,10 +187,21 @@ const SimpleChart = ({
     window.addEventListener('resize', handleResize);
     
     return () => {
-      chart.unsubscribeCrosshairMove(handleCrosshairMove);
+      try {
+        if (crosshairSubscription) {
+          chart.unsubscribeCrosshairMove(crosshairSubscription);
+        }
+      } catch (error) {
+        console.warn('Failed to unsubscribe from crosshair move:', error);
+      }
       window.removeEventListener('resize', handleResize);
       if (tooltip.parentNode) {
         tooltip.parentNode.removeChild(tooltip);
+      }
+      try {
+        chart.remove();
+      } catch (error) {
+        console.warn('Failed to remove chart:', error);
       }
     };
   }, []);
