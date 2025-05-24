@@ -11,6 +11,7 @@ import ExchangePage from './components/Exchange/ExchangePage';
 import PortfolioPage from './pages/PortfolioPage';
 import InvestmentPage from './pages/InvestmentPage';
 import WalletPage from './pages/WalletPage';
+import WhitelistAddressesPage from './pages/WhitelistAddressesPage.jsx';
 import TradingPage from './pages/TradingPage'; // 주문 관련 컴포넌트가 이 페이지 내에 있음
 import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/Register';
@@ -59,6 +60,10 @@ function App() {
                     <Route path="/investment" element={<InvestmentPage />} />
                     <Route path="/wallet" element={<WalletPage />} />
                     <Route path="/wallet/:coin" element={<WalletPage />} />
+                    <Route
+                      path="/wallet/whitelist-addresses"
+                      element={<WhitelistAddressesPage />}
+                    />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/admin/*" element={<AdminApp />} />

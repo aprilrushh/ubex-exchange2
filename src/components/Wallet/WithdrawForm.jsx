@@ -2,10 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   listWhitelist,
-  addWhitelist,
-  deleteWhitelist,
   requestWithdrawal
 } from '../../services/WalletService';
+import AddWhitelistModal from './AddWhitelistModal.jsx';
 import './Wallet.css';
 
 const WithdrawForm = ({ currency }) => {
@@ -15,6 +14,7 @@ const WithdrawForm = ({ currency }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchWhitelist = async () => {
@@ -25,6 +25,8 @@ const WithdrawForm = ({ currency }) => {
         setWhitelist(addresses);
         if (addresses.length > 0) {
           setSelectedAddress(addresses[0].address);
+        } else {
+          setSelectedAddress('');
         }
       } catch (error) {
         console.error('화이트리스트 조회 실패', error);
@@ -70,6 +72,15 @@ const WithdrawForm = ({ currency }) => {
     }
   };
 
+  const handleSelect = (e) => {
+    const value = e.target.value;
+    if (value === 'add-new') {
+      setShowModal(true);
+    } else {
+      setSelectedAddress(value);
+    }
+  };
+
   if (loading) {
     return <div className="wallet-loading">Loading...</div>;
   }
@@ -86,27 +97,19 @@ const WithdrawForm = ({ currency }) => {
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>출금 주소</label>
-          <input
-            type="text"
+          <select
+            className="whitelist-select"
             value={selectedAddress}
-            onChange={(e) => setSelectedAddress(e.target.value)}
-            placeholder="출금 주소를 입력하세요"
-            required
-          />
-          {whitelist.length > 0 && (
-            <select
-              className="whitelist-select"
-              value={selectedAddress}
-              onChange={(e) => setSelectedAddress(e.target.value)}
-            >
-              <option value="">주소를 선택하세요</option>
-              {whitelist.map((addr) => (
-                <option key={addr.id} value={addr.address}>
-                  {addr.label} ({addr.address})
-                </option>
-              ))}
-            </select>
-          )}
+            onChange={handleSelect}
+          >
+            <option value="">주소를 선택하세요</option>
+            {whitelist.map((addr) => (
+              <option key={addr.id} value={addr.address}>
+                {addr.label} ({addr.address})
+              </option>
+            ))}
+            <option value="add-new">+ 새 주소 등록</option>
+          </select>
         </div>
         <div className="form-group">
           <label>출금 수량</label>
@@ -132,6 +135,23 @@ const WithdrawForm = ({ currency }) => {
           <li>출금 요청 후 처리까지 최대 30분이 소요될 수 있습니다.</li>
         </ul>
       </div>
+      {showModal && (
+        <AddWhitelistModal
+          coin={currency}
+          onClose={() => setShowModal(false)}
+          onSuccess={() => {
+            setShowModal(false);
+            // refresh list
+            (async () => {
+              const addresses = await listWhitelist(currency);
+              setWhitelist(addresses);
+              if (addresses.length > 0) {
+                setSelectedAddress(addresses[0].address);
+              }
+            })();
+          }}
+        />
+      )}
     </div>
   );
 };
