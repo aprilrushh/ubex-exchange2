@@ -12,7 +12,6 @@ const {
   getUserBalances,
   listAllWhitelist,
   listWhitelist,
-  listAllWhitelist,
   addWhitelist,
   deleteWhitelist,
   confirmWhitelistAddress,
@@ -44,10 +43,11 @@ router.get('/balance/:coin', authMiddleware, getCoinBalance);
 // GET /api/wallet/balances - 전체 코인 잔액 조회 (이전 버전에서 사용)
 router.get('/balances', authMiddleware, getUserBalances);
 
-// GET /api/v1/wallet/whitelist-addresses/:coin - 화이트리스트 주소 목록 조회
+// GET /api/v1/wallet/whitelist-addresses - 모든 화이트리스트 주소 목록 조회
 router.get('/whitelist-addresses', authMiddleware, listAllWhitelist);
+
+// GET /api/v1/wallet/whitelist-addresses/:coin - 특정 코인의 화이트리스트 주소 목록 조회
 router.get('/whitelist-addresses/:coin', authMiddleware, listWhitelist);
-router.get('/whitelist-addresses', authMiddleware, listAllWhitelist); // new controller
 
 // POST /api/v1/wallet/whitelist-address - 화이트리스트 주소 추가
 router.post(
@@ -62,7 +62,5 @@ router.delete('/whitelist-address/:id', authMiddleware, deleteWhitelist);
 
 // POST /api/v1/wallet/whitelist/:id/resend - 화이트리스트 확인 또는 재발송
 router.post('/whitelist/:id/resend', authMiddleware, resendWhitelistConfirmation);
-
-
 
 module.exports = router;
