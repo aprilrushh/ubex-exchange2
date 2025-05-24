@@ -41,6 +41,23 @@ router.get('/balance/:coin', authMiddleware, getCoinBalance);
 // GET /api/wallet/balances - 전체 코인 잔액 조회 (이전 버전에서 사용)
 router.get('/balances', authMiddleware, getUserBalances);
 
+// GET /api/v1/wallet/whitelist-addresses/:coin - 화이트리스트 주소 목록 조회
+router.get('/whitelist-addresses/:coin', authMiddleware, listWhitelist);
+
+// POST /api/v1/wallet/whitelist-address - 화이트리스트 주소 추가
+router.post(
+  '/whitelist-address',
+  authMiddleware,
+  whitelistRateLimit,
+  addWhitelist
+);
+
+// DELETE /api/v1/wallet/whitelist-address/:id - 화이트리스트 주소 삭제
+router.delete('/whitelist-address/:id', authMiddleware, deleteWhitelist);
+
+// POST /api/v1/wallet/whitelist/:id/resend - 화이트리스트 확인 또는 재발송
+router.post('/whitelist/:id/resend', authMiddleware, confirmWhitelistAddress);
+
 
 
 module.exports = router;
