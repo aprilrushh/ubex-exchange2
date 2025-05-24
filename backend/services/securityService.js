@@ -1,4 +1,5 @@
 // backend/services/securityService.js
+const securityLogger = require('./securityLogger');
 const createSecurityService = () => {
   // 보안 설정 상태를 저장할 객체 (실제 구현에서는 데이터베이스 사용)
   const userSecuritySettings = new Map();
@@ -165,6 +166,10 @@ const createSecurityService = () => {
           details: suspiciousActivity,
           originalAction: action
         });
+        securityLogger.suspiciousPattern(userId, suspiciousActivity);
+        if (calculateRiskLevel(suspiciousActivity) === 'high') {
+          securityLogger.alert(`High risk activity detected for user ${userId}`);
+        }
       }
       
       return {
