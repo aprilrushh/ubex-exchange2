@@ -407,6 +407,30 @@ exports.getUserBalances = async (req, res) => {
     }
   };
 
+  // 모든 화이트리스트 주소 목록 조회
+  exports.listAllWhitelist = async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const currentPort = req.app.get('port') || process.env.PORT || 3035;
+
+      const addresses = await db.WhitelistAddress.findAll({
+        where: { user_id: userId },
+        order: [['id', 'DESC']]
+      });
+
+      console.log(
+        `[Port:${currentPort}] 사용자 ID ${userId}의 화이트리스트 전체 조회 요청.`
+      );
+      res.json({ success: true, data: addresses });
+    } catch (error) {
+      console.error('[WalletController] 전체 화이트리스트 조회 오류:', error);
+      res.status(500).json({
+        success: false,
+        message: '화이트리스트 조회 중 오류가 발생했습니다.'
+      });
+    }
+  };
+
   // 화이트리스트 주소 추가
   exports.addWhitelist = async (req, res) => {
     try {
