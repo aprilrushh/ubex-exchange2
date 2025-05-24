@@ -107,7 +107,7 @@ export const listWhitelist = async (currency) => {
   }
 
   try {
-    const response = await api.get(`/wallet/${currency}/whitelist`);
+    const response = await api.get(`/wallet/whitelist-addresses/${currency}`);
     return response.data;
   } catch (error) {
     console.error('화이트리스트 조회 실패', error);
@@ -124,7 +124,7 @@ export const addWhitelistAddress = async (data) => {
   }
 
   try {
-    const response = await api.post('/wallet/whitelist', data);
+    const response = await api.post('/wallet/whitelist-address', data);
     return response.data;
   } catch (error) {
     console.error('화이트리스트 주소 추가 실패', error);
@@ -141,10 +141,47 @@ export const removeWhitelistAddress = async (addressId) => {
   }
 
   try {
-    const response = await api.delete(`/wallet/whitelist/${addressId}`);
+    const response = await api.delete(`/wallet/whitelist-address/${addressId}`);
     return response.data;
   } catch (error) {
     console.error('화이트리스트 주소 삭제 실패', error);
+    throw error;
+  }
+};
+
+export const resendWhitelistConfirmation = async (addressId) => {
+  if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
+    return { success: true };
+  }
+
+  try {
+    const response = await api.post(`/wallet/whitelist/${addressId}/resend`);
+    return response.data;
+  } catch (error) {
+    console.error('화이트리스트 확인 재전송 실패', error);
+    throw error;
+  }
+};
+
+export const getWhitelistAddresses = async () => {
+  if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
+    return [
+      {
+        id: 1,
+        coin_symbol: 'BTC',
+        address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+        label: 'My Bitcoin Wallet',
+        status: 'CONFIRMED',
+        created_at: new Date().toISOString(),
+      },
+    ];
+  }
+
+  try {
+    const response = await api.get('/wallet/whitelist-addresses');
+    return response.data;
+  } catch (error) {
+    console.error('화이트리스트 전체 조회 실패', error);
     throw error;
   }
 };

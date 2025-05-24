@@ -7,12 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     coin_symbol: { type: DataTypes.STRING(10), allowNull: false },
     address:     { type: DataTypes.STRING(128), allowNull: false },
     label:       { type: DataTypes.STRING(50) },
-    status:      {
-      type: DataTypes.ENUM('pending', 'confirmed'),
-      allowNull: false,
-      defaultValue: 'pending'
-    },
-    confirmed_at:{ type: DataTypes.DATE }
+
   }, {
     tableName: 'whitelist_addresses',
     timestamps: true,

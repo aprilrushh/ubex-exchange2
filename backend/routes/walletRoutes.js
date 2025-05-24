@@ -16,6 +16,7 @@ const {
   confirmWhitelistAddress // 화이트리스트 관리 및 확인
 } = require('../controllers/walletController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const whitelistRateLimit = require('../middlewares/whitelistRateLimit');
 // const { validateWithdraw } = require('../middlewares/validation'); // 유효성 검사 미들웨어 (추후 구현 시 사용)
 
 // GET /api/wallet/deposit-address/:coin - 입금 주소 조회
@@ -40,10 +41,6 @@ router.get('/balance/:coin', authMiddleware, getCoinBalance);
 // GET /api/wallet/balances - 전체 코인 잔액 조회 (이전 버전에서 사용)
 router.get('/balances', authMiddleware, getUserBalances);
 
-// 화이트리스트 관리
-router.get('/:coin/whitelist', authMiddleware, listWhitelist);
-router.post('/:coin/whitelist', authMiddleware, addWhitelist);
-router.delete('/:coin/whitelist/:id', authMiddleware, deleteWhitelist);
-router.post('/whitelist-address/confirm', confirmWhitelistAddress);
+
 
 module.exports = router;
