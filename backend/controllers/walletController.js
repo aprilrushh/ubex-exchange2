@@ -46,6 +46,7 @@ let userWallets = {
   // DB 및 블록체인 서비스 불러오기
   const db = require('../models');
   const blockchainService = require('../services/blockchainService')();
+  const whitelistConfig = require('../config/whitelist');
 
   // 입금 주소 조회 로직
 exports.getDepositAddress = async (req, res) => {
@@ -147,6 +148,30 @@ exports.setDepositAddress = async (req, res) => {
       }
   
       ensureUserWallet(userId); // 사용자 지갑 존재 확인 및 초기화
+
+      // Enforce whitelist rules if enabled
+      if (whitelistConfig.emailVerification) {
+        const wl = await db.WhitelistAddress.findOne({
+          where: { user_id: userId, coin_symbol: coinSymbol, address }
+        });
+        if (!wl) {
+          return res.status(400).json({
+            success: false,
+            message: 'Whitelist address not registered.'
+          });
+        }
+        if (!whitelistConfig.instantConfirm) {
+          const validAfter =
+            new Date(wl.created_at).getTime() +
+            whitelistConfig.waitingPeriod * 1000;
+          if (Date.now() < validAfter) {
+            return res.status(400).json({
+              success: false,
+              message: 'Whitelist waiting period has not passed.'
+            });
+          }
+        }
+      }
   
       const userCoinWallet = userWallets[userId][coinSymbol];
       if (!userCoinWallet || userCoinWallet.available < withdrawalAmount) {
@@ -370,10 +395,26 @@ exports.getUserBalances = async (req, res) => {
         label
       });
 
+      // Behaviour changes based on environment configuration
+      if (whitelistConfig.emailVerification) {
+        console.log(
+          `[Whitelist] verification email would be sent for address ${address}`
+        );
+      }
+
+      const availableAfter = whitelistConfig.waitingPeriod
+        ? new Date(Date.now() + whitelistConfig.waitingPeriod * 1000)
+        : new Date();
+
+      const confirmed = !!whitelistConfig.instantConfirm;
+
       console.log(
         `[Port:${currentPort}] 사용자 ID ${userId} ${coinSymbol} 화이트리스트 추가: ${address}`
       );
-      res.status(201).json({ success: true, data: entry });
+      res.status(201).json({
+        success: true,
+        data: { ...entry.toJSON(), confirmed, availableAfter }
+      });
     } catch (error) {
       console.error('[WalletController] 화이트리스트 추가 오류:', error);
       res.status(500).json({
