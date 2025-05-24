@@ -24,7 +24,16 @@ const generateDummyBalance = (currency) => {
 };
 
 // 더미 화이트리스트 주소 저장소
-let dummyWhitelistAddresses = [];
+let dummyWhitelistAddresses = [
+  {
+    id: 1,
+    coin_symbol: 'BTC',
+    address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    label: 'My Bitcoin Wallet',
+    status: 'CONFIRMED',
+    created_at: new Date().toISOString(),
+  }
+];
 
 const api = axios.create({
   baseURL: `${API_URL}/api/v1`,
@@ -93,7 +102,7 @@ export const listWhitelist = async (currency) => {
     console.log('더미 데이터 모드에서 화이트리스트 조회');
     const addresses = dummyWhitelistAddresses.filter(addr => addr.coin_symbol === currency);
     console.log('조회된 더미 화이트리스트:', addresses);
-    return addresses;
+    return { success: true, data: addresses };
   }
 
   try {
@@ -116,8 +125,8 @@ export const addWhitelistAddress = async ({ coin, address, label }) => {
       coin_symbol: coin,
       address,
       label,
-      status: 'confirmed',
-      created_at: new Date()
+      status: 'CONFIRMED',
+      created_at: new Date().toISOString()
     };
     dummyWhitelistAddresses = [...dummyWhitelistAddresses, newAddress];
     console.log('추가된 더미 화이트리스트:', newAddress);
@@ -140,6 +149,7 @@ export const addWhitelistAddress = async ({ coin, address, label }) => {
 
 export const removeWhitelistAddress = async (addressId) => {
   if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
+    dummyWhitelistAddresses = dummyWhitelistAddresses.filter(addr => addr.id !== addressId);
     return {
       success: true,
       message: 'Address removed from whitelist successfully'
@@ -171,16 +181,7 @@ export const resendWhitelistConfirmation = async (addressId) => {
 
 export const getWhitelistAddresses = async () => {
   if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
-    return [
-      {
-        id: 1,
-        coin_symbol: 'BTC',
-        address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-        label: 'My Bitcoin Wallet',
-        status: 'CONFIRMED',
-        created_at: new Date().toISOString(),
-      },
-    ];
+    return dummyWhitelistAddresses;
   }
 
   try {

@@ -21,8 +21,9 @@ const WithdrawForm = ({ coin }) => {
       setLoading(true);
       setError(null);
       console.log('화이트리스트 조회 시작:', coin);
-      const addresses = await listWhitelist(coin);
-      console.log('조회된 화이트리스트:', addresses);
+      const response = await listWhitelist(coin);
+      console.log('조회된 화이트리스트:', response);
+      const addresses = response.data || [];
       setWhitelist(addresses);
       if (addresses.length > 0) {
         setSelectedAddress(addresses[0].address);
