@@ -81,6 +81,28 @@ const WithdrawForm = ({ currency }) => {
     }
   };
 
+  const handleAddWhitelistSuccess = async () => {
+    setShowModal(false);
+    try {
+      setLoading(true);
+      const addresses = await listWhitelist(currency);
+      console.log('새로 추가된 화이트리스트 주소들:', addresses);
+      setWhitelist(addresses);
+      // 새로 추가된 주소를 선택
+      if (addresses && addresses.length > 0) {
+        const lastAddedAddress = addresses[addresses.length - 1];
+        setSelectedAddress(lastAddedAddress.address);
+      }
+    } catch (error) {
+      console.error('화이트리스트 조회 실패', error);
+      if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
+        setError('화이트리스트를 불러오는데 실패했습니다.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return <div className="wallet-loading">Loading...</div>;
   }
@@ -139,17 +161,7 @@ const WithdrawForm = ({ currency }) => {
         <AddWhitelistModal
           coin={currency}
           onClose={() => setShowModal(false)}
-          onSuccess={() => {
-            setShowModal(false);
-            // refresh list
-            (async () => {
-              const addresses = await listWhitelist(currency);
-              setWhitelist(addresses);
-              if (addresses.length > 0) {
-                setSelectedAddress(addresses[0].address);
-              }
-            })();
-          }}
+          onSuccess={handleAddWhitelistSuccess}
         />
       )}
     </div>
