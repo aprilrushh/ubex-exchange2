@@ -40,6 +40,7 @@ const authRoutes = require('./backend/routes/authRoutes');
 const tradeRoutes = require('./backend/routes/tradeRoutes');
 const tradesRoutes = require('./backend/routes/tradesRoutes');
 const marketRoutes = require('./backend/routes/marketRoutes');
+const coinRoutes = require('./backend/routes/coinRoutes');
 const apiKeyRoutes = require('./backend/routes/apiKeyRoutes');
 const adminCoinRoutes = require('./backend/routes/adminCoinRoutes');
 const adminPairRoutes = require('./backend/routes/adminPairRoutes');
@@ -57,6 +58,7 @@ app.use('/auth', authRoutes);      // 기존 /auth 경로도 유지
 app.use('/api/orders', tradeRoutes);
 app.use('/api/trades', tradesRoutes);
 app.use('/api/markets', marketRoutes);
+app.use('/api/coins', coinRoutes);
 app.use('/api/keys', apiKeyRoutes);
 app.use('/api/admin', adminAuthRoutes);
 app.use('/api/admin', adminAuth);
