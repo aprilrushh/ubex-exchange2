@@ -46,7 +46,7 @@ let userWallets = {
   // DB 및 블록체인 서비스 불러오기
   const db = require('../models');
   const blockchainService = require('../services/blockchainService')();
-  const validateEthereumAddress = require('../utils/addressValidator');
+
 
   // 입금 주소 조회 로직
 exports.getDepositAddress = async (req, res) => {
@@ -394,6 +394,18 @@ exports.getUserBalances = async (req, res) => {
         label
       });
 
+      // 보안 로그 기록 및 패턴 점검
+      await securityService.logUserActivity(userId, 'whitelist_added', {
+        coin: coinSymbol,
+        address,
+        ip: req.ip
+      });
+      await securityService.checkSuspiciousActivity(userId, 'whitelist_added', {
+        ip: req.ip,
+        coin: coinSymbol
+      });
+      securityLogger.whitelistAdd(userId, coinSymbol, address);
+
       console.log(
         `[Port:${currentPort}] 사용자 ID ${userId} ${coinSymbol} 화이트리스트 추가: ${address}`
       );
@@ -414,6 +426,9 @@ exports.getUserBalances = async (req, res) => {
       const userId = req.user.id;
       const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
+      const record = await db.WhitelistAddress.findOne({
+        where: { id, user_id: userId, coin_symbol: coinSymbol }
+      });
       const deleted = await db.WhitelistAddress.destroy({
         where: { id, user_id: userId }
       });
@@ -427,6 +442,16 @@ exports.getUserBalances = async (req, res) => {
       console.log(
         `[Port:${currentPort}] 사용자 ID ${userId}의 화이트리스트 항목 삭제: ${id}`
       );
+      await securityService.logUserActivity(userId, 'whitelist_deleted', {
+        coin: coinSymbol,
+        address: record ? record.address : 'unknown',
+        ip: req.ip
+      });
+      await securityService.checkSuspiciousActivity(userId, 'whitelist_deleted', {
+        ip: req.ip,
+        coin: coinSymbol
+      });
+      securityLogger.whitelistDelete(userId, coinSymbol, record ? record.address : 'unknown');
       res.json({ success: true });
     } catch (error) {
       console.error('[WalletController] 화이트리스트 삭제 오류:', error);
