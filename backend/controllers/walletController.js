@@ -353,9 +353,11 @@ exports.getUserBalances = async (req, res) => {
   // 화이트리스트 주소 추가
   exports.addWhitelist = async (req, res) => {
     try {
-      const { coin } = req.params;
-      const { address, label } = req.body;
+      const { coin, address, label } = req.body;
       const userId = req.user.id;
+      if (!coin) {
+        return res.status(400).json({ success: false, message: '코인 정보가 필요합니다.' });
+      }
       const coinSymbol = coin.toUpperCase();
       const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
@@ -386,13 +388,12 @@ exports.getUserBalances = async (req, res) => {
   // 화이트리스트 주소 삭제
   exports.deleteWhitelist = async (req, res) => {
     try {
-      const { coin, id } = req.params;
+      const { id } = req.params;
       const userId = req.user.id;
-      const coinSymbol = coin.toUpperCase();
       const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
       const deleted = await db.WhitelistAddress.destroy({
-        where: { id, user_id: userId, coin_symbol: coinSymbol }
+        where: { id, user_id: userId }
       });
 
       if (!deleted) {

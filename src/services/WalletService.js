@@ -107,7 +107,7 @@ export const listWhitelist = async (currency) => {
   }
 
   try {
-    const response = await api.get(`/wallet/${currency}/whitelist`);
+    const response = await api.get(`/wallet/whitelist-addresses/${currency}`);
     return response.data;
   } catch (error) {
     console.error('화이트리스트 조회 실패', error);
@@ -124,7 +124,7 @@ export const addWhitelistAddress = async (data) => {
   }
 
   try {
-    const response = await api.post('/wallet/whitelist', data);
+    const response = await api.post('/wallet/whitelist-address', data);
     return response.data;
   } catch (error) {
     console.error('화이트리스트 주소 추가 실패', error);
@@ -141,7 +141,7 @@ export const removeWhitelistAddress = async (addressId) => {
   }
 
   try {
-    const response = await api.delete(`/wallet/whitelist/${addressId}`);
+    const response = await api.delete(`/wallet/whitelist-address/${addressId}`);
     return response.data;
   } catch (error) {
     console.error('화이트리스트 주소 삭제 실패', error);
