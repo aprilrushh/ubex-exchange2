@@ -31,9 +31,16 @@ class WebSocketService {
     this.maxReconnectAttempts = 5;
     this.reconnectDelay = 1000;
     this.usePolling = false;
+    this.useDummyData = process.env.REACT_APP_USE_DUMMY_DATA === 'true';
+    this.wsUrl = process.env.REACT_APP_WS_URL || 'http://localhost:3035';
   }
 
   connect() {
+    if (this.useDummyData) {
+      console.log('[WS] Using dummy data mode');
+      return this.createDummySocket();
+    }
+
     if (this.socket?.connected) {
       console.log('[WS] Socket already connected');
       return this.socket;
@@ -65,65 +72,103 @@ class WebSocketService {
 
       if (!this.socket) {
         console.log('[WS] Creating new socket connection');
-        this.socket = io('http://localhost:3035', options);
+        this.socket = io(this.wsUrl, options);
       } else {
         console.log('[WS] Reusing existing socket connection');
         this.socket.connect();
       }
 
-      this.socket.on('connect', () => {
-        console.log('[WS] Connected successfully');
-        this.isConnecting = false;
-        this.reconnectAttempts = 0;
-        this.usePolling = false;
-      });
-
-      this.socket.on('connect_error', (error) => {
-        console.error('[WS] Connection error:', error);
-        this.isConnecting = false;
-        this.reconnectAttempts++;
-        
-        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-          console.error('[WS] Max reconnection attempts reached');
-          if (!this.usePolling) {
-            console.log('[WS] Switching to polling transport');
-            this.usePolling = true;
-            this.reconnectAttempts = 0;
-            this.disconnect();
-            this.connect();
-          } else {
-            this.socket.disconnect();
-          }
-        }
-      });
-
-      this.socket.on('disconnect', (reason) => {
-        console.log('[WS] Disconnected:', reason);
-        this.isConnecting = false;
-      });
-
-      this.socket.on('error', (error) => {
-        console.error('[WS] Socket error:', error);
-      });
-
-      // 기존 구독자들에게 이벤트 전달
-      this.socket.onAny((event, ...args) => {
-        const subscribers = this.subscribers.get(event) || [];
-        subscribers.forEach(callback => {
-          try {
-            callback(...args);
-          } catch (error) {
-            console.error(`[WS] Error in subscriber callback for ${event}:`, error);
-          }
-        });
-      });
-
+      this.setupSocketListeners();
       return this.socket;
     } catch (error) {
       console.error('[WS] Connection error:', error);
       this.isConnecting = false;
       throw error;
     }
+  }
+
+  createDummySocket() {
+    const dummySocket = {
+      connected: true,
+      emit: (event, data) => {
+        if (event === 'getCandles') {
+          setTimeout(() => {
+            const dummyData = generateDummyChartData();
+            const subscribers = this.subscribers.get('candles') || [];
+            subscribers.forEach(callback => callback(dummyData));
+          }, 1000);
+        }
+      },
+      on: (event, callback) => {
+        if (!this.subscribers.has(event)) {
+          this.subscribers.set(event, []);
+        }
+        this.subscribers.get(event).push(callback);
+      },
+      off: (event, callback) => {
+        if (this.subscribers.has(event)) {
+          const callbacks = this.subscribers.get(event);
+          const index = callbacks.indexOf(callback);
+          if (index !== -1) {
+            callbacks.splice(index, 1);
+          }
+        }
+      },
+      disconnect: () => {
+        this.subscribers.clear();
+      }
+    };
+
+    this.socket = dummySocket;
+    return dummySocket;
+  }
+
+  setupSocketListeners() {
+    this.socket.on('connect', () => {
+      console.log('[WS] Connected successfully');
+      this.isConnecting = false;
+      this.reconnectAttempts = 0;
+      this.usePolling = false;
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('[WS] Connection error:', error);
+      this.isConnecting = false;
+      this.reconnectAttempts++;
+      
+      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        console.error('[WS] Max reconnection attempts reached');
+        if (!this.usePolling) {
+          console.log('[WS] Switching to polling transport');
+          this.usePolling = true;
+          this.reconnectAttempts = 0;
+          this.disconnect();
+          this.connect();
+        } else {
+          this.socket.disconnect();
+        }
+      }
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('[WS] Disconnected:', reason);
+      this.isConnecting = false;
+    });
+
+    this.socket.on('error', (error) => {
+      console.error('[WS] Socket error:', error);
+    });
+
+    this.socket.onAny((event, ...args) => {
+      const subscribers = this.subscribers.get(event) || [];
+      subscribers.forEach(callback => {
+        try {
+          callback(...args);
+        } catch (error) {
+          console.error(`[WS] Error in subscriber callback for ${event}:`, error);
+        }
+      });
+    });
   }
 
   disconnect() {

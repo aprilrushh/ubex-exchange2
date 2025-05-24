@@ -214,18 +214,21 @@ const SimpleChart = ({
     const handleError = (error) => {
       console.error('WebSocket 오류:', error);
       setConnectionStatus('error');
-      processInitialData(generateDummyData());
+      const dummyData = generateDummyData();
+      processInitialData(dummyData);
     };
 
     const handleConnectError = (error) => {
       console.error('WebSocket 연결 실패:', error);
       setConnectionStatus('error');
-      processInitialData(generateDummyData());
+      const dummyData = generateDummyData();
+      processInitialData(dummyData);
     };
 
     const handleCandles = (data) => {
       if (!data || data.length === 0) {
-        processInitialData(generateDummyData());
+        const dummyData = generateDummyData();
+        processInitialData(dummyData);
       } else {
         processInitialData(data);
       }
@@ -448,7 +451,15 @@ const SimpleChart = ({
 
   useEffect(() => {
     initChart();
-    connectWebSocket();
+    
+    // 웹소켓 연결 시도
+    try {
+      connectWebSocket();
+    } catch (error) {
+      console.error('WebSocket 연결 실패, 더미 데이터로 대체:', error);
+      const dummyData = generateDummyData();
+      processInitialData(dummyData);
+    }
 
     return () => {
       if (wsRef.current?.__handlers) {
