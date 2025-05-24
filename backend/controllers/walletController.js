@@ -46,8 +46,7 @@ let userWallets = {
   // DB 및 블록체인 서비스 불러오기
   const db = require('../models');
   const blockchainService = require('../services/blockchainService')();
-  const securityLogger = require('../services/securityLogger');
-  const securityService = require('../services/securityService')();
+
 
   // 입금 주소 조회 로직
 exports.getDepositAddress = async (req, res) => {
@@ -103,6 +102,13 @@ exports.setDepositAddress = async (req, res) => {
       return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
     }
 
+    if (address.startsWith('0x')) {
+      const { valid, message } = await validateEthereumAddress(address);
+      if (!valid) {
+        return res.status(400).json({ success: false, message });
+      }
+    }
+
     let wallet = await db.Wallet.findOne({
       where: { user_id: userId, coin_symbol: coinSymbol }
     });
@@ -146,6 +152,13 @@ exports.setDepositAddress = async (req, res) => {
       // 유효성 검사 (간단 예시)
       if (!coinSymbol || !address || isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
         return res.status(400).json({ success: false, message: '필수 출금 정보(코인, 주소, 유효한 수량)가 누락되었거나 잘못되었습니다.' });
+      }
+
+      if (address.startsWith('0x')) {
+        const { valid, message } = await validateEthereumAddress(address);
+        if (!valid) {
+          return res.status(400).json({ success: false, message });
+        }
       }
   
       ensureUserWallet(userId); // 사용자 지갑 존재 확인 및 초기화
@@ -355,14 +368,23 @@ exports.getUserBalances = async (req, res) => {
   // 화이트리스트 주소 추가
   exports.addWhitelist = async (req, res) => {
     try {
-      const { coin } = req.params;
-      const { address, label } = req.body;
+      const { coin, address, label } = req.body;
       const userId = req.user.id;
+      if (!coin) {
+        return res.status(400).json({ success: false, message: '코인 정보가 필요합니다.' });
+      }
       const coinSymbol = coin.toUpperCase();
       const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
       if (!address) {
         return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
+      }
+
+      if (address.startsWith('0x')) {
+        const { valid, message } = await validateEthereumAddress(address);
+        if (!valid) {
+          return res.status(400).json({ success: false, message });
+        }
       }
 
       const entry = await db.WhitelistAddress.create({
@@ -400,16 +422,15 @@ exports.getUserBalances = async (req, res) => {
   // 화이트리스트 주소 삭제
   exports.deleteWhitelist = async (req, res) => {
     try {
-      const { coin, id } = req.params;
+      const { id } = req.params;
       const userId = req.user.id;
-      const coinSymbol = coin.toUpperCase();
       const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
       const record = await db.WhitelistAddress.findOne({
         where: { id, user_id: userId, coin_symbol: coinSymbol }
       });
       const deleted = await db.WhitelistAddress.destroy({
-        where: { id, user_id: userId, coin_symbol: coinSymbol }
+        where: { id, user_id: userId }
       });
 
       if (!deleted) {
