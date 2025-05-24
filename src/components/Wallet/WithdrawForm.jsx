@@ -6,85 +6,125 @@ import {
   deleteWhitelist,
   requestWithdrawal
 } from '../../services/WalletService';
+import './Wallet.css';
 
-export default function WithdrawForm({ coin }) {
+const WithdrawForm = ({ currency }) => {
   const [whitelist, setWhitelist] = useState([]);
-  const [toAddress, setToAddress] = useState('');
-  const [label, setLabel] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState('');
   const [amount, setAmount] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
-  // 1) 화이트리스트 로딩
   useEffect(() => {
-    (async () => {
-      const list = await listWhitelist(coin);
-      setWhitelist(list);
-    })();
-  }, [coin]);
+    const fetchWhitelist = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const addresses = await listWhitelist(currency);
+        setWhitelist(addresses);
+        if (addresses.length > 0) {
+          setSelectedAddress(addresses[0].address);
+        }
+      } catch (error) {
+        console.error('화이트리스트 조회 실패', error);
+        if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
+          setError('화이트리스트를 불러오는데 실패했습니다.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // 2) 화이트리스트 추가
-  const handleAdd = async () => {
-    if (!toAddress) return alert('주소를 입력하세요');
-    await addWhitelist(coin, toAddress, label);
-    const list = await listWhitelist(coin);
-    setWhitelist(list);
-    setToAddress(''); setLabel('');
+    fetchWhitelist();
+  }, [currency]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setError(null);
+      setSuccess(false);
+      
+      if (!selectedAddress || !amount) {
+        setError('모든 필드를 입력해주세요.');
+        return;
+      }
+
+      const response = await requestWithdrawal({
+        currency,
+        address: selectedAddress,
+        amount: parseFloat(amount)
+      });
+
+      if (response.success) {
+        setSuccess(true);
+        setAmount('');
+      } else {
+        setError(response.message || '출금 요청에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('출금 요청 실패', error);
+      if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
+        setError('출금 요청에 실패했습니다.');
+      }
+    }
   };
 
-  // 3) 출금 요청
-  const handleWithdraw = async () => {
-    if (!toAddress || !amount) return alert('주소와 수량을 입력하세요');
-    await requestWithdrawal(coin, toAddress, amount);
-    alert('출금 요청이 완료되었습니다');
-  };
+  if (loading) {
+    return <div className="wallet-loading">Loading...</div>;
+  }
 
   return (
     <div className="withdraw-form">
-      <h2>{coin} 출금</h2>
-
-      <div className="whitelist-list">
-        <h3>화이트리스트</h3>
+      <h3>{currency} 출금</h3>
+      {error && <div className="wallet-error">{error}</div>}
+      {success && (
+        <div className="wallet-success">
+          출금 요청이 성공적으로 제출되었습니다.
+        </div>
+      )}
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>출금 주소</label>
+          <select
+            value={selectedAddress}
+            onChange={(e) => setSelectedAddress(e.target.value)}
+            required
+          >
+            <option value="">주소를 선택하세요</option>
+            {whitelist.map((addr) => (
+              <option key={addr.id} value={addr.address}>
+                {addr.label} ({addr.address})
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label>출금 수량</label>
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="출금할 수량을 입력하세요"
+            step="any"
+            min="0"
+            required
+          />
+        </div>
+        <button type="submit" className="submit-button">
+          출금 요청
+        </button>
+      </form>
+      <div className="withdraw-info">
+        <p>※ 주의사항:</p>
         <ul>
-          {whitelist.map(item => (
-            <li key={item.id}>
-              {item.label || item.address}
-              <button onClick={() => setToAddress(item.address)}>선택</button>
-              <button onClick={async () => {
-                await deleteWhitelist(coin, item.id);
-                setWhitelist(whitelist.filter(x => x.id !== item.id));
-              }}>삭제</button>
-            </li>
-          ))}
+          <li>출금은 화이트리스트에 등록된 주소로만 가능합니다.</li>
+          <li>출금 수수료는 네트워크 상황에 따라 변동될 수 있습니다.</li>
+          <li>출금 요청 후 처리까지 최대 30분이 소요될 수 있습니다.</li>
         </ul>
-      </div>
-
-      <div className="whitelist-add">
-        <input
-          type="text"
-          className="input-field"
-          placeholder="새 주소"
-          value={toAddress}
-          onChange={e => setToAddress(e.target.value)}
-        />
-        <input
-          type="text"
-          className="input-field"
-          placeholder="레이블 (선택)"
-          value={label}
-          onChange={e => setLabel(e.target.value)}
-        />
-        <button onClick={handleAdd}>화이트리스트 추가</button>
-      </div>
-
-      <div className="withdraw-action" style={{ marginTop: 16 }}>
-        <input
-          type="number"
-          className="input-field"
-          placeholder="수량"
-          value={amount}
-          onChange={e => setAmount(e.target.value)}
-        />
-        <button onClick={handleWithdraw}>출금 요청</button>
       </div>
     </div>
   );
-}
+};
+
+export default WithdrawForm;
