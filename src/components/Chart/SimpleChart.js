@@ -353,7 +353,7 @@ const SimpleChart = ({
         });
         series.setData(maData.map((value, index) => ({
           time: data[index].time,
-          value: value
+          value: Number(value)
         })));
         lineSeriesRefs.current[key] = series;
       }
@@ -368,7 +368,7 @@ const SimpleChart = ({
       });
       series.setData(rsiData.map((value, index) => ({
         time: data[index].time,
-        value: value
+        value: Number(value)
       })));
       lineSeriesRefs.current.rsi = series;
     }
@@ -392,15 +392,15 @@ const SimpleChart = ({
 
       macdSeries.setData(macdLine.map((value, index) => ({
         time: data[index].time,
-        value: value
+        value: Number(value)
       })));
       signalSeries.setData(signalLine.map((value, index) => ({
         time: data[index].time,
-        value: value
+        value: Number(value)
       })));
       histogramSeries.setData(histogram.map((value, index) => ({
         time: data[index].time,
-        value: value,
+        value: Number(value),
         color: value >= 0 ? '#4CAF50' : '#F44336'
       })));
 
@@ -478,7 +478,7 @@ const SimpleChart = ({
         chartRef.current.remove();
       }
     };
-  }, []);
+  }, [connectWebSocket, processInitialData]);
 
   useEffect(() => {
     if (wsRef.current?.__handlers) {
@@ -491,7 +491,7 @@ const SimpleChart = ({
       webSocketService.off('candlestick', handleCandlestick);
     }
     connectWebSocket();
-  }, [symbol, timeframe]);
+  }, [symbol, timeframe, connectWebSocket]);
 
   return (
     <div className="chart-container">
