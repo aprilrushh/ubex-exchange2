@@ -459,31 +459,34 @@ exports.getUserBalances = async (req, res) => {
       const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
       const record = await db.WhitelistAddress.findOne({
-        where: { id, user_id: userId, coin_symbol: coinSymbol }
-      });
-      const deleted = await db.WhitelistAddress.destroy({
         where: { id, user_id: userId }
       });
 
-      if (!deleted) {
+      if (!record) {
         return res
           .status(404)
           .json({ success: false, message: '화이트리스트 항목을 찾을 수 없습니다.' });
       }
+
+      const coinSymbol = record.coin_symbol;
+
+      await db.WhitelistAddress.destroy({
+        where: { id, user_id: userId }
+      });
 
       console.log(
         `[Port:${currentPort}] 사용자 ID ${userId}의 화이트리스트 항목 삭제: ${id}`
       );
       await securityService.logUserActivity(userId, 'whitelist_deleted', {
         coin: coinSymbol,
-        address: record ? record.address : 'unknown',
+        address: record.address,
         ip: req.ip
       });
       await securityService.checkSuspiciousActivity(userId, 'whitelist_deleted', {
         ip: req.ip,
         coin: coinSymbol
       });
-      securityLogger.whitelistDelete(userId, coinSymbol, record ? record.address : 'unknown');
+      securityLogger.whitelistDelete(userId, coinSymbol, record.address);
       res.json({ success: true });
     } catch (error) {
       console.error('[WalletController] 화이트리스트 삭제 오류:', error);
