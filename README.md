@@ -86,3 +86,10 @@ The application includes error boundaries to gracefully handle runtime errors. I
 - The backend server must be running on port 3035 for the frontend to function properly
 - WebSocket connections and API requests will timeout if the backend is not available
 - Make sure to start the backend server before starting the frontend application 
+## Whitelist Environment Settings
+
+The following environment variables configure whitelist behavior:
+- `EMAIL_VERIFICATION`
+- `WAITING_PERIOD`
+- `INSTANT_CONFIRM`
+
