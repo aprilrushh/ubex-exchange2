@@ -149,6 +149,23 @@ const WithdrawForm = ({ coin }) => {
           출금 요청
         </button>
       </form>
+
+      <div className="registered-addresses">
+        <h4>등록된 주소</h4>
+        {whitelist.length > 0 ? (
+          <ul className="address-list">
+            {whitelist.map((addr) => (
+              <li key={addr.id} className="address-item">
+                <span className="address-label">{addr.label}</span>
+                <span className="address-value">{addr.address}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="no-addresses">등록된 주소가 없습니다.</p>
+        )}
+      </div>
+
       <div className="withdraw-info">
         <p>※ 주의사항:</p>
         <ul>

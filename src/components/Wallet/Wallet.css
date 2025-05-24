@@ -182,3 +182,51 @@
 .whitelist-table .mono {
   font-family: monospace;
 }
+
+.registered-addresses {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.registered-addresses h4 {
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.address-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.address-item {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.address-item:last-child {
+  border-bottom: none;
+}
+
+.address-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.address-value {
+  font-family: monospace;
+  color: #6c757d;
+  word-break: break-all;
+}
+
+.no-addresses {
+  color: #6c757d;
+  text-align: center;
+  padding: 1rem;
+}
