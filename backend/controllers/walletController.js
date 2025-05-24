@@ -46,8 +46,6 @@ let userWallets = {
   // DB 및 블록체인 서비스 불러오기
   const db = require('../models');
   const blockchainService = require('../services/blockchainService')();
-  const validateEthereumAddress = require('../utils/addressValidator');
-  const whitelistConfig = require('../config/whitelist');
 
 
   // 입금 주소 조회 로직
@@ -196,16 +194,21 @@ exports.setDepositAddress = async (req, res) => {
         return res.status(400).json({ success: false, message: `${coinSymbol} 출금 가능 잔액이 부족합니다. (보유: ${availableBalance})` });
       }
   
-      // 실제 출금 처리 로직 (블록체인 트랜잭션 생성 및 DB 기록)
-      userWallets[userId][coinSymbol].available -= withdrawalAmount;
-      userWallets[userId][coinSymbol].total -= withdrawalAmount; // total도 함께 차감
-
       const wallet = await db.Wallet.findOne({
         where: { user_id: userId, coin_symbol: coinSymbol }
       });
       if (!wallet) {
         return res.status(400).json({ success: false, message: `${coinSymbol} 지갑이 존재하지 않습니다.` });
       }
+
+      const allowed = await checkWhitelistAddress(userId, coinSymbol, address);
+      if (!allowed) {
+        return res.status(400).json({ success: false, message: '등록된 출금 주소가 아닙니다.' });
+      }
+
+      // 실제 출금 처리 로직 (블록체인 트랜잭션 생성 및 DB 기록)
+      userWallets[userId][coinSymbol].available -= withdrawalAmount;
+      userWallets[userId][coinSymbol].total -= withdrawalAmount; // total도 함께 차감
 
       const tx = await blockchainService.sendTransaction(
         coinSymbol,
