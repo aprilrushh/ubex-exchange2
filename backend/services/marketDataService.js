@@ -188,4 +188,45 @@ const createMarketDataService = (exchangeService) => {
   };
   
   // 헬퍼 함수: 랜덤 변동율 생성
-  con
+  const generateRandomChange = () => {
+    return (Math.random() * 10 - 5).toFixed(2); // -5% ~ +5%
+  };
+
+  // 헬퍼 함수: 랜덤 거래량 생성
+  const generateRandomVolume = () => {
+    return Math.floor(Math.random() * 10000) + 1000;
+  };
+
+  // 헬퍼 함수: 오더북 데이터 생성
+  const generateOrderBookEntries = (count, isBid) => {
+    const entries = [];
+    const basePrice = 30000000; // BTC/KRW 기준
+    const spread = 10000; // 호가 간격
+
+    for (let i = 0; i < count; i++) {
+      const price = isBid
+        ? basePrice - (i + 1) * spread
+        : basePrice + (i + 1) * spread;
+
+      const quantity = (Math.random() * 2 + 0.1).toFixed(8);
+
+      entries.push({
+        price,
+        quantity,
+        total: price * parseFloat(quantity)
+      });
+    }
+
+    return entries;
+  };
+
+  return {
+    getRealtimePrice,
+    getCandlestickData,
+    getOrderBookDepth,
+    getMarketSummary,
+    subscribeToMarketEvents
+  };
+};
+
+module.exports = createMarketDataService;
