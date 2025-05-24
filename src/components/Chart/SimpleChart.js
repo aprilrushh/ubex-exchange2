@@ -224,7 +224,11 @@ const SimpleChart = ({
     };
 
     const handleCandles = (data) => {
-      processInitialData(data);
+      if (!data || data.length === 0) {
+        processInitialData(generateDummyData());
+      } else {
+        processInitialData(data);
+      }
     };
 
     const handleCandlestick = (data) => {
