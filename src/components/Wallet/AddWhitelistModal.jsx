@@ -10,25 +10,30 @@ const coinOptions = [
   { symbol: 'USDC', label: 'USD Coin (USDC)' }
 ];
 
-export default function AddWhitelistModal({ coin, coins = [], onClose, onSuccess }) {
-  const availableCoins = coins.length > 0 ? coins : coinOptions;
-  const [formCoin, setFormCoin] = useState(coin || (availableCoins[0]?.symbol || 'ETH'));
-  const [label, setLabel] = useState('');
+const AddWhitelistModal = ({ coin, onClose, onSuccess }) => {
   const [address, setAddress] = useState('');
-  const [error, setError] = useState(null);
+  const [label, setLabel] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
-      await addWhitelistAddress({ coin: formCoin, label, address });
-      onSuccess && onSuccess();
-      onClose();
-    } catch (err) {
-      console.error(err);
-      setError('주소 등록에 실패했습니다.');
+      console.log('화이트리스트 주소 추가 시도:', { coin, address, label });
+      const response = await addWhitelistAddress({ coin, address, label });
+      console.log('화이트리스트 주소 추가 응답:', response);
+
+      if (response.success) {
+        onSuccess();
+      } else {
+        setError(response.message || '주소 등록에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('화이트리스트 주소 추가 실패:', error);
+      setError('주소 등록 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
@@ -40,32 +45,42 @@ export default function AddWhitelistModal({ coin, coins = [], onClose, onSuccess
         <h3>화이트리스트 주소 추가</h3>
         {error && <div className="wallet-error">{error}</div>}
         <form onSubmit={handleSubmit}>
-          {!coin && (
-            <div className="form-group">
-              <label>코인</label>
-              <select value={formCoin} onChange={(e) => setFormCoin(e.target.value)}>
-                {availableCoins.map((c) => (
-                  <option key={c.symbol} value={c.symbol}>
-                    {c.label || c.symbol}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div className="form-group">
+            <label>코인</label>
+            <input type="text" value={coin} disabled />
+          </div>
           <div className="form-group">
             <label>라벨</label>
-            <input value={label} onChange={(e) => setLabel(e.target.value)} required />
+            <input
+              type="text"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="주소에 대한 설명을 입력하세요"
+              required
+            />
           </div>
           <div className="form-group">
             <label>주소</label>
-            <input value={address} onChange={(e) => setAddress(e.target.value)} required />
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="지갑 주소를 입력하세요"
+              required
+            />
           </div>
-          <div className="modal-actions">
-            <button type="submit" className="submit-button" disabled={loading}>추가</button>
-            <button type="button" onClick={onClose}>취소</button>
+          <div className="modal-buttons">
+            <button type="submit" disabled={loading}>
+              {loading ? '등록 중...' : '등록'}
+            </button>
+            <button type="button" onClick={onClose} disabled={loading}>
+              취소
+            </button>
           </div>
         </form>
       </div>
     </div>
   );
-}
+};
+
+export default AddWhitelistModal;

@@ -13,24 +13,6 @@ const generateDummyDepositAddress = (currency) => {
   return addresses[currency] || 'dummy_address';
 };
 
-// 더미 화이트리스트 주소 생성
-const generateDummyWhitelist = (currency) => {
-  return [
-    {
-      id: 1,
-      address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-      label: 'My Bitcoin Wallet',
-      currency: 'BTC'
-    },
-    {
-      id: 2,
-      address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
-      label: 'My Ethereum Wallet',
-      currency: 'ETH'
-    }
-  ].filter(addr => addr.currency === currency);
-};
-
 // 더미 잔액 생성
 const generateDummyBalance = (currency) => {
   const balances = {
@@ -40,6 +22,26 @@ const generateDummyBalance = (currency) => {
   };
   return balances[currency] || 0;
 };
+
+// 더미 화이트리스트 주소 저장소
+let dummyWhitelistAddresses = [
+  {
+    id: 1,
+    coin_symbol: 'BTC',
+    address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    label: 'My Bitcoin Wallet',
+    status: 'confirmed',
+    created_at: new Date()
+  },
+  {
+    id: 2,
+    coin_symbol: 'ETH',
+    address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+    label: 'My Ethereum Wallet',
+    status: 'confirmed',
+    created_at: new Date()
+  }
+];
 
 const api = axios.create({
   baseURL: `${API_URL}/api/v1`,
@@ -102,32 +104,53 @@ export const setDepositAddress = async (currency, data) => {
  * 화이트리스트 조회/등록/삭제
  */
 export const listWhitelist = async (currency) => {
+  console.log('화이트리스트 조회 시작:', currency);
+  
   if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
-    return generateDummyWhitelist(currency);
+    console.log('더미 데이터 모드에서 화이트리스트 조회');
+    const addresses = dummyWhitelistAddresses.filter(addr => addr.coin_symbol === currency);
+    console.log('조회된 더미 화이트리스트:', addresses);
+    return addresses;
   }
 
   try {
     const response = await api.get(`/wallet/whitelist-addresses/${currency}`);
-    return response.data.data;
+    return response.data;
   } catch (error) {
-    console.error('화이트리스트 조회 실패', error);
+    console.error('화이트리스트 조회 실패:', error);
     throw error;
   }
 };
 
-export const addWhitelistAddress = async (data) => {
+// 화이트리스트 주소 추가
+export const addWhitelistAddress = async ({ coin, address, label }) => {
+  console.log('화이트리스트 주소 추가 시작:', { coin, address, label });
+  
   if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
-    return {
-      success: true,
-      message: 'Address added to whitelist successfully'
+    console.log('더미 데이터 모드에서 화이트리스트 주소 추가');
+    const newAddress = {
+      id: dummyWhitelistAddresses.length + 1,
+      coin_symbol: coin,
+      address,
+      label,
+      status: 'confirmed',
+      created_at: new Date()
     };
+    dummyWhitelistAddresses = [...dummyWhitelistAddresses, newAddress];
+    console.log('추가된 더미 화이트리스트:', newAddress);
+    console.log('전체 더미 화이트리스트:', dummyWhitelistAddresses);
+    return { success: true, data: newAddress };
   }
 
   try {
-    const response = await api.post('/wallet/whitelist-address', data);
+    const response = await api.post('/wallet/whitelist-address', {
+      coin,
+      address,
+      label
+    });
     return response.data;
   } catch (error) {
-    console.error('화이트리스트 주소 추가 실패', error);
+    console.error('화이트리스트 주소 추가 실패:', error);
     throw error;
   }
 };
