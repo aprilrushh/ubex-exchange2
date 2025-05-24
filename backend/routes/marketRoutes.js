@@ -14,5 +14,7 @@ const marketController = require('../controllers/marketController');
 
 router.get('/', marketController.getMarkets);
 router.get('/:exchange/:symbol', marketController.getTicker);
+router.get('/:exchange/:symbol/orderbook', marketController.getOrderBook);
+router.get('/:exchange/:symbol/trades', marketController.getTrades);
 
 module.exports = router;
