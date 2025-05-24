@@ -46,7 +46,7 @@ let userWallets = {
   // DB 및 블록체인 서비스 불러오기
   const db = require('../models');
   const blockchainService = require('../services/blockchainService')();
-  const { checkWhitelistAddress } = require('../helpers/whitelistHelper');
+
 
   // 입금 주소 조회 로직
 exports.getDepositAddress = async (req, res) => {
@@ -102,6 +102,13 @@ exports.setDepositAddress = async (req, res) => {
       return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
     }
 
+    if (address.startsWith('0x')) {
+      const { valid, message } = await validateEthereumAddress(address);
+      if (!valid) {
+        return res.status(400).json({ success: false, message });
+      }
+    }
+
     let wallet = await db.Wallet.findOne({
       where: { user_id: userId, coin_symbol: coinSymbol }
     });
@@ -146,8 +153,39 @@ exports.setDepositAddress = async (req, res) => {
       if (!coinSymbol || !address || isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
         return res.status(400).json({ success: false, message: '필수 출금 정보(코인, 주소, 유효한 수량)가 누락되었거나 잘못되었습니다.' });
       }
+
+      if (address.startsWith('0x')) {
+        const { valid, message } = await validateEthereumAddress(address);
+        if (!valid) {
+          return res.status(400).json({ success: false, message });
+        }
+      }
   
       ensureUserWallet(userId); // 사용자 지갑 존재 확인 및 초기화
+
+      // Enforce whitelist rules if enabled
+      if (whitelistConfig.emailVerification) {
+        const wl = await db.WhitelistAddress.findOne({
+          where: { user_id: userId, coin_symbol: coinSymbol, address }
+        });
+        if (!wl) {
+          return res.status(400).json({
+            success: false,
+            message: 'Whitelist address not registered.'
+          });
+        }
+        if (!whitelistConfig.instantConfirm) {
+          const validAfter =
+            new Date(wl.created_at).getTime() +
+            whitelistConfig.waitingPeriod * 1000;
+          if (Date.now() < validAfter) {
+            return res.status(400).json({
+              success: false,
+              message: 'Whitelist waiting period has not passed.'
+            });
+          }
+        }
+      }
   
       const userCoinWallet = userWallets[userId][coinSymbol];
       if (!userCoinWallet || userCoinWallet.available < withdrawalAmount) {
@@ -359,14 +397,23 @@ exports.getUserBalances = async (req, res) => {
   // 화이트리스트 주소 추가
   exports.addWhitelist = async (req, res) => {
     try {
-      const { coin } = req.params;
-      const { address, label } = req.body;
+      const { coin, address, label } = req.body;
       const userId = req.user.id;
+      if (!coin) {
+        return res.status(400).json({ success: false, message: '코인 정보가 필요합니다.' });
+      }
       const coinSymbol = coin.toUpperCase();
       const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
       if (!address) {
         return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
+      }
+
+      if (address.startsWith('0x')) {
+        const { valid, message } = await validateEthereumAddress(address);
+        if (!valid) {
+          return res.status(400).json({ success: false, message });
+        }
       }
 
       const entry = await db.WhitelistAddress.create({
@@ -376,10 +423,15 @@ exports.getUserBalances = async (req, res) => {
         label
       });
 
+
+
       console.log(
         `[Port:${currentPort}] 사용자 ID ${userId} ${coinSymbol} 화이트리스트 추가: ${address}`
       );
-      res.status(201).json({ success: true, data: entry });
+      res.status(201).json({
+        success: true,
+        data: { ...entry.toJSON(), confirmed, availableAfter }
+      });
     } catch (error) {
       console.error('[WalletController] 화이트리스트 추가 오류:', error);
       res.status(500).json({
@@ -392,13 +444,15 @@ exports.getUserBalances = async (req, res) => {
   // 화이트리스트 주소 삭제
   exports.deleteWhitelist = async (req, res) => {
     try {
-      const { coin, id } = req.params;
+      const { id } = req.params;
       const userId = req.user.id;
-      const coinSymbol = coin.toUpperCase();
       const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
-      const deleted = await db.WhitelistAddress.destroy({
+      const record = await db.WhitelistAddress.findOne({
         where: { id, user_id: userId, coin_symbol: coinSymbol }
+      });
+      const deleted = await db.WhitelistAddress.destroy({
+        where: { id, user_id: userId }
       });
 
       if (!deleted) {
@@ -410,6 +464,16 @@ exports.getUserBalances = async (req, res) => {
       console.log(
         `[Port:${currentPort}] 사용자 ID ${userId}의 화이트리스트 항목 삭제: ${id}`
       );
+      await securityService.logUserActivity(userId, 'whitelist_deleted', {
+        coin: coinSymbol,
+        address: record ? record.address : 'unknown',
+        ip: req.ip
+      });
+      await securityService.checkSuspiciousActivity(userId, 'whitelist_deleted', {
+        ip: req.ip,
+        coin: coinSymbol
+      });
+      securityLogger.whitelistDelete(userId, coinSymbol, record ? record.address : 'unknown');
       res.json({ success: true });
     } catch (error) {
       console.error('[WalletController] 화이트리스트 삭제 오류:', error);
