@@ -35,7 +35,7 @@ export const connectWebSocket = (symbols, onMessage) => {
 export async function fetchCoinList() {
   try {
     // 관리자 혹은 공개 API 엔드포인트에서 코인 목록을 조회합니다.
-    const response = await fetch(`${API_BASE_URL}/admin/coins`);
+    const response = await fetch(`${API_BASE_URL}/coins`);
     if (!response.ok) {
       throw new Error('Failed to fetch coin list');
     }
