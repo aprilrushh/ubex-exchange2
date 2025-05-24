@@ -46,6 +46,7 @@ let userWallets = {
   // DB 및 블록체인 서비스 불러오기
   const db = require('../models');
   const blockchainService = require('../services/blockchainService')();
+  const validateEthereumAddress = require('../utils/addressValidator');
 
   // 입금 주소 조회 로직
 exports.getDepositAddress = async (req, res) => {
@@ -101,6 +102,13 @@ exports.setDepositAddress = async (req, res) => {
       return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
     }
 
+    if (address.startsWith('0x')) {
+      const { valid, message } = await validateEthereumAddress(address);
+      if (!valid) {
+        return res.status(400).json({ success: false, message });
+      }
+    }
+
     let wallet = await db.Wallet.findOne({
       where: { user_id: userId, coin_symbol: coinSymbol }
     });
@@ -144,6 +152,13 @@ exports.setDepositAddress = async (req, res) => {
       // 유효성 검사 (간단 예시)
       if (!coinSymbol || !address || isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
         return res.status(400).json({ success: false, message: '필수 출금 정보(코인, 주소, 유효한 수량)가 누락되었거나 잘못되었습니다.' });
+      }
+
+      if (address.startsWith('0x')) {
+        const { valid, message } = await validateEthereumAddress(address);
+        if (!valid) {
+          return res.status(400).json({ success: false, message });
+        }
       }
   
       ensureUserWallet(userId); // 사용자 지갑 존재 확인 및 초기화
@@ -361,6 +376,13 @@ exports.getUserBalances = async (req, res) => {
 
       if (!address) {
         return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
+      }
+
+      if (address.startsWith('0x')) {
+        const { valid, message } = await validateEthereumAddress(address);
+        if (!valid) {
+          return res.status(400).json({ success: false, message });
+        }
       }
 
       const entry = await db.WhitelistAddress.create({
