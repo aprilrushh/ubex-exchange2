@@ -28,6 +28,27 @@ class ExternalApiService {
     return Array.isArray(data) ? data[0] : data;
   }
 
+  async fetchBinanceOrderBook(symbol, limit = 50) {
+    const url = `https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=${limit}`;
+    return this._cachedRequest(`binance_ob_${symbol}_${limit}`, url);
+  }
+
+  async fetchUpbitOrderBook(symbol) {
+    const url = `https://api.upbit.com/v1/orderbook?markets=${symbol}`;
+    const data = await this._cachedRequest(`upbit_ob_${symbol}`, url);
+    return Array.isArray(data) ? data[0] : data;
+  }
+
+  async fetchBinanceTrades(symbol, limit = 50) {
+    const url = `https://api.binance.com/api/v3/trades?symbol=${symbol}&limit=${limit}`;
+    return this._cachedRequest(`binance_trades_${symbol}_${limit}`, url);
+  }
+
+  async fetchUpbitTrades(symbol) {
+    const url = `https://api.upbit.com/v1/trades/ticks?market=${symbol}&count=50`;
+    return this._cachedRequest(`upbit_trades_${symbol}`, url);
+  }
+
   async getDefaultMarkets() {
     const binance = await this.fetchBinanceTicker('BTCUSDT');
     const upbit = await this.fetchUpbitTicker('KRW-BTC');
