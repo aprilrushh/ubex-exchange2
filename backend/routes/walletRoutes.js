@@ -12,7 +12,8 @@ const {
   getUserBalances,
   listWhitelist,
   addWhitelist,
-  deleteWhitelist // 화이트리스트 관리
+  deleteWhitelist,
+  confirmWhitelistAddress // 화이트리스트 관리 및 확인
 } = require('../controllers/walletController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const whitelistRateLimit = require('../middlewares/whitelistRateLimit');
