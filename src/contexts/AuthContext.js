@@ -12,14 +12,23 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [authState, setAuthState] = useState({
+    user: null,
+    isAuthenticated: false,
+    token: null
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // 로컬 스토리지에서 사용자 정보 복원
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedToken = localStorage.getItem('token');
+    if (storedUser && storedToken) {
+      setAuthState({
+        user: JSON.parse(storedUser),
+        isAuthenticated: true,
+        token: storedToken
+      });
     }
     setLoading(false);
   }, []);
@@ -31,9 +40,14 @@ export const AuthProvider = ({ children }) => {
       
       if (response.success) {
         const userData = response.data.user;
-        setUser(userData);
+        const token = response.data.token;
+        setAuthState({
+          user: userData,
+          isAuthenticated: true,
+          token: token
+        });
         localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('token', token);
         return { success: true };
       } else {
         return { success: false, message: response.message };
@@ -47,9 +61,14 @@ export const AuthProvider = ({ children }) => {
           username: credentials.email,
           email: credentials.email
         };
-        setUser(dummyUser);
+        const dummyToken = 'dummy-token';
+        setAuthState({
+          user: dummyUser,
+          isAuthenticated: true,
+          token: dummyToken
+        });
         localStorage.setItem('user', JSON.stringify(dummyUser));
-        localStorage.setItem('token', 'dummy-token');
+        localStorage.setItem('token', dummyToken);
         return { success: true };
       }
       return { success: false, message: '로그인 중 오류가 발생했습니다.' };
@@ -57,13 +76,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    setUser(null);
+    setAuthState({
+      user: null,
+      isAuthenticated: false,
+      token: null
+    });
     localStorage.removeItem('user');
     localStorage.removeItem('token');
   };
 
   const value = {
-    user,
+    authState,
     loading,
     login,
     logout

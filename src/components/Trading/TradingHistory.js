@@ -53,7 +53,7 @@ const TradingHistory = ({ symbol = 'BTC/USDT' }) => {
           </thead>
           <tbody>
             {trades.map((trade) => {
-              const isUserTrade = authState?.user?.id && 
+              const isUserTrade = authState && authState.user && authState.user.id && 
                 (trade.buyerId === authState.user.id || trade.sellerId === authState.user.id);
               return (
                 <tr key={trade.id} className={`${trade.type === 'BUY' ? 'buy' : 'sell'} ${isUserTrade ? 'user-trade' : ''}`}>
