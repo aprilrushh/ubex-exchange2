@@ -18,7 +18,7 @@ export default function WhitelistAddressesPage() {
       setLoading(true);
       setError(null);
       const data = await getWhitelistAddresses();
-      setAddresses(data.data || data);
+      setAddresses(data);
     } catch (err) {
       console.error(err);
       setError('화이트리스트를 불러오는데 실패했습니다.');
