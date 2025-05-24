@@ -32,9 +32,17 @@ export const connectWebSocket = (symbols, onMessage) => {
 }; 
 
 // 코인 목록 조회
-export async function fetchCoinList() {
+export const fetchCoinList = async () => {
+  if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
+    // 더미 데이터 반환
+    return [
+      { id: 'BTC/USDT', name: 'Bitcoin', symbol: 'BTC', price: 50000, change24h: 2.5 },
+      { id: 'ETH/USDT', name: 'Ethereum', symbol: 'ETH', price: 3000, change24h: -1.2 },
+      { id: 'XRP/USDT', name: 'Ripple', symbol: 'XRP', price: 0.5, change24h: 0.8 }
+    ];
+  }
+
   try {
-    // 관리자 혹은 공개 API 엔드포인트에서 코인 목록을 조회합니다.
     const response = await fetch(`${API_BASE_URL}/coins`);
     if (!response.ok) {
       throw new Error('Failed to fetch coin list');
@@ -42,10 +50,9 @@ export async function fetchCoinList() {
     return await response.json();
   } catch (error) {
     console.error('코인 목록 조회 실패:', error);
-    // 실제 API가 없을 경우 샘플 데이터 반환
-    return getSampleCoinData();
+    throw error;
   }
-}
+};
 
 // 코인 가격 조회
 export async function fetchPrice(symbol) {
@@ -216,4 +223,31 @@ function generateSampleChartData() {
     });
   }
   return data;
-} 
+}
+
+export const fetchCoinDetail = async (symbol) => {
+  if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
+    // 더미 데이터 반환
+    return {
+      id: symbol,
+      name: symbol.split('/')[0],
+      symbol: symbol.split('/')[0],
+      price: 50000,
+      change24h: 2.5,
+      volume24h: 1000000,
+      high24h: 51000,
+      low24h: 49000
+    };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/coins/${symbol}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch coin detail');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('코인 상세 정보 조회 실패:', error);
+    throw error;
+  }
+}; 

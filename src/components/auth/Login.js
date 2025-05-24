@@ -1,40 +1,57 @@
 // src/components/Auth/Login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { login } from '../../services/authService';
 import './Auth.css';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setError('');
+    setIsLoading(true);
 
     try {
-      const result = await login(formData);
-      if (result.success) {
+      const response = await login(formData);
+      if (response.success) {
+        // 로그인 성공 시 토큰 저장
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
         navigate('/');
       } else {
-        setError(result.message || '로그인에 실패했습니다.');
+        setError(response.message || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError(error.message || '로그인 중 오류가 발생했습니다.');
+      // 더미 데이터 모드에서는 성공으로 처리
+      if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
+        const dummyUser = {
+          id: 1,
+          username: formData.email,
+          email: formData.email
+        };
+        localStorage.setItem('token', 'dummy-token');
+        localStorage.setItem('user', JSON.stringify(dummyUser));
+        navigate('/');
+      } else {
+        setError('Login failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,10 +83,13 @@ const Login = () => {
               required
             />
           </div>
-          <button type="submit" className="submit-button">
-            Login
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+        <p className="auth-link">
+          Don't have an account? <a href="/register">Register</a>
+        </p>
       </div>
     </div>
   );

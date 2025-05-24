@@ -1,59 +1,55 @@
 // src/components/Auth/Register.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import './AuthForm.css';
+import { register } from '../../services/authService';
+import './Auth.css';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setError('');
+    setIsLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:3035/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Registration failed');
+      const response = await register(formData);
+      if (response.success) {
+        navigate('/login');
+      } else {
+        setError(response.message || 'Registration failed');
       }
-
-      const data = await response.json();
-      await login({ email: formData.email, password: formData.password });
-      navigate('/');
     } catch (error) {
-      setError(error.message);
+      console.error('Registration error:', error);
+      // 더미 데이터 모드에서는 성공으로 처리
+      if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
+        navigate('/login');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -107,10 +103,13 @@ const Register = () => {
               required
             />
           </div>
-          <button type="submit" className="submit-button">
-            Register
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? 'Registering...' : 'Register'}
           </button>
         </form>
+        <p className="auth-link">
+          Already have an account? <a href="/login">Login</a>
+        </p>
       </div>
     </div>
   );
