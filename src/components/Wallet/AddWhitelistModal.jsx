@@ -2,8 +2,17 @@ import React, { useState } from 'react';
 import { addWhitelistAddress } from '../../services/WalletService';
 import './Wallet.css';
 
+// 기본 코인 옵션(Phase 1 하드코딩)
+const coinOptions = [
+  { symbol: 'ETH', label: 'Ethereum (ETH)' },
+  { symbol: 'BTC', label: 'Bitcoin (BTC)' },
+  { symbol: 'USDT', label: 'Tether (USDT)' },
+  { symbol: 'USDC', label: 'USD Coin (USDC)' }
+];
+
 export default function AddWhitelistModal({ coin, coins = [], onClose, onSuccess }) {
-  const [formCoin, setFormCoin] = useState(coin || (coins[0]?.symbol || ''));
+  const availableCoins = coins.length > 0 ? coins : coinOptions;
+  const [formCoin, setFormCoin] = useState(coin || (availableCoins[0]?.symbol || 'ETH'));
   const [label, setLabel] = useState('');
   const [address, setAddress] = useState('');
   const [error, setError] = useState(null);
@@ -35,9 +44,9 @@ export default function AddWhitelistModal({ coin, coins = [], onClose, onSuccess
             <div className="form-group">
               <label>코인</label>
               <select value={formCoin} onChange={(e) => setFormCoin(e.target.value)}>
-                {coins.map((c) => (
+                {availableCoins.map((c) => (
                   <option key={c.symbol} value={c.symbol}>
-                    {c.symbol}
+                    {c.label || c.symbol}
                   </option>
                 ))}
               </select>
