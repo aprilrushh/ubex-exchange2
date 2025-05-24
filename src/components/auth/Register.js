@@ -50,7 +50,7 @@ const Register = () => {
       }
 
       const data = await response.json();
-      await login({ username: formData.username, password: formData.password });
+      await login({ email: formData.email, password: formData.password });
       navigate('/');
     } catch (error) {
       setError(error.message);
