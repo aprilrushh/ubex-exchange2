@@ -23,11 +23,8 @@ const WithdrawForm = ({ currency }) => {
         setError(null);
         const addresses = await listWhitelist(currency);
         setWhitelist(addresses);
-        if (addresses.length > 0) {
-          setSelectedAddress(addresses[0].address);
-        } else {
-          setSelectedAddress('');
-        }
+        // 기본 선택값을 비워 사용자가 직접 주소를 선택하도록 한다
+        setSelectedAddress('');
       } catch (error) {
         console.error('화이트리스트 조회 실패', error);
         if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
@@ -102,12 +99,17 @@ const WithdrawForm = ({ currency }) => {
             value={selectedAddress}
             onChange={handleSelect}
           >
-            <option value="">주소를 선택하세요</option>
+            <option value="" disabled hidden>
+              주소를 선택하세요
+            </option>
             {whitelist.map((addr) => (
               <option key={addr.id} value={addr.address}>
                 {addr.label} ({addr.address})
               </option>
             ))}
+            {whitelist.length > 0 && (
+              <option disabled>────────────</option>
+            )}
             <option value="add-new">+ 새 주소 등록</option>
           </select>
         </div>
@@ -145,9 +147,8 @@ const WithdrawForm = ({ currency }) => {
             (async () => {
               const addresses = await listWhitelist(currency);
               setWhitelist(addresses);
-              if (addresses.length > 0) {
-                setSelectedAddress(addresses[0].address);
-              }
+              // 새 주소 추가 후에도 직접 선택하도록 초기화
+              setSelectedAddress('');
             })();
           }}
         />
