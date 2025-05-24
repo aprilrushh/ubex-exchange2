@@ -4,6 +4,7 @@ const router = express.Router();
 // walletController에서 다양한 함수를 가져올 것이므로, 객체 구조 분해 할당을 사용합니다.
 const {
   getDepositAddress,
+  setDepositAddress,
   requestWithdrawal,
   getDeposits,
   getWithdrawals,
@@ -18,6 +19,9 @@ const authMiddleware = require('../middlewares/authMiddleware');
 
 // GET /api/wallet/deposit-address/:coin - 입금 주소 조회
 router.get('/deposit-address/:coin', authMiddleware, getDepositAddress);
+
+// POST /api/wallet/deposit-address/:coin - 입금 주소 수동 설정
+router.post('/deposit-address/:coin', authMiddleware, setDepositAddress);
 
 // POST /api/wallet/withdraw - 출금 요청
 // 사용자님 코드의 validateWithdraw 미들웨어는 우선 컨트롤러 내에서 처리합니다.

@@ -48,7 +48,7 @@ let userWallets = {
   const blockchainService = require('../services/blockchainService')();
 
   // 입금 주소 조회 로직
-  exports.getDepositAddress = async (req, res) => {
+exports.getDepositAddress = async (req, res) => {
     try {
       const { coin } = req.params;
       const coinSymbol = coin.toUpperCase();
@@ -87,6 +87,50 @@ let userWallets = {
       });
     }
   };
+
+// 사용자가 입금 주소를 수동으로 지정
+exports.setDepositAddress = async (req, res) => {
+  try {
+    const { coin } = req.params;
+    const { address, privateKey } = req.body;
+    const userId = req.user.id;
+    const coinSymbol = coin.toUpperCase();
+    const currentPort = req.app.get('port') || process.env.PORT || 3035;
+
+    if (!address || address.trim() === '') {
+      return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
+    }
+
+    let wallet = await db.Wallet.findOne({
+      where: { user_id: userId, coin_symbol: coinSymbol }
+    });
+
+    if (wallet) {
+      await wallet.update({
+        address,
+        private_key: privateKey !== undefined ? privateKey : wallet.private_key
+      });
+    } else {
+      await db.Wallet.create({
+        user_id: userId,
+        coin_symbol: coinSymbol,
+        address,
+        private_key: privateKey || ''
+      });
+    }
+
+    console.log(
+      `[Port:${currentPort}] 사용자 ID ${userId}의 ${coinSymbol} 입금 주소 설정: ${address}`
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[WalletController] 입금 주소 설정 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '입금 주소 설정 중 오류가 발생했습니다.'
+    });
+  }
+};
   
   // 출금 요청 로직
   exports.requestWithdrawal = async (req, res) => {
