@@ -33,6 +33,25 @@ const SimpleChart = ({
   const [isLoading, setIsLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
+  const generateDummyData = () => {
+    const data = [];
+    let price = 50000;
+    const now = Date.now();
+    for (let i = 0; i < 100; i++) {
+      const timestamp = now - (100 - i) * 60000;
+      price = price + (Math.random() - 0.5) * 1000;
+      data.push({
+        time: timestamp,
+        open: price,
+        high: price + Math.random() * 100,
+        low: price - Math.random() * 100,
+        close: price + (Math.random() - 0.5) * 50,
+        volume: Math.random() * 10,
+      });
+    }
+    return data;
+  };
+
   // 차트 초기화
   const initChart = () => {
     if (!chartContainerRef.current) return;
@@ -178,6 +197,7 @@ const SimpleChart = ({
     const subscribe = () => {
       const channel = `candlestick:${symbol}:${timeframe}`;
       webSocketService.emit('subscribe', { channel });
+      webSocketService.emit('getCandles', { symbol, interval: timeframe });
     };
 
     const handleConnect = () => {
@@ -194,6 +214,13 @@ const SimpleChart = ({
     const handleError = (error) => {
       console.error('WebSocket 오류:', error);
       setConnectionStatus('error');
+      processInitialData(generateDummyData());
+    };
+
+    const handleConnectError = (error) => {
+      console.error('WebSocket 연결 실패:', error);
+      setConnectionStatus('error');
+      processInitialData(generateDummyData());
     };
 
     const handleCandles = (data) => {
@@ -207,6 +234,7 @@ const SimpleChart = ({
     webSocketService.on('connect', handleConnect);
     webSocketService.on('disconnect', handleDisconnect);
     webSocketService.on('error', handleError);
+    webSocketService.on('connect_error', handleConnectError);
     webSocketService.on('candles', handleCandles);
     webSocketService.on('candlestick', handleCandlestick);
 
@@ -214,6 +242,7 @@ const SimpleChart = ({
       handleConnect,
       handleDisconnect,
       handleError,
+      handleConnectError,
       handleCandles,
       handleCandlestick,
     };
@@ -393,6 +422,7 @@ const SimpleChart = ({
       webSocketService.emit('subscribe', {
         channel: `candlestick:${symbol}:${newTimeframe}`,
       });
+      webSocketService.emit('getCandles', { symbol, interval: newTimeframe });
     }
 
     if (newTimeframe) {
@@ -414,10 +444,11 @@ const SimpleChart = ({
 
     return () => {
       if (wsRef.current?.__handlers) {
-        const { handleConnect, handleDisconnect, handleError, handleCandles, handleCandlestick } = wsRef.current.__handlers;
+        const { handleConnect, handleDisconnect, handleError, handleConnectError, handleCandles, handleCandlestick } = wsRef.current.__handlers;
         webSocketService.off('connect', handleConnect);
         webSocketService.off('disconnect', handleDisconnect);
         webSocketService.off('error', handleError);
+        webSocketService.off('connect_error', handleConnectError);
         webSocketService.off('candles', handleCandles);
         webSocketService.off('candlestick', handleCandlestick);
       }
@@ -432,10 +463,11 @@ const SimpleChart = ({
 
   useEffect(() => {
     if (wsRef.current?.__handlers) {
-      const { handleConnect, handleDisconnect, handleError, handleCandles, handleCandlestick } = wsRef.current.__handlers;
+      const { handleConnect, handleDisconnect, handleError, handleConnectError, handleCandles, handleCandlestick } = wsRef.current.__handlers;
       webSocketService.off('connect', handleConnect);
       webSocketService.off('disconnect', handleDisconnect);
       webSocketService.off('error', handleError);
+      webSocketService.off('connect_error', handleConnectError);
       webSocketService.off('candles', handleCandles);
       webSocketService.off('candlestick', handleCandlestick);
     }
