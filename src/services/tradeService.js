@@ -126,7 +126,8 @@ export const getOrderBook = async (symbol) => {
 
 export const getRecentTrades = async (symbol) => {
   try {
-    const response = await api.get(`/trades/${symbol}`);
+    const query = encodeURIComponent(symbol);
+    const response = await api.get(`/trades?symbol=${query}`);
     return response.data;
   } catch (error) {
     console.error('최근 체결 내역 조회 서비스 실패:', error.message);

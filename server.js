@@ -38,6 +38,7 @@ db.sequelize.authenticate()
 const walletRoutes = require('./backend/routes/walletRoutes');
 const authRoutes = require('./backend/routes/authRoutes');
 const tradeRoutes = require('./backend/routes/tradeRoutes');
+const tradesRoutes = require('./backend/routes/tradesRoutes');
 const marketRoutes = require('./backend/routes/marketRoutes');
 const apiKeyRoutes = require('./backend/routes/apiKeyRoutes');
 const adminCoinRoutes = require('./backend/routes/adminCoinRoutes');
@@ -54,6 +55,7 @@ app.use('/api/v1/wallet', walletRoutes);
 app.use('/api/auth', authRoutes);  // /api/auth 경로로 수정
 app.use('/auth', authRoutes);      // 기존 /auth 경로도 유지
 app.use('/api/orders', tradeRoutes);
+app.use('/api/trades', tradesRoutes);
 app.use('/api/markets', marketRoutes);
 app.use('/api/keys', apiKeyRoutes);
 app.use('/api/admin', adminAuthRoutes);
