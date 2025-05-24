@@ -100,7 +100,7 @@
 
   <script>
     // 서버 URL 설정
-    const SERVER_URL = 'http://localhost:3001';
+    const SERVER_URL = process.env.REACT_APP_API_URL || 'http://localhost:3035';
     
     // 소켓 연결
     const socket = io(SERVER_URL, {

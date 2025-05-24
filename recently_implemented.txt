@@ -80,8 +80,8 @@ let socket = null;
 export const connectWebSocket = () => {
   if (!socket) {
     // 개발 환경에서는 localhost, 프로덕션에서는 실제 서버 주소로 변경
-    const SERVER_URL = window.location.hostname === 'localhost' 
-      ? 'http://localhost:3001' 
+    const SERVER_URL = window.location.hostname === 'localhost'
+      ? (process.env.REACT_APP_API_URL || 'http://localhost:3035')
       : window.location.origin;
     
     socket = io(SERVER_URL, {
