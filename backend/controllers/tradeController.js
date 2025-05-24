@@ -47,3 +47,20 @@ exports.getUserOrders = async (req, res) => {
     res.status(500).json({ message: '오류 발생' });
   }
 };
+
+// 특정 심볼의 최근 체결 내역 조회
+exports.getTradeHistory = async (req, res) => {
+  const symbol = req.query.symbol;
+
+  if (!symbol) {
+    return res.status(400).json({ message: 'symbol parameter is required' });
+  }
+
+  try {
+    const trades = tradeEngine.getTradeHistory(symbol);
+    res.status(200).json(trades);
+  } catch (err) {
+    logger.error(`getTradeHistory error ${err.message}`);
+    res.status(500).json({ message: '오류 발생' });
+  }
+};
