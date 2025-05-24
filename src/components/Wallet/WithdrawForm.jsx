@@ -86,18 +86,27 @@ const WithdrawForm = ({ currency }) => {
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>출금 주소</label>
-          <select
+          <input
+            type="text"
             value={selectedAddress}
             onChange={(e) => setSelectedAddress(e.target.value)}
+            placeholder="출금 주소를 입력하세요"
             required
-          >
-            <option value="">주소를 선택하세요</option>
-            {whitelist.map((addr) => (
-              <option key={addr.id} value={addr.address}>
-                {addr.label} ({addr.address})
-              </option>
-            ))}
-          </select>
+          />
+          {whitelist.length > 0 && (
+            <select
+              className="whitelist-select"
+              value={selectedAddress}
+              onChange={(e) => setSelectedAddress(e.target.value)}
+            >
+              <option value="">주소를 선택하세요</option>
+              {whitelist.map((addr) => (
+                <option key={addr.id} value={addr.address}>
+                  {addr.label} ({addr.address})
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="form-group">
           <label>출금 수량</label>
