@@ -14,7 +14,7 @@ const {
   deleteWhitelist // 화이트리스트 관리
 } = require('../controllers/walletController');
 const authMiddleware = require('../middlewares/authMiddleware');
-// const { validateWithdraw } = require('../middleware/validation'); // 유효성 검사 미들웨어 (추후 구현 시 사용)
+// const { validateWithdraw } = require('../middlewares/validation'); // 유효성 검사 미들웨어 (추후 구현 시 사용)
 
 // GET /api/wallet/deposit-address/:coin - 입금 주소 조회
 router.get('/deposit-address/:coin', authMiddleware, getDepositAddress);

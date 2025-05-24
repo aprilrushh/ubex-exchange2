@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../middlewares/authMiddleware');
 const portfolioController = require('../controllers/portfolioController');
 
 // 포트폴리오 요약 정보 조회

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const authMiddleware = require('../../backend/middleware/authMiddleware');
+const authMiddleware = require('../../backend/middlewares/authMiddleware');
 const jwtConfig = require('../../backend/config/jwtConfig');
 
 describe('authMiddleware', () => {
