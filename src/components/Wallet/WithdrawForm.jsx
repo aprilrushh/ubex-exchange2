@@ -1,5 +1,5 @@
 // src/components/Wallet/WithdrawForm.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   listWhitelist,
   requestWithdrawal
@@ -16,18 +16,22 @@ const WithdrawForm = ({ coin }) => {
   const [success, setSuccess] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const fetchWhitelist = async () => {
+  const fetchWhitelist = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       console.log('화이트리스트 조회 시작:', coin);
       const response = await listWhitelist(coin);
       console.log('조회된 화이트리스트:', response);
-      const addresses = response.data || [];
-      setWhitelist(addresses);
-      if (addresses.length > 0) {
-        setSelectedAddress(addresses[0].address);
+      if (response.success && Array.isArray(response.data)) {
+        setWhitelist(response.data);
+        if (response.data.length > 0) {
+          setSelectedAddress(response.data[0].address);
+        } else {
+          setSelectedAddress('');
+        }
       } else {
+        setWhitelist([]);
         setSelectedAddress('');
       }
     } catch (error) {
@@ -35,14 +39,16 @@ const WithdrawForm = ({ coin }) => {
       if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
         setError('화이트리스트를 불러오는데 실패했습니다.');
       }
+      setWhitelist([]);
+      setSelectedAddress('');
     } finally {
       setLoading(false);
     }
-  };
+  }, [coin]);
 
   useEffect(() => {
     fetchWhitelist();
-  }, [coin]);
+  }, [coin, fetchWhitelist]);
 
   const handleAddWhitelistSuccess = async () => {
     console.log('화이트리스트 주소 추가 성공, 목록 갱신 시작');
