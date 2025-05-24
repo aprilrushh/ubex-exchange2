@@ -12,7 +12,8 @@ const {
   getUserBalances,
   listWhitelist,
   addWhitelist,
-  deleteWhitelist // 화이트리스트 관리
+  deleteWhitelist,
+  confirmWhitelistAddress // 화이트리스트 관리 및 확인
 } = require('../controllers/walletController');
 const authMiddleware = require('../middlewares/authMiddleware');
 // const { validateWithdraw } = require('../middlewares/validation'); // 유효성 검사 미들웨어 (추후 구현 시 사용)
@@ -43,5 +44,6 @@ router.get('/balances', authMiddleware, getUserBalances);
 router.get('/:coin/whitelist', authMiddleware, listWhitelist);
 router.post('/:coin/whitelist', authMiddleware, addWhitelist);
 router.delete('/:coin/whitelist/:id', authMiddleware, deleteWhitelist);
+router.post('/whitelist-address/confirm', confirmWhitelistAddress);
 
 module.exports = router;
