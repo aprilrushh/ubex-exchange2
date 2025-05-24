@@ -85,19 +85,4 @@ The application includes error boundaries to gracefully handle runtime errors. I
 
 - The backend server must be running on port 3035 for the frontend to function properly
 - WebSocket connections and API requests will timeout if the backend is not available
-- Make sure to start the backend server before starting the frontend application
-
-## Whitelist Environment Settings
-
-The backend reads `backend/config/whitelist.js` to control withdrawal whitelist
-behaviour. Three values can be set per environment:
-
-- `emailVerification` – require new addresses to be verified via email.
-- `waitingPeriod` – number of seconds before a newly whitelisted address becomes
-  usable.
-- `instantConfirm` – immediately mark new addresses as confirmed (useful for
-  automated tests).
-
-The default test configuration disables verification and waiting so unit tests
-run quickly. Production keeps verification enabled with a 24 hour waiting
-period.
+<
