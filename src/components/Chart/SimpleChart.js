@@ -1,5 +1,5 @@
 // src/components/Chart/SimpleChart.js
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createChart } from 'lightweight-charts';
 import IndicatorSelector from './Indicators/IndicatorSelector';
 import TimeframeSelector from './TimeframeSelector';
@@ -53,11 +53,15 @@ const SimpleChart = ({
   };
 
   // 차트 초기화
-  const initChart = () => {
+  const initChart = useCallback(() => {
     if (!chartContainerRef.current) return;
 
     if (chartRef.current) {
-      chartRef.current.remove();
+      try {
+        chartRef.current.remove();
+      } catch (error) {
+        console.warn('Chart removal error:', error);
+      }
     }
 
     const chart = createChart(chartContainerRef.current, {
@@ -176,17 +180,18 @@ const SimpleChart = ({
     };
 
     window.addEventListener('resize', handleResize);
-    chart._cleanup = () => {
+    
+    return () => {
       chart.unsubscribeCrosshairMove(handleCrosshairMove);
       window.removeEventListener('resize', handleResize);
       if (tooltip.parentNode) {
         tooltip.parentNode.removeChild(tooltip);
       }
     };
-  };
+  }, []);
 
   // 웹소켓 연결 및 이벤트 설정
-  const connectWebSocket = () => {
+  const connectWebSocket = useCallback(() => {
     const socket = webSocketService.connect();
     if (!socket || typeof socket !== 'object') {
       console.error('WebSocket initialization failed', socket);
@@ -257,10 +262,19 @@ const SimpleChart = ({
     if (socket.connected) {
       handleConnect();
     }
-  };
+
+    return () => {
+      webSocketService.off('connect', handleConnect);
+      webSocketService.off('disconnect', handleDisconnect);
+      webSocketService.off('error', handleError);
+      webSocketService.off('connect_error', handleConnectError);
+      webSocketService.off('candles', handleCandles);
+      webSocketService.off('candlestick', handleCandlestick);
+    };
+  }, [symbol, timeframe]);
 
   // 초기 데이터 처리
-  const processInitialData = (data) => {
+  const processInitialData = useCallback((data) => {
     if (!data || data.length === 0) return;
 
     const candleData = data.map(candle => ({
@@ -292,7 +306,7 @@ const SimpleChart = ({
     if (chartRef.current) {
       chartRef.current.timeScale().fitContent();
     }
-  };
+  }, []);
 
   // 실시간 캔들스틱 업데이트
   const updateCandle = (candle) => {
@@ -450,47 +464,25 @@ const SimpleChart = ({
   };
 
   useEffect(() => {
-    initChart();
+    const cleanup = initChart();
     
-    // 웹소켓 연결 시도
     try {
-      connectWebSocket();
+      const wsCleanup = connectWebSocket();
+      return () => {
+        cleanup?.();
+        wsCleanup?.();
+      };
     } catch (error) {
       console.error('WebSocket 연결 실패, 더미 데이터로 대체:', error);
       const dummyData = generateDummyData();
       processInitialData(dummyData);
+      return cleanup;
     }
-
-    return () => {
-      if (wsRef.current?.__handlers) {
-        const { handleConnect, handleDisconnect, handleError, handleConnectError, handleCandles, handleCandlestick } = wsRef.current.__handlers;
-        webSocketService.off('connect', handleConnect);
-        webSocketService.off('disconnect', handleDisconnect);
-        webSocketService.off('error', handleError);
-        webSocketService.off('connect_error', handleConnectError);
-        webSocketService.off('candles', handleCandles);
-        webSocketService.off('candlestick', handleCandlestick);
-      }
-      if (chartRef.current) {
-        if (chartRef.current._cleanup) {
-          chartRef.current._cleanup();
-        }
-        chartRef.current.remove();
-      }
-    };
-  }, [connectWebSocket, processInitialData]);
+  }, [initChart, connectWebSocket, processInitialData]);
 
   useEffect(() => {
-    if (wsRef.current?.__handlers) {
-      const { handleConnect, handleDisconnect, handleError, handleConnectError, handleCandles, handleCandlestick } = wsRef.current.__handlers;
-      webSocketService.off('connect', handleConnect);
-      webSocketService.off('disconnect', handleDisconnect);
-      webSocketService.off('error', handleError);
-      webSocketService.off('connect_error', handleConnectError);
-      webSocketService.off('candles', handleCandles);
-      webSocketService.off('candlestick', handleCandlestick);
-    }
-    connectWebSocket();
+    const wsCleanup = connectWebSocket();
+    return wsCleanup;
   }, [symbol, timeframe, connectWebSocket]);
 
   return (
