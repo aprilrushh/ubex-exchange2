@@ -495,7 +495,7 @@ exports.getUserBalances = async (req, res) => {
   };
 
   // 화이트리스트 주소 확인
-  exports.confirmWhitelistAddress = async (req, res) => {
+exports.confirmWhitelistAddress = async (req, res) => {
     try {
       const { token } = req.body;
       const record = await db.WhitelistConfirmationToken.findOne({ where: { token, used: false } });
@@ -519,5 +519,73 @@ exports.getUserBalances = async (req, res) => {
       console.error('[WalletController] 화이트리스트 확인 오류:', error);
       res.status(500).json({ success: false, message: '주소 확인 중 오류가 발생했습니다.' });
     }
-  };
+  }; 
+
+// 전체 화이트리스트 주소 조회
+exports.listAllWhitelist = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const currentPort = req.app.get('port') || process.env.PORT || 3035;
+
+    const addresses = await db.WhitelistAddress.findAll({
+      where: { user_id: userId },
+      order: [['id', 'DESC']]
+    });
+
+    console.log(
+      `[Port:${currentPort}] 사용자 ID ${userId}의 전체 화이트리스트 조회 요청.`
+    );
+    res.json({ success: true, data: addresses });
+  } catch (error) {
+    console.error('[WalletController] 전체 화이트리스트 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '화이트리스트 조회 중 오류가 발생했습니다.'
+    });
+  }
+};
+
+// 화이트리스트 확인 메일 재전송
+exports.resendWhitelistConfirmation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const currentPort = req.app.get('port') || process.env.PORT || 3035;
+
+    const whitelist = await db.WhitelistAddress.findOne({
+      where: { id, user_id: userId }
+    });
+    if (!whitelist) {
+      return res
+        .status(404)
+        .json({ success: false, message: '화이트리스트 항목을 찾을 수 없습니다.' });
+    }
+
+    const token = crypto.randomBytes(20).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await db.WhitelistConfirmationToken.create({
+      token,
+      user_id: userId,
+      whitelist_id: id,
+      expires_at: expiresAt
+    });
+
+    const user = await db.User.findOne({ where: { id: userId } });
+    if (user) {
+      await emailService.sendConfirmationEmail(user.email, token);
+    }
+
+    console.log(
+      `[Port:${currentPort}] 사용자 ID ${userId}의 화이트리스트 확인 메일 재전송: ${id}`
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[WalletController] 화이트리스트 확인 메일 재전송 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '주소 확인 메일 재전송 중 오류가 발생했습니다.'
+    });
+  }
+};
   

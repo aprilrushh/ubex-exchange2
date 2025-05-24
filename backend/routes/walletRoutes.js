@@ -11,9 +11,11 @@ const {
   getCoinBalance,
   getUserBalances,
   listWhitelist,
+  listAllWhitelist,
   addWhitelist,
   deleteWhitelist,
-  confirmWhitelistAddress // 화이트리스트 관리 및 확인
+  confirmWhitelistAddress,
+  resendWhitelistConfirmation // 화이트리스트 관리 및 확인
 } = require('../controllers/walletController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const whitelistRateLimit = require('../middlewares/whitelistRateLimit');
@@ -43,6 +45,7 @@ router.get('/balances', authMiddleware, getUserBalances);
 
 // GET /api/v1/wallet/whitelist-addresses/:coin - 화이트리스트 주소 목록 조회
 router.get('/whitelist-addresses/:coin', authMiddleware, listWhitelist);
+router.get('/whitelist-addresses', authMiddleware, listAllWhitelist); // new controller
 
 // POST /api/v1/wallet/whitelist-address - 화이트리스트 주소 추가
 router.post(
@@ -56,7 +59,7 @@ router.post(
 router.delete('/whitelist-address/:id', authMiddleware, deleteWhitelist);
 
 // POST /api/v1/wallet/whitelist/:id/resend - 화이트리스트 확인 또는 재발송
-router.post('/whitelist/:id/resend', authMiddleware, confirmWhitelistAddress);
+router.post('/whitelist/:id/resend', authMiddleware, resendWhitelistConfirmation);
 
 
 
