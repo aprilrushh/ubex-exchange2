@@ -12,6 +12,12 @@
   color: var(--text-secondary);
   font-weight: 500;
   transition: color 0.2s;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 .nav-item.active {
@@ -30,4 +36,17 @@
 
 .nav-item:hover {
   color: var(--text-primary);
+}
+
+.user-info {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.logout-button {
+  color: var(--text-secondary);
+}
+
+.logout-button:hover {
+  color: var(--accent-color);
 }
