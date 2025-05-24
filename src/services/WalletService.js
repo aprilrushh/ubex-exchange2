@@ -74,7 +74,7 @@ export const getDepositAddress = async (currency) => {
 
   try {
     const response = await api.get(`/wallet/deposit-address/${currency}`);
-    return response.data.address;
+    return response.data.data.address;
   } catch (error) {
     console.error('입금주소 조회 실패', error);
     throw error;
@@ -108,7 +108,7 @@ export const listWhitelist = async (currency) => {
 
   try {
     const response = await api.get(`/wallet/whitelist-addresses/${currency}`);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error('화이트리스트 조회 실패', error);
     throw error;
@@ -179,7 +179,7 @@ export const getWhitelistAddresses = async () => {
 
   try {
     const response = await api.get('/wallet/whitelist-addresses');
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error('화이트리스트 전체 조회 실패', error);
     throw error;
