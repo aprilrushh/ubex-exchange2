@@ -82,6 +82,23 @@ export const getDepositAddress = async (currency) => {
 };
 
 /**
+ * 사용자가 직접 입금 주소를 설정
+ */
+export const setDepositAddress = async (currency, data) => {
+  if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
+    return { success: true };
+  }
+
+  try {
+    const response = await api.post(`/wallet/deposit-address/${currency}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('입금주소 설정 실패', error);
+    throw error;
+  }
+};
+
+/**
  * 화이트리스트 조회/등록/삭제
  */
 export const listWhitelist = async (currency) => {
