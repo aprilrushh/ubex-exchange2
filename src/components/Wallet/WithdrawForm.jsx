@@ -16,30 +16,38 @@ const WithdrawForm = ({ coin }) => {
   const [success, setSuccess] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    const fetchWhitelist = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const addresses = await listWhitelist(coin);
-        setWhitelist(addresses);
-        if (addresses.length > 0) {
-          setSelectedAddress(addresses[0].address);
-        } else {
-          setSelectedAddress('');
-        }
-      } catch (error) {
-        console.error('화이트리스트 조회 실패', error);
-        if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
-          setError('화이트리스트를 불러오는데 실패했습니다.');
-        }
-      } finally {
-        setLoading(false);
+  const fetchWhitelist = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('화이트리스트 조회 시작:', coin);
+      const addresses = await listWhitelist(coin);
+      console.log('조회된 화이트리스트:', addresses);
+      setWhitelist(addresses);
+      if (addresses.length > 0) {
+        setSelectedAddress(addresses[0].address);
+      } else {
+        setSelectedAddress('');
       }
-    };
+    } catch (error) {
+      console.error('화이트리스트 조회 실패', error);
+      if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
+        setError('화이트리스트를 불러오는데 실패했습니다.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchWhitelist();
   }, [coin]);
+
+  const handleAddWhitelistSuccess = async () => {
+    console.log('화이트리스트 주소 추가 성공, 목록 갱신 시작');
+    await fetchWhitelist();
+    setShowModal(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,28 +86,6 @@ const WithdrawForm = ({ coin }) => {
       setShowModal(true);
     } else {
       setSelectedAddress(value);
-    }
-  };
-
-  const handleAddWhitelistSuccess = async () => {
-    setShowModal(false);
-    try {
-      setLoading(true);
-      const addresses = await listWhitelist(coin);
-      console.log('새로 추가된 화이트리스트 주소들:', addresses);
-      setWhitelist(addresses);
-      // 새로 추가된 주소를 선택
-      if (addresses && addresses.length > 0) {
-        const lastAddedAddress = addresses[addresses.length - 1];
-        setSelectedAddress(lastAddedAddress.address);
-      }
-    } catch (error) {
-      console.error('화이트리스트 조회 실패', error);
-      if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
-        setError('화이트리스트를 불러오는데 실패했습니다.');
-      }
-    } finally {
-      setLoading(false);
     }
   };
 
