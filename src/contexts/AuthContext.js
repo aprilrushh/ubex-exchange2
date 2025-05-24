@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
       if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
         const dummyUser = {
           id: 1,
-          username: credentials.email,
+          username: '테스트사용자',
           email: credentials.email
         };
         const dummyToken = 'dummy-token';

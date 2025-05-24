@@ -37,7 +37,7 @@ const Navigation = () => {
           <NavLink to="/login" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
             로그인
           </NavLink>
-          <NavLink to="/signup" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/register" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
             회원가입
           </NavLink>
         </>
