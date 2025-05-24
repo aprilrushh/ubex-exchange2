@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { errorHandler } = require('./middleware/errorHandler');
 const routes = require('./routes');
-const { setupWebSocket } = require('./websocket');
 
 const app = express();
 
