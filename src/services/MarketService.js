@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:3035'}/api`;
 
 export const fetchTickerList = async () => {
   try {
@@ -14,7 +14,10 @@ export const fetchTickerList = async () => {
 };
 
 export const connectWebSocket = (symbols, onMessage) => {
-  const ws = new WebSocket('ws://localhost:3001/ws/ticker');
+  const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3035';
+  const wsProtocol = baseUrl.startsWith('https') ? 'wss' : 'ws';
+  const wsUrl = baseUrl.replace(/^https?/, wsProtocol) + '/ws/ticker';
+  const ws = new WebSocket(wsUrl);
   ws.onopen = () => {
     ws.send(JSON.stringify({ type: 'subscribe', symbols }));
   };
