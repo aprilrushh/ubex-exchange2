@@ -24,24 +24,7 @@ const generateDummyBalance = (currency) => {
 };
 
 // 더미 화이트리스트 주소 저장소
-let dummyWhitelistAddresses = [
-  {
-    id: 1,
-    coin_symbol: 'BTC',
-    address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-    label: 'My Bitcoin Wallet',
-    status: 'confirmed',
-    created_at: new Date()
-  },
-  {
-    id: 2,
-    coin_symbol: 'ETH',
-    address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
-    label: 'My Ethereum Wallet',
-    status: 'confirmed',
-    created_at: new Date()
-  }
-];
+let dummyWhitelistAddresses = [];
 
 const api = axios.create({
   baseURL: `${API_URL}/api/v1`,

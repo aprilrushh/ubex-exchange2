@@ -1,5 +1,5 @@
 // src/components/Wallet/WithdrawForm.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   listWhitelist,
   requestWithdrawal
@@ -7,8 +7,7 @@ import {
 import AddWhitelistModal from './AddWhitelistModal.jsx';
 import './Wallet.css';
 
-const WithdrawForm = ({ currency }) => {
-  console.log('WithdrawForm rendered with currency:', currency);
+const WithdrawForm = ({ coin }) => {
   const [whitelist, setWhitelist] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [amount, setAmount] = useState('');
@@ -19,16 +18,10 @@ const WithdrawForm = ({ currency }) => {
 
   useEffect(() => {
     const fetchWhitelist = async () => {
-      if (!currency) {
-        console.log('Currency is not defined, skipping whitelist fetch');
-        return;
-      }
       try {
         setLoading(true);
         setError(null);
-        console.log('Fetching whitelist for currency:', currency);
-        const addresses = await listWhitelist(currency);
-        console.log('Fetched whitelist addresses:', addresses);
+        const addresses = await listWhitelist(coin);
         setWhitelist(addresses);
         if (addresses.length > 0) {
           setSelectedAddress(addresses[0].address);
@@ -46,7 +39,7 @@ const WithdrawForm = ({ currency }) => {
     };
 
     fetchWhitelist();
-  }, [currency]);
+  }, [coin]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,7 +53,7 @@ const WithdrawForm = ({ currency }) => {
       }
 
       const response = await requestWithdrawal({
-        currency,
+        currency: coin,
         address: selectedAddress,
         amount: parseFloat(amount)
       });
@@ -88,26 +81,27 @@ const WithdrawForm = ({ currency }) => {
     }
   };
 
-  const handleAddWhitelistSuccess = useCallback(async () => {
-    console.log('화이트리스트 주소 추가 성공, 목록 갱신 시작');
-    if (!currency) {
-      console.error('Currency is not defined, cannot refresh whitelist');
-      return;
-    }
+  const handleAddWhitelistSuccess = async () => {
+    setShowModal(false);
     try {
-      const updatedWhitelist = await listWhitelist(currency);
-      console.log('갱신된 화이트리스트:', updatedWhitelist);
-      setWhitelist(updatedWhitelist);
-      
-      // 마지막으로 추가된 주소를 선택
-      if (updatedWhitelist.length > 0) {
-        const lastAddedAddress = updatedWhitelist[updatedWhitelist.length - 1];
+      setLoading(true);
+      const addresses = await listWhitelist(coin);
+      console.log('새로 추가된 화이트리스트 주소들:', addresses);
+      setWhitelist(addresses);
+      // 새로 추가된 주소를 선택
+      if (addresses && addresses.length > 0) {
+        const lastAddedAddress = addresses[addresses.length - 1];
         setSelectedAddress(lastAddedAddress.address);
       }
     } catch (error) {
-      console.error('화이트리스트 갱신 실패:', error);
+      console.error('화이트리스트 조회 실패', error);
+      if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
+        setError('화이트리스트를 불러오는데 실패했습니다.');
+      }
+    } finally {
+      setLoading(false);
     }
-  }, [currency]);
+  };
 
   if (loading) {
     return <div className="wallet-loading">Loading...</div>;
@@ -115,7 +109,7 @@ const WithdrawForm = ({ currency }) => {
 
   return (
     <div className="withdraw-form">
-      <h3>{currency} 출금</h3>
+      <h3>{coin} 출금</h3>
       {error && <div className="wallet-error">{error}</div>}
       {success && (
         <div className="wallet-success">
@@ -165,7 +159,7 @@ const WithdrawForm = ({ currency }) => {
       </div>
       {showModal && (
         <AddWhitelistModal
-          coin={currency}
+          coin={coin}
           onClose={() => setShowModal(false)}
           onSuccess={handleAddWhitelistSuccess}
         />

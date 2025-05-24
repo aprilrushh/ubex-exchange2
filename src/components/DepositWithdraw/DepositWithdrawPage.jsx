@@ -60,8 +60,8 @@ const DepositWithdrawPage = () => {
 
       {selectedCoinSymbol ? (
         <div className="form-area">
-          {activeTab === 'deposit' && <DepositForm currency={selectedCoinSymbol} />}
-          {activeTab === 'withdraw' && <WithdrawForm currency={selectedCoinSymbol} />}
+          {activeTab === 'deposit' && <DepositForm coin={selectedCoinSymbol} />}
+          {activeTab === 'withdraw' && <WithdrawForm coin={selectedCoinSymbol} />}
         </div>
       ) : (
         <p className="select-coin-msg">위에서 코인을 선택해주세요.</p>
