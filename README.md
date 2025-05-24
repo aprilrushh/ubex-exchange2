@@ -26,6 +26,12 @@ If the backend is not running, the React frontend will encounter WebSocket and A
 The backend uses **MySQL** with Sequelize. Configure credentials via environment variables (`DB_USER`, `DB_PASS`, `DB_NAME`, `DB_HOST`) or edit `mysqlconnect.ini`.
 Start MySQL before running the backend.
 
+After running the database migrations you can seed some demo data:
+
+```bash
+npm run seed
+```
+
 ### Frontend
 Run `npm run start:frontend` to start the React app.
 
