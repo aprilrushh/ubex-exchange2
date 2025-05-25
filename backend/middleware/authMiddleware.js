@@ -1,142 +1,89 @@
+// backend/middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
 
-// 🔧 JWT 토큰 검증 미들웨어
+// JWT 시크릿 키 (실제 환경에서는 환경변수 사용)
+const JWT_SECRET = process.env.JWT_SECRET || 57afddace4b22b4f8ef0cd5c34253c649d0dbf1bc55fad9fca68cd447b7ff520984b8e923d559e3176e5c3dfa05297db57b8c4b819a10dbfa16a1c861f7c6f6f;
+
+// 🔐 필수 인증 미들웨어
 const authMiddleware = (req, res, next) => {
   try {
-    console.log('[Auth] 인증 미들웨어 실행');
+    const token = req.header('Authorization')?.replace('Bearer ', '') || 
+                  req.header('x-access-token') ||
+                  req.cookies?.token;
     
-    // Authorization 헤더에서 토큰 추출
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1]; // "Bearer TOKEN"에서 TOKEN 부분만
+    console.log('🔑 인증 토큰 확인:', token ? '존재함' : '없음');
     
     if (!token) {
-      console.log('[Auth] 토큰이 없음 - 임시 사용자로 처리');
-      
-      // 🔧 개발 모드: 토큰 없어도 임시 사용자로 진행
-      req.user = {
-        id: 'temp-user-123',
-        email: 'test@ubex.com',
-        role: 'user'
-      };
-      
-      return next();
+      return res.status(401).json({
+        success: false,
+        error: '액세스 토큰이 필요합니다'
+      });
     }
     
     // JWT 토큰 검증
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('[Auth] 토큰 검증 성공:', decoded.userId);
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
     
-    req.user = {
-      id: decoded.userId,
-      email: decoded.email || 'unknown@ubex.com',
-      role: decoded.role || 'user'
-    };
-    
+    console.log('✅ 인증 성공:', req.user?.id || 'unknown');
     next();
     
   } catch (error) {
-    console.error('[Auth] 토큰 검증 실패:', error.message);
-    
-    // 🔧 개발 모드: 토큰 오류도 임시 사용자로 처리
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Auth] 개발 모드 - 임시 사용자로 진행');
-      req.user = {
-        id: 'temp-user-123',
-        email: 'test@ubex.com',
-        role: 'user'
-      };
-      return next();
-    }
-    
-    // 프로덕션에서는 401 반환
+    console.error('❌ 인증 실패:', error.message);
     return res.status(401).json({
       success: false,
-      error: 'Unauthorized',
-      message: '유효하지 않은 토큰입니다'
+      error: '유효하지 않은 토큰입니다'
     });
   }
 };
 
-// 🔧 선택적 인증 미들웨어 (토큰이 있으면 검증, 없어도 통과)
+// 🔓 선택적 인증 미들웨어 (토큰이 없어도 통과)
 const optionalAuth = (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = req.header('Authorization')?.replace('Bearer ', '') || 
+                  req.header('x-access-token') ||
+                  req.cookies?.token;
+    
+    console.log('🔑 선택적 인증 토큰:', token ? '존재함' : '없음');
     
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = {
-        id: decoded.userId,
-        email: decoded.email,
-        role: decoded.role || 'user'
-      };
-    } else {
-      req.user = null; // 로그인하지 않은 사용자
-    }
-    
-    next();
-    
-  } catch (error) {
-    console.error('[Auth] 선택적 인증 오류:', error.message);
-    req.user = null;
-    next();
-  }
-};
-
-// 🔧 관리자 권한 확인 미들웨어
-const adminAuth = (req, res, next) => {
-  authMiddleware(req, res, () => {
-    if (req.user && (req.user.role === 'admin' || req.user.id === 'temp-user-123')) {
-      next();
-    } else {
-      res.status(403).json({
-        success: false,
-        error: 'Forbidden',
-        message: '관리자 권한이 필요합니다'
-      });
-    }
-  });
-};
-
-// 🔧 JWT 토큰 생성 함수
-const generateToken = (userId, email, role = 'user') => {
-  try {
-    const token = jwt.sign(
-      {
-        userId,
-        email,
-        role,
-        iat: Math.floor(Date.now() / 1000)
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: '24h'
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        console.log('✅ 선택적 인증 성공:', req.user?.id);
+      } catch (error) {
+        console.log('⚠️ 토큰 검증 실패 (무시하고 진행):', error.message);
+        // 토큰이 잘못되어도 계속 진행
       }
-    );
+    }
     
-    console.log('[Auth] JWT 토큰 생성 완료:', userId);
-    return token;
+    // 토큰이 없거나 잘못되어도 req.user는 undefined로 설정하고 진행
+    req.user = req.user || { id: 'anonymous-' + Date.now() };
+    next();
     
   } catch (error) {
-    console.error('[Auth] JWT 토큰 생성 실패:', error);
-    throw new Error('토큰 생성 실패');
+    console.error('❌ 선택적 인증 오류:', error.message);
+    req.user = { id: 'anonymous-' + Date.now() };
+    next();
   }
 };
 
-// 🔧 토큰 검증 함수
+// 🔑 토큰 생성 헬퍼 함수
+const generateToken = (payload) => {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+};
+
+// 🔍 토큰 검증 헬퍼 함수
 const verifyToken = (token) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return { success: true, data: decoded };
+    return jwt.verify(token, JWT_SECRET);
   } catch (error) {
-    return { success: false, error: error.message };
+    return null;
   }
 };
 
 module.exports = {
   authMiddleware,
   optionalAuth,
-  adminAuth,
   generateToken,
   verifyToken
-}; 
+};
