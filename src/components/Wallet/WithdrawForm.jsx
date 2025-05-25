@@ -7,7 +7,8 @@ import {
 import AddWhitelistModal from './AddWhitelistModal.jsx';
 import './Wallet.css';
 
-const WithdrawForm = ({ currency }) => {
+const WithdrawForm = ({ coin, currency }) => {
+  const coinSymbol = coin || currency;
   const [whitelist, setWhitelist] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [amount, setAmount] = useState('');
@@ -21,13 +22,10 @@ const WithdrawForm = ({ currency }) => {
       try {
         setLoading(true);
         setError(null);
-        const addresses = await listWhitelist(currency);
+        const addresses = await listWhitelist(coinSymbol);
         setWhitelist(addresses);
-        if (addresses.length > 0) {
-          setSelectedAddress(addresses[0].address);
-        } else {
-          setSelectedAddress('');
-        }
+        // 기본 선택값을 비워 사용자가 직접 주소를 선택하도록 한다
+        setSelectedAddress('');
       } catch (error) {
         console.error('화이트리스트 조회 실패', error);
         if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
@@ -39,7 +37,7 @@ const WithdrawForm = ({ currency }) => {
     };
 
     fetchWhitelist();
-  }, [currency]);
+  }, [coinSymbol]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,7 +51,7 @@ const WithdrawForm = ({ currency }) => {
       }
 
       const response = await requestWithdrawal({
-        currency,
+        currency: coinSymbol,
         address: selectedAddress,
         amount: parseFloat(amount)
       });
@@ -87,7 +85,7 @@ const WithdrawForm = ({ currency }) => {
 
   return (
     <div className="withdraw-form">
-      <h3>{currency} 출금</h3>
+      <h3>{coinSymbol} 출금</h3>
       {error && <div className="wallet-error">{error}</div>}
       {success && (
         <div className="wallet-success">
@@ -102,12 +100,17 @@ const WithdrawForm = ({ currency }) => {
             value={selectedAddress}
             onChange={handleSelect}
           >
-            <option value="">주소를 선택하세요</option>
+            <option value="" disabled hidden>
+              주소를 선택하세요
+            </option>
             {whitelist.map((addr) => (
               <option key={addr.id} value={addr.address}>
                 {addr.label} ({addr.address})
               </option>
             ))}
+            {whitelist.length > 0 && (
+              <option disabled>────────────</option>
+            )}
             <option value="add-new">+ 새 주소 등록</option>
           </select>
         </div>
@@ -137,17 +140,16 @@ const WithdrawForm = ({ currency }) => {
       </div>
       {showModal && (
         <AddWhitelistModal
-          coin={currency}
+          coin={coinSymbol}
           onClose={() => setShowModal(false)}
           onSuccess={() => {
             setShowModal(false);
             // refresh list
             (async () => {
-              const addresses = await listWhitelist(currency);
+              const addresses = await listWhitelist(coinSymbol);
               setWhitelist(addresses);
-              if (addresses.length > 0) {
-                setSelectedAddress(addresses[0].address);
-              }
+              // 새 주소 추가 후에도 직접 선택하도록 초기화
+              setSelectedAddress('');
             })();
           }}
         />
