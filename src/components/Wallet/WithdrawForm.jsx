@@ -48,8 +48,9 @@ const WithdrawForm = ({ coin }) => {
   }, [coin]);
 
   useEffect(() => {
+    console.log('WithdrawForm useEffect triggered with coin:', coin);
     fetchWhitelist();
-  }, [fetchWhitelist]);
+  }, [coin, fetchWhitelist]);
 
   const handleAddWhitelistSuccess = async () => {
     console.log('화이트리스트 주소 추가 성공, 목록 갱신 시작');

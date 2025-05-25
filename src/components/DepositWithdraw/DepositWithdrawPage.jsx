@@ -43,7 +43,10 @@ const DepositWithdrawPage = () => {
       <Tabs
         tabs={tabItems}
         activeTab={activeTab}
-        onChange={(key) => setActiveTab(key)}
+        onChange={(key) => {
+          console.log('탭 변경:', key);
+          setActiveTab(key);
+        }}
       />
 
       <div className="coin-selection">
