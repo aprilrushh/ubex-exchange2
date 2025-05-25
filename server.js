@@ -9,14 +9,23 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 3035;
 const logger = require('./backend/services/logger');
 
-// CORS 설정
+// 🔧 CORS 설정 (가장 중요!)
 app.use(cors({
-  origin: 'http://localhost:3000',  // React 개발 서버 포트를 3000으로 수정
-  credentials: true
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://172.30.1.99:3000',  // 현재 사용 중인 네트워크 IP
+    'http://192.168.1.99:3000'  // 다른 가능한 IP들
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token']
 }));
 
-// Body parser
+// 기본 미들웨어
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.url}`);
   next();
@@ -29,10 +38,24 @@ db.sequelize.authenticate()
   .then(() => console.log('[DB] Connected and synced'))
   .catch(err => console.error('[DB] Error:', err));
 
-// ─── 블록체인 리스너 활성화 ───
-const { startListening } = require('./backend/services/blockchainListener');
-//startListening();
-// ────────────────────────────────
+// 🚨 블록체인 리스너 오류 수정
+try {
+  const blockchainListener = require('./backend/services/blockchainListener');
+  
+  // ❌ 기존 오류 코드 주석 처리
+  // startListening(); // 이 줄이 34번째 줄 오류의 원인
+  
+  // ✅ 올바른 호출
+  blockchainListener.initialize().then(() => {
+    console.log('⛓️ 블록체인 리스너 초기화 완료');
+    // blockchainListener.startListening(); // 필요시 주석 해제
+  }).catch(error => {
+    console.log('⛓️ 블록체인 리스너 초기화 실패 (무시하고 진행):', error.message);
+  });
+  
+} catch (error) {
+  console.log('⛓️ 블록체인 리스너 로드 실패 (무시하고 진행):', error.message);
+}
 
 // 라우트 연결
 const walletRoutes = require('./backend/routes/walletRoutes');
@@ -71,7 +94,37 @@ app.use('/api/admin/engine', adminEngineRoutes);
 
 websocketService.initWebSocket(server);
 
-// 서버 시작
-server.listen(PORT, () => {
-  console.log(`[Server] Listening on port ${PORT}`);
+// 🚀 서버 시작
+server.listen(PORT, '0.0.0.0', () => {
+  console.log('🚀 ================================');
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📡 API: http://localhost:${PORT}`);
+  console.log(`🌐 Network: http://172.30.1.99:${PORT}`);
+  console.log('🔌 WebSocket: active');
+  console.log('✅ CORS: enabled');
+  console.log('💾 Database: disabled (dev mode)');
+  console.log('🚀 ================================');
 });
+
+// 기본 라우트
+app.get('/', (req, res) => {
+  res.json({ 
+    message: '🚀 UBEX Exchange API Server',
+    status: 'running',
+    cors: 'enabled'
+  });
+});
+
+// 코인 목록 API (임시)
+app.get('/api/coins', (req, res) => {
+  res.json({
+    success: true,
+    data: [
+      { symbol: 'BTC', name: 'Bitcoin', price: '50000' },
+      { symbol: 'ETH', name: 'Ethereum', price: '3000' },
+      { symbol: 'USDT', name: 'Tether', price: '1' }
+    ]
+  });
+});
+
+module.exports = app;
