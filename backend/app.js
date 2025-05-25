@@ -112,15 +112,15 @@ const initializeDatabase = async () => {
 // 🔧 블록체인 리스너 초기화
 const initializeBlockchainListener = async () => {
   try {
-    const blockchainListener = require('./services/blockchainListener');
-    await blockchainListener.initialize();
+    // ❌ 오류 발생 부분을 주석 처리
+    // await blockchainListener.initialize();
     
-    // 감시할 주소 추가 (입금 주소)
-    blockchainListener.addWatchedAddress('0x9726a5943D6e371FFC9FEc5Cb56FCDDB87f7b3d7');
+    // ✅ 임시 로그로 대체
+    console.log('⛓️ 블록체인 리스너 임시 비활성화 (개발 모드)');
     
-    console.log('⛓️  블록체인 리스너 초기화 완료');
   } catch (error) {
-    console.error('⛓️  블록체인 리스너 초기화 실패:', error.message);
+    console.error('⛓️ 블록체인 리스너 초기화 실패:', error.message);
+    // 오류가 있어도 서버는 계속 실행
   }
 };
 
@@ -186,9 +186,9 @@ const startServer = async () => {
       console.log('🚀 ================================');
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📡 API: http://localhost:${PORT}`);
-      console.log(`🔌 WebSocket: active`);
-      console.log(`⛓️  Blockchain: listening`);
-      console.log(`💾 Database: disabled (dev mode)`);
+      console.log('🔌 WebSocket: active');
+      console.log('⛓️ Blockchain: 임시 비활성화');
+      console.log('💾 Database: disabled (dev mode)');
       console.log('🚀 ================================');
     });
     
