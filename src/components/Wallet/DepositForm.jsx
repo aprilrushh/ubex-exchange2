@@ -42,6 +42,7 @@ const DepositForm = () => {
       if (result.success && result.data && result.data.address) {
         setSavedAddress(result.data.address);
         setMessage('');
+        setShowAddressInput(false); // 주소가 있으면 입력창 숨김
       } else {
         setSavedAddress('');
         setMessage(result.message || '입금 주소가 설정되지 않았습니다');
@@ -142,7 +143,7 @@ const DepositForm = () => {
         setSavedAddress(depositAddress);
         setDepositAddress('');
         setShowAddressInput(false);
-        setMessage('입금 주소가 성공적으로 저장되었습니다');
+        setMessage('입금 주소가 성공적으로 저장되었습니다!');
         setMessageType('success');
         
         // 5초 후 메시지 자동 삭제
@@ -170,13 +171,13 @@ const DepositForm = () => {
     try {
       await navigator.clipboard.writeText(savedAddress);
       setCopied(true);
-      setMessage('주소가 복사되었습니다');
+      setMessage('주소가 클립보드에 복사되었습니다!');
       setMessageType('success');
       
       setTimeout(() => {
         setCopied(false);
         setMessage('');
-      }, 2000);
+      }, 3000);
     } catch (error) {
       console.error('❌ 복사 실패', error);
       setMessage('복사에 실패했습니다');
@@ -215,15 +216,28 @@ const DepositForm = () => {
   return (
     <div className="container">
       {/* 🎨 헤더 개선 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>💰 ETH 입금</h1>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '30px',
+        padding: '0 5px'
+      }}>
+        <h1 style={{ margin: 0, fontSize: '28px', color: '#333' }}>💰 ETH 입금</h1>
         <button 
           className="refresh-btn"
           onClick={() => {
             fetchDepositAddress();
             fetchDepositHistory();
           }}
-          style={{ padding: '8px 15px' }}
+          style={{ 
+            padding: '10px 16px',
+            fontSize: '14px',
+            borderRadius: '6px',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
         >
           🔄 새로고침
         </button>
@@ -231,19 +245,24 @@ const DepositForm = () => {
 
       {/* 🔔 메시지 표시 (개선됨) */}
       {message && (
-        <div className={`message-alert ${messageType}`} style={{
-          padding: '12px 16px',
-          marginBottom: '20px',
-          borderRadius: '8px',
-          border: '1px solid',
-          backgroundColor: messageType === 'success' ? '#d4edda' : 
-                          messageType === 'error' ? '#f8d7da' : '#d1ecf1',
-          borderColor: messageType === 'success' ? '#c3e6cb' : 
-                      messageType === 'error' ? '#f5c6cb' : '#bee5eb',
-          color: messageType === 'success' ? '#155724' : 
-                messageType === 'error' ? '#721c24' : '#0c5460'
-        }}>
-          <span style={{ marginRight: '8px' }}>
+        <div 
+          className={`message-alert ${messageType}`} 
+          style={{
+            padding: '15px 20px',
+            marginBottom: '25px',
+            borderRadius: '10px',
+            border: '1px solid',
+            fontSize: '14px',
+            lineHeight: '1.5',
+            backgroundColor: messageType === 'success' ? '#d4edda' : 
+                            messageType === 'error' ? '#f8d7da' : '#d1ecf1',
+            borderColor: messageType === 'success' ? '#c3e6cb' : 
+                        messageType === 'error' ? '#f5c6cb' : '#bee5eb',
+            color: messageType === 'success' ? '#155724' : 
+                  messageType === 'error' ? '#721c24' : '#0c5460'
+          }}
+        >
+          <span style={{ marginRight: '10px', fontSize: '16px' }}>
             {messageType === 'success' ? '✅' : messageType === 'error' ? '❌' : 'ℹ️'}
           </span>
           {message}
@@ -252,62 +271,105 @@ const DepositForm = () => {
       
       {/* 🏠 저장된 주소 표시 (개선됨) */}
       {savedAddress ? (
-        <div className="success-alert" style={{ position: 'relative' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ marginBottom: '8px', fontSize: '14px', color: '#155724' }}>
-                📍 현재 입금 주소
-              </div>
-              <strong style={{ 
-                fontFamily: 'monospace', 
+        <div className="success-alert" style={{ 
+          padding: '20px',
+          marginBottom: '25px',
+          borderRadius: '12px',
+          position: 'relative'
+        }}>
+          <div style={{ marginBottom: '12px', fontSize: '16px', fontWeight: '600', color: '#155724' }}>
+            📍 현재 등록된 입금 주소
+          </div>
+          <div style={{ 
+            backgroundColor: '#f8f9fa',
+            padding: '15px',
+            borderRadius: '8px',
+            marginBottom: '15px',
+            border: '1px solid #e9ecef'
+          }}>
+            <div style={{ 
+              fontFamily: 'Monaco, Consolas, "Courier New", monospace', 
+              fontSize: '13px', 
+              wordBreak: 'break-all',
+              color: '#495057',
+              lineHeight: '1.4'
+            }}>
+              {savedAddress}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button 
+              className={`btn ${copied ? 'copied' : ''}`}
+              onClick={handleCopyAddress}
+              style={{ 
+                padding: '8px 16px', 
+                fontSize: '13px',
+                backgroundColor: copied ? '#28a745' : '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                fontWeight: '500'
+              }}
+            >
+              {copied ? '✓ 복사 완료!' : '📋 주소 복사'}
+            </button>
+            <button 
+              className="btn"
+              onClick={() => setShowAddressInput(!showAddressInput)}
+              style={{ 
+                padding: '8px 16px', 
                 fontSize: '13px', 
-                wordBreak: 'break-all',
-                display: 'block',
-                marginBottom: '10px'
-              }}>
-                {savedAddress}
-              </strong>
-            </div>
-            <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-              <button 
-                className={`btn ${copied ? 'copied' : ''}`}
-                onClick={handleCopyAddress}
-                style={{ 
-                  padding: '6px 12px', 
-                  fontSize: '12px',
-                  backgroundColor: copied ? '#28a745' : '#007bff'
-                }}
-              >
-                {copied ? '✓ 복사됨' : '📋 복사'}
-              </button>
-              <button 
-                className="btn"
-                onClick={() => setShowAddressInput(!showAddressInput)}
-                style={{ padding: '6px 12px', fontSize: '12px', backgroundColor: '#6c757d' }}
-              >
-                {showAddressInput ? '🔻 숨기기' : '✏️ 변경'}
-              </button>
-            </div>
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                fontWeight: '500'
+              }}
+            >
+              {showAddressInput ? '🔻 입력창 숨기기' : '✏️ 주소 변경'}
+            </button>
           </div>
         </div>
       ) : (
         <div style={{
-          padding: '16px',
+          padding: '20px',
           backgroundColor: '#fff3cd',
-          border: '1px solid #ffeaa7',
-          borderRadius: '8px',
-          marginBottom: '20px'
+          border: '2px solid #ffeaa7',
+          borderRadius: '12px',
+          marginBottom: '25px'
         }}>
-          <div style={{ color: '#856404', marginBottom: '12px' }}>
+          <div style={{ 
+            color: '#856404', 
+            marginBottom: '12px', 
+            fontSize: '16px',
+            fontWeight: '600'
+          }}>
             ⚠️ 입금 주소가 설정되지 않았습니다
           </div>
-          <p style={{ color: '#856404', fontSize: '14px', marginBottom: '12px' }}>
-            ETH 입금을 받기 위해 지갑 주소를 등록해주세요.
+          <p style={{ 
+            color: '#856404', 
+            fontSize: '14px', 
+            marginBottom: '15px',
+            lineHeight: '1.5'
+          }}>
+            ETH 입금을 받기 위해 지갑 주소를 등록해주세요. 등록된 주소로 ETH를 전송하면 자동으로 입금 처리됩니다.
           </p>
           <button
             className="btn"
             onClick={() => setShowAddressInput(true)}
-            style={{ backgroundColor: '#ffc107', color: '#212529' }}
+            style={{ 
+              backgroundColor: '#ffc107', 
+              color: '#212529',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: '500'
+            }}
           >
             📝 주소 등록하기
           </button>
@@ -316,28 +378,50 @@ const DepositForm = () => {
       
       {/* 🔧 주소 입력 섹션 (조건부 표시) */}
       {showAddressInput && (
-        <div className="form-section">
-          <h3>📍 {savedAddress ? '주소 변경' : '입금 주소 설정'}</h3>
-          <div className="input-group">
+        <div className="form-section" style={{ marginBottom: '30px' }}>
+          <h3 style={{ marginBottom: '15px', color: '#495057' }}>
+            📍 {savedAddress ? '주소 변경' : '새 입금 주소 등록'}
+          </h3>
+          <div className="input-group" style={{ marginBottom: '15px' }}>
             <input
               type="text"
-              placeholder="0x로 시작하는 ETH 주소를 입력하세요"
+              placeholder="0x로 시작하는 42자리 ETH 주소를 입력하세요"
               value={depositAddress}
               onChange={(e) => {
                 setDepositAddress(e.target.value);
                 setMessage(''); // 입력 시 메시지 초기화
               }}
-              style={{ fontFamily: 'monospace', fontSize: '14px' }}
+              style={{ 
+                fontFamily: 'Monaco, Consolas, "Courier New", monospace', 
+                fontSize: '13px',
+                padding: '12px 15px',
+                width: '100%',
+                border: '2px solid #dee2e6',
+                borderRadius: '8px',
+                transition: 'border-color 0.2s'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#007bff'}
+              onBlur={(e) => e.target.style.borderColor = '#dee2e6'}
             />
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <button 
               className="btn"
               onClick={handleSaveAddress}
               disabled={saving || !depositAddress.trim()}
-              style={{ flex: 1 }}
+              style={{ 
+                flex: 1,
+                padding: '12px 20px',
+                backgroundColor: saving ? '#6c757d' : '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                fontWeight: '500',
+                opacity: (!depositAddress.trim()) ? 0.6 : 1
+              }}
             >
-              {saving ? '저장 중...' : '💾 저장'}
+              {saving ? '💾 저장 중...' : '💾 주소 저장'}
             </button>
             <button
               className="btn"
@@ -346,15 +430,23 @@ const DepositForm = () => {
                 setDepositAddress('');
                 setMessage('');
               }}
-              style={{ backgroundColor: '#6c757d', padding: '12px 20px' }}
+              style={{ 
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '500'
+              }}
             >
-              취소
+              ✖️ 취소
             </button>
           </div>
         </div>
       )}
       
-      {/* 📊 입금 내역 (기존 스타일 유지) */}
+      {/* 📊 입금 내역 (기존 스타일 유지 + 소폭 개선) */}
       <div className="deposit-history">
         <div className="history-header">
           <h3>📊 최근 입금 내역</h3>
@@ -391,6 +483,7 @@ const DepositForm = () => {
                     className="tx-hash" 
                     onClick={() => openEtherscan(deposit.tx_hash)}
                     style={{ cursor: 'pointer' }}
+                    title="클릭하면 Etherscan에서 확인할 수 있습니다"
                   >
                     {deposit.tx_hash.slice(0,6)}...{deposit.tx_hash.slice(-4)}
                   </td>
@@ -416,7 +509,7 @@ const DepositForm = () => {
           <li>다른 코인을 이 주소로 보내면 자산이 손실될 수 있습니다.</li>
           <li>입금 후 확인까지 최대 30분이 소요될 수 있습니다.</li>
           <li>최소 입금 금액은 0.01 ETH입니다.</li>
-          <li>현재 Sepolia 테스트넷을 사용 중입니다.</li>
+          <li>현재 Sepolia 테스트넷을 사용 중입니다. 실제 ETH를 보내지 마세요.</li>
         </ul>
       </div>
     </div>
