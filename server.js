@@ -31,7 +31,7 @@ db.sequelize.authenticate()
 
 // ─── 블록체인 리스너 활성화 ───
 const { startListening } = require('./backend/services/blockchainListener');
-startListening();
+//startListening();
 // ────────────────────────────────
 
 // 라우트 연결
