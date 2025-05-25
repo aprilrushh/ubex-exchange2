@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // 라우트 설정
-app.use('/api/v1/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/v1/market', marketRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/trade', tradeRoutes);
