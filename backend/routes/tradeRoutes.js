@@ -1,124 +1,162 @@
-// backend/routes/tradeRoutes.js
+// backend/routes/tradeRoutes.js - 누락된 거래 API 추가
+
 const express = require('express');
-const router = express.Router(); // Express 라우터 인스턴스 생성
-const tradeController = require('../controllers/tradeController'); // 주문 관련 로직을 처리할 컨트롤러
-const authMiddleware = require('../middlewares/authMiddleware'); // 사용자 인증을 위한 미들웨어
+const router = express.Router();
 
-/**
- * @route   POST /api/orders
- * @desc    새로운 주문 생성
- * @access  Private (인증된 사용자만 접근 가능)
- */
-router.post(
-  '/', // 기본 경로 ('/api/orders'의 하위 경로이므로 '/'는 '/api/orders'를 의미)
-  authMiddleware, // 이 라우트에 접근하기 전에 인증 미들웨어를 통과해야 함
-  tradeController.createOrder // 인증 성공 시 tradeController의 createOrder 함수 실행
-);
-
-/**
- * @route   GET /api/orders
- * @desc    현재 로그인된 사용자의 주문 목록 조회
- * @access  Private (인증된 사용자만 접근 가능)
- */
-router.get(
-  '/', // 기본 경로 ('/api/orders'의 하위 경로이므로 '/'는 '/api/orders'를 의미)
-  authMiddleware, // 이 라우트에 접근하기 전에 인증 미들웨어를 통과해야 함
-  tradeController.getUserOrders // 인증 성공 시 tradeController의 getUserOrders 함수 실행
-);
-
-// 최근 거래 내역 조회 API
+// 🔧 거래 내역 조회 API
 router.get('/trades', async (req, res) => {
   try {
     const { symbol, limit = 50 } = req.query;
-    console.log('📊 거래 내역 조회:', { symbol, limit });
+    console.log('📊 거래 내역 조회 요청:', { symbol, limit });
     
     // 임시 더미 거래 데이터
-    const generateTradeData = (symbol, count) => {
-      const trades = [];
-      const basePrice = symbol === 'BTC/USDT' ? 67500 : symbol === 'ETH/USDT' ? 3420 : 1;
-      
-      for (let i = 0; i < count; i++) {
-        const price = basePrice + (Math.random() - 0.5) * basePrice * 0.01; // ±1% 변동
-        const quantity = Math.random() * 2; // 0-2 범위의 랜덤 수량
-        const side = Math.random() > 0.5 ? 'buy' : 'sell';
-        
-        trades.push({
-          id: Date.now() + i,
-          symbol: symbol || 'BTC/USDT',
-          price: price.toFixed(2),
-          quantity: quantity.toFixed(6),
-          side,
-          timestamp: new Date(Date.now() - i * 60000).toISOString(), // 1분씩 이전
-          total: (price * quantity).toFixed(2)
-        });
+    const dummyTrades = [
+      {
+        id: 1,
+        symbol: symbol || 'BTC/USDT',
+        price: '50000.00',
+        amount: '0.001',
+        side: 'buy',
+        timestamp: new Date().toISOString(),
+        fee: '0.1'
+      },
+      {
+        id: 2,
+        symbol: symbol || 'BTC/USDT',
+        price: '49950.00',
+        amount: '0.002',
+        side: 'sell',
+        timestamp: new Date(Date.now() - 60000).toISOString(),
+        fee: '0.1'
+      },
+      {
+        id: 3,
+        symbol: symbol || 'BTC/USDT',
+        price: '50100.00',
+        amount: '0.0015',
+        side: 'buy',
+        timestamp: new Date(Date.now() - 120000).toISOString(),
+        fee: '0.1'
       }
-      
-      return trades;
-    };
+    ];
     
-    const trades = generateTradeData(symbol, parseInt(limit));
+    // 심볼 필터링
+    let filteredTrades = dummyTrades;
+    if (symbol) {
+      filteredTrades = dummyTrades.map(trade => ({
+        ...trade,
+        symbol: symbol
+      }));
+    }
     
-    console.log('📊 생성된 거래 내역:', trades.length, '개');
+    // 제한 적용
+    const limitedTrades = filteredTrades.slice(0, parseInt(limit));
+    
+    console.log('📊 조회된 거래 내역:', limitedTrades.length, '건');
     
     res.json({
       success: true,
-      data: trades,
-      total: trades.length,
-      symbol: symbol || 'BTC/USDT'
+      data: limitedTrades,
+      total: filteredTrades.length,
+      symbol: symbol
     });
     
   } catch (error) {
-    console.error('💥 거래 내역 조회 오류:', error);
+    console.error('📊 거래 내역 조회 오류:', error);
     res.status(500).json({
       success: false,
-      error: '거래 내역 조회 실패',
-      message: error.message
+      error: '거래 내역 조회 실패'
     });
   }
 });
 
-// 오더북 조회 API
-router.get('/orderbook/:symbol', async (req, res) => {
+// 🔧 코인 목록 조회 API
+router.get('/coins', async (req, res) => {
   try {
-    const { symbol } = req.params;
-    console.log('📖 오더북 조회:', symbol);
+    console.log('💰 코인 목록 조회 요청');
     
-    const basePrice = symbol === 'BTCUSDT' ? 67500 : symbol === 'ETHUSDT' ? 3420 : 1;
-    
-    // 임시 오더북 데이터 생성
-    const generateOrderbook = (basePrice) => {
-      const bids = []; // 매수 주문
-      const asks = []; // 매도 주문
-      
-      // 매수 주문 (가격이 높은 순서)
-      for (let i = 0; i < 10; i++) {
-        const price = basePrice - (i + 1) * basePrice * 0.001; // 0.1%씩 낮은 가격
-        const quantity = Math.random() * 5;
-        bids.push([price.toFixed(2), quantity.toFixed(6)]);
+    const coins = [
+      {
+        symbol: 'BTC',
+        name: 'Bitcoin',
+        price: '50000.00',
+        change24h: '+2.5%',
+        volume24h: '1000000000',
+        marketCap: '950000000000'
+      },
+      {
+        symbol: 'ETH',
+        name: 'Ethereum',
+        price: '3000.00',
+        change24h: '+1.8%',
+        volume24h: '500000000',
+        marketCap: '360000000000'
+      },
+      {
+        symbol: 'USDT',
+        name: 'Tether',
+        price: '1.00',
+        change24h: '0.0%',
+        volume24h: '2000000000',
+        marketCap: '90000000000'
+      },
+      {
+        symbol: 'BNB',
+        name: 'Binance Coin',
+        price: '300.00',
+        change24h: '+3.2%',
+        volume24h: '100000000',
+        marketCap: '46000000000'
       }
-      
-      // 매도 주문 (가격이 낮은 순서)
-      for (let i = 0; i < 10; i++) {
-        const price = basePrice + (i + 1) * basePrice * 0.001; // 0.1%씩 높은 가격
-        const quantity = Math.random() * 5;
-        asks.push([price.toFixed(2), quantity.toFixed(6)]);
-      }
-      
-      return { bids, asks };
-    };
-    
-    const orderbook = generateOrderbook(basePrice);
+    ];
     
     res.json({
       success: true,
-      symbol,
-      bids: orderbook.bids,
-      asks: orderbook.asks,
-      timestamp: new Date().toISOString()
+      data: coins,
+      total: coins.length
     });
     
   } catch (error) {
-    console.error('💥 오더북 조회 오류:', error);
+    console.error('💰 코인 목록 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '코인 목록 조회 실패'
+    });
+  }
+});
+
+// 🔧 오더북 조회 API
+router.get('/orderbook', async (req, res) => {
+  try {
+    const { symbol } = req.query;
+    console.log('📖 오더북 조회 요청:', symbol);
+    
+    const orderbook = {
+      symbol: symbol || 'BTC/USDT',
+      bids: [
+        ['49950.00', '0.5'],
+        ['49900.00', '1.2'],
+        ['49850.00', '0.8'],
+        ['49800.00', '2.1'],
+        ['49750.00', '1.5']
+      ],
+      asks: [
+        ['50050.00', '0.3'],
+        ['50100.00', '0.9'],
+        ['50150.00', '1.1'],
+        ['50200.00', '0.7'],
+        ['50250.00', '1.8']
+      ],
+      timestamp: new Date().toISOString()
+    };
+    
+    res.json({
+      success: true,
+      data: orderbook
+    });
+    
+  } catch (error) {
+    console.error('📖 오더북 조회 오류:', error);
     res.status(500).json({
       success: false,
       error: '오더북 조회 실패'
@@ -126,24 +164,20 @@ router.get('/orderbook/:symbol', async (req, res) => {
   }
 });
 
-// 24시간 통계 조회 API
-router.get('/ticker/:symbol', async (req, res) => {
+// 🔧 가격 정보 조회 API
+router.get('/ticker', async (req, res) => {
   try {
-    const { symbol } = req.params;
-    console.log('📈 티커 조회:', symbol);
-    
-    const basePrice = symbol === 'BTCUSDT' ? 67500 : symbol === 'ETHUSDT' ? 3420 : 1;
-    const change = (Math.random() - 0.5) * basePrice * 0.05; // ±5% 변동
+    const { symbol } = req.query;
+    console.log('💹 가격 정보 조회 요청:', symbol);
     
     const ticker = {
-      symbol,
-      price: basePrice.toFixed(2),
-      priceChange: change.toFixed(2),
-      priceChangePercent: ((change / basePrice) * 100).toFixed(2),
-      high: (basePrice * 1.03).toFixed(2),
-      low: (basePrice * 0.97).toFixed(2),
-      volume: (Math.random() * 1000000).toFixed(2),
-      quoteVolume: (Math.random() * basePrice * 1000000).toFixed(2),
+      symbol: symbol || 'BTC/USDT',
+      price: '50000.00',
+      high24h: '51000.00',
+      low24h: '48500.00',
+      volume24h: '1000.5',
+      change24h: '+1250.00',
+      changePercent24h: '+2.56%',
       timestamp: new Date().toISOString()
     };
     
@@ -153,13 +187,61 @@ router.get('/ticker/:symbol', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('💥 티커 조회 오류:', error);
+    console.error('💹 가격 정보 조회 오류:', error);
     res.status(500).json({
       success: false,
-      error: '티커 조회 실패'
+      error: '가격 정보 조회 실패'
     });
   }
 });
 
-// 생성한 라우터를 모듈로 내보내서 server.js에서 사용할 수 있도록 함
-module.exports = router;
+// 🔧 주문 생성 API
+router.post('/orders', async (req, res) => {
+  try {
+    console.log('📝 주문 생성 요청:', req.body);
+    const { symbol, side, type, amount, price } = req.body;
+    
+    if (!symbol || !side || !type || !amount) {
+      return res.status(400).json({
+        success: false,
+        error: '필수 파라미터가 누락되었습니다'
+      });
+    }
+    
+    const order = {
+      id: 'order_' + Date.now(),
+      symbol,
+      side,
+      type,
+      amount,
+      price: price || '시장가',
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    
+    console.log('📝 주문 생성 완료:', order.id);
+    
+    res.json({
+      success: true,
+      message: '주문이 접수되었습니다',
+      data: order
+    });
+    
+  } catch (error) {
+    console.error('📝 주문 생성 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '주문 생성 실패'
+    });
+  }
+});
+
+// 🔧 주문 내역 조회 API
+router.get('/orders', async (req, res) => {
+  try {
+    const { symbol, status } = req.query;
+    console.log('📋 주문 내역 조회 요청:', { symbol, status });
+    
+    const dummyOrders = [
+      {
+        id:
