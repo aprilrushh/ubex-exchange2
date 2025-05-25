@@ -56,8 +56,9 @@ const DepositForm = () => {
     setSaving(true);
     
     try {
-      // 로그인 상태 확인
       const token = localStorage.getItem('token');
+      console.log('🔑 사용 중인 토큰:', token ? '존재함' : '없음');
+      
       if (!token) {
         alert('로그인이 필요합니다.');
         window.location.href = '/login';
@@ -70,7 +71,6 @@ const DepositForm = () => {
         return;
       }
       
-      // 서버에 저장
       const response = await fetch(`${API_BASE_URL}/api/v1/wallet/deposit-address/ETH`, {
         method: 'POST',
         headers: { 
@@ -80,30 +80,29 @@ const DepositForm = () => {
         body: JSON.stringify({ address: depositAddress })
       });
       
+      console.log('📡 API 응답 상태:', response.status);
+      
+      if (response.status === 401) {
+        console.log('❌ 인증 실패 - 하지만 로그아웃하지 않음');
+        alert('인증이 만료되었습니다. 다시 로그인해주세요.');
+        return; // 로그아웃하지 말고 여기서 중단
+      }
+      
       const data = await response.json();
       
       if (response.ok) {
+        console.log('✅ 저장 성공:', data);
         setSavedAddress(depositAddress);
         setDepositAddress(''); // 입력창 초기화
         alert('ETH 입금 주소가 등록되었습니다!');
       } else {
-        if (response.status === 401) {
-          if (data.message === '토큰이 만료되었습니다.') {
-            alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-          } else {
-            alert('인증에 실패했습니다. 다시 로그인해주세요.');
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-          }
-        } else {
-          alert(data.message || '저장에 실패했습니다.');
-        }
+        console.log('❌ 저장 실패:', data);
+        alert('저장에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
       }
     } catch (error) {
-      console.error('주소 저장 오류:', error);
-      alert('저장 중 오류가 발생했습니다.');
+      console.error('💥 API 호출 오류:', error);
+      // 여기서 자동 로그아웃하지 말고 에러만 표시
+      alert('네트워크 오류가 발생했습니다.');
     } finally {
       setSaving(false);
     }
