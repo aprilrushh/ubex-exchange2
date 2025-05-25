@@ -16,22 +16,40 @@ module.exports.startListening = () => {
     
     try {
       const block = await web3.eth.getBlock(header.number, true);
+      console.log(`[BlockListener] New block received: ${block.number}`);
+      
       for (const tx of block.transactions || []) {
         const wallet = await db.Wallet.findOne({ where: { address: tx.to } });
         if (wallet) {
+          const amount = web3.utils.fromWei(tx.value, 'ether');
+          console.log(`[Deposit] Found transaction to wallet ${tx.to}: ${amount} ETH`);
+          
           await db.Deposit.create({
             wallet_id: wallet.id,
             tx_hash: tx.hash,
-            amount: web3.utils.fromWei(tx.value, 'ether'),
-            confirmed: false
+            amount: amount,
+            confirmed: false,
+            block_number: block.number,
+            from_address: tx.from,
+            to_address: tx.to
           });
-          console.log(`[Deposit] ${tx.to} ← ${tx.hash}`);
+          
+          console.log(`[Deposit] Created deposit record for tx ${tx.hash}`);
         }
       }
     } catch (error) {
-      console.error('Error processing block:', error);
+      console.error('[BlockListener] Error processing block:', error);
     }
   })
-  .on('connected', subId => console.log(`[BlockListener] Subscribed: ${subId}`))
-  .on('error', error => console.error('[BlockListener] Subscription error:', error));
+  .on('connected', subId => {
+    console.log(`[BlockListener] Successfully subscribed to new blocks: ${subId}`);
+  })
+  .on('error', error => {
+    console.error('[BlockListener] Subscription error:', error);
+    // 재연결 로직 추가
+    setTimeout(() => {
+      console.log('[BlockListener] Attempting to reconnect...');
+      startListening();
+    }, 5000);
+  });
 };

@@ -85,8 +85,15 @@ class WebSocketService {
       this.io.on('connection', (socket) => {
         console.log(`[BE WS] 새 클라이언트 연결 성공: ${socket.id}, 사용자 ID: ${socket.user?.userId}`);
         
-        socket.on('disconnect', (reason) => {
-          console.log(`[BE WS] 클라이언트 연결 해제: ${socket.id}, 이유: ${reason}`);
+        // 블록 리스너 이벤트 구독
+        socket.on('subscribeBlocks', () => {
+          console.log(`[BE WS] 클라이언트 ${socket.id}가 블록 이벤트 구독`);
+          socket.join('blocks');
+        });
+
+        socket.on('unsubscribeBlocks', () => {
+          console.log(`[BE WS] 클라이언트 ${socket.id}가 블록 이벤트 구독 해지`);
+          socket.leave('blocks');
         });
 
         socket.on('getCandles', async ({ symbol, interval }) => {
@@ -138,6 +145,10 @@ class WebSocketService {
         socket.on('error', (error) => {
           console.error(`[BE WS] 소켓 오류 (ID: ${socket.id}):`, error);
         });
+
+        socket.on('disconnect', (reason) => {
+          console.log(`[BE WS] 클라이언트 연결 해제: ${socket.id}, 이유: ${reason}`);
+        });
       });
 
       this.io.engine.on("connection_error", (err) => {
@@ -150,6 +161,18 @@ class WebSocketService {
           this.io.emit('marketDataUpdate', marketData);
         }
       }, 2000);
+
+      // 블록 리스너 이벤트를 WebSocket 클라이언트에 전달하는 함수
+      this.emitBlockEvent = (eventType, data) => {
+        if (this.io) {
+          this.io.to('blocks').emit('blockEvent', {
+            type: eventType,
+            data: data,
+            timestamp: new Date().toISOString()
+          });
+        }
+      };
+
       return this.io;
     } catch (error) {
       console.error('[BE WS] Socket.IO 서버 초기화 중 오류:', error);
