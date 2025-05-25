@@ -2,7 +2,7 @@
 const jwt = require('jsonwebtoken');
 
 // JWT 시크릿 키 (실제 환경에서는 환경변수 사용)
-const JWT_SECRET = process.env.JWT_SECRET || 57afddace4b22b4f8ef0cd5c34253c649d0dbf1bc55fad9fca68cd447b7ff520984b8e923d559e3176e5c3dfa05297db57b8c4b819a10dbfa16a1c861f7c6f6f;
+const JWT_SECRET = process.env.JWT_SECRET || '57afddace4b22b4f8ef0cd5c34253c649d0dbf1bc55fad9fca68cd447b7ff520984b8e923d559e3176e5c3dfa05297db57b8c4b819a10dbfa16a1c861f7c6f6f';
 
 // 🔐 필수 인증 미들웨어
 const authMiddleware = (req, res, next) => {

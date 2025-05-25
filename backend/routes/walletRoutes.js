@@ -251,78 +251,22 @@ router.get('/deposits', optionalAuth, async (req, res) => {
   }
 });
 
-// 🔧 화이트리스트 조회 API (코인별) - 프론트엔드 호환
+// 🔧 화이트리스트 주소 조회 API (코인별)
 router.get('/whitelist-addresses/:coin', optionalAuth, async (req, res) => {
   try {
     const { coin } = req.params;
-    console.log('📝 화이트리스트 조회 요청:', coin);
+    console.log('📋 화이트리스트 주소 조회:', coin);
     
-    const userId = req.user?.id || 'default';
-    
-    // 임시 더미 데이터 (저장된 입금 주소 포함)
-    const whitelist = [];
-    
-    // 저장된 입금 주소가 있으면 화이트리스트에 추가
-    const depositAddress = global.depositAddresses?.[userId];
-    if (depositAddress && depositAddress.coin.toUpperCase() === coin.toUpperCase()) {
-      whitelist.push({
+    // 임시 더미 데이터
+    const whitelist = [
+      {
         id: 1,
-        address: depositAddress.address,
-        label: '내 입금 주소',
-        coin: depositAddress.coin,
-        createdAt: depositAddress.createdAt,
-        verified: true
-      });
-    }
-    
-    // 추가 더미 데이터
-    if (coin.toUpperCase() === 'ETH') {
-      whitelist.push({
-        id: 2,
-        address: '0x742d35Cc7B6C2158532e3B8b7F9ea02E29a2D5F6',
-        label: '예시 주소 1',
-        coin: 'ETH',
-        createdAt: new Date().toISOString(),
-        verified: false
-      });
-    }
-    
-    res.json({
-      success: true,
-      data: whitelist,
-      total: whitelist.length,
-      coin: coin.toUpperCase()
-    });
-    
-  } catch (error) {
-    console.error('📝 화이트리스트 조회 오류:', error);
-    res.status(500).json({
-      success: false,
-      error: '화이트리스트 조회 실패'
-    });
-  }
-});
-
-// 🔧 화이트리스트 조회 API (일반) - 기존 호환성
-router.get('/whitelist', optionalAuth, async (req, res) => {
-  try {
-    console.log('📝 화이트리스트 조회 요청 (일반)');
-    
-    const userId = req.user?.id || 'default';
-    const whitelist = [];
-    
-    // 저장된 입금 주소가 있으면 포함
-    const depositAddress = global.depositAddresses?.[userId];
-    if (depositAddress) {
-      whitelist.push({
-        id: 1,
-        address: depositAddress.address,
-        label: '내 입금 주소',
-        coin: depositAddress.coin,
-        createdAt: depositAddress.createdAt,
-        verified: true
-      });
-    }
+        address: '0x1234567890abcdef1234567890abcdef12345678',
+        coin: coin.toUpperCase(),
+        label: 'My Wallet',
+        createdAt: new Date().toISOString()
+      }
+    ];
     
     res.json({
       success: true,
@@ -330,10 +274,74 @@ router.get('/whitelist', optionalAuth, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('📝 화이트리스트 조회 오류:', error);
+    console.error('📋 화이트리스트 조회 오류:', error);
     res.status(500).json({
       success: false,
       error: '화이트리스트 조회 실패'
+    });
+  }
+});
+
+// 🔧 화이트리스트 주소 추가 API
+router.post('/whitelist-address', optionalAuth, async (req, res) => {
+  try {
+    const { address, coin, label } = req.body;
+    console.log('📋 화이트리스트 주소 추가:', { address, coin, label });
+    
+    if (!address || !coin) {
+      return res.status(400).json({
+        success: false,
+        error: '주소와 코인이 필요합니다'
+      });
+    }
+    
+    // 주소 형식 검증
+    if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+      return res.status(400).json({
+        success: false,
+        error: '유효하지 않은 주소입니다'
+      });
+    }
+    
+    // 임시: 성공 응답
+    res.json({
+      success: true,
+      message: '화이트리스트 주소가 추가되었습니다',
+      data: {
+        id: Date.now(),
+        address,
+        coin: coin.toUpperCase(),
+        label: label || 'My Wallet',
+        createdAt: new Date().toISOString()
+      }
+    });
+    
+  } catch (error) {
+    console.error('📋 화이트리스트 추가 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '화이트리스트 추가 실패'
+    });
+  }
+});
+
+// 🔧 화이트리스트 주소 삭제 API
+router.delete('/whitelist-address/:id', optionalAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('📋 화이트리스트 주소 삭제:', id);
+    
+    // 임시: 성공 응답
+    res.json({
+      success: true,
+      message: '화이트리스트 주소가 삭제되었습니다'
+    });
+    
+  } catch (error) {
+    console.error('📋 화이트리스트 삭제 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '화이트리스트 삭제 실패'
     });
   }
 });
@@ -421,133 +429,3 @@ router.post('/withdraw', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
-// 🚨 누락된 API: 화이트리스트 주소 추가 API
-// walletRoutes.js의 module.exports = router; 바로 위에 이 코드를 추가하세요
-
-// 🔧 화이트리스트 주소 추가 API
-router.post('/whitelist-address', optionalAuth, async (req, res) => {
-  try {
-    console.log('📝 화이트리스트 주소 추가 요청:', req.body);
-    const { coin, address, label } = req.body;
-    
-    // 입력 검증
-    if (!coin || !address || !label) {
-      return res.status(400).json({
-        success: false,
-        error: '코인, 주소, 라벨이 모두 필요합니다'
-      });
-    }
-    
-    // 주소 형식 검증
-    let isValidAddress = false;
-    if (coin.toUpperCase() === 'ETH') {
-      // Ethereum 주소 검증
-      isValidAddress = /^0x[a-fA-F0-9]{40}$/.test(address);
-    } else if (coin.toUpperCase() === 'BTC') {
-      // Bitcoin 주소 검증 (간단한 형태)
-      isValidAddress = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address) || 
-                     /^bc1[a-z0-9]{39,59}$/.test(address);
-    } else {
-      // 기타 코인은 기본 검증
-      isValidAddress = address.length > 10;
-    }
-    
-    if (!isValidAddress) {
-      return res.status(400).json({
-        success: false,
-        error: `유효하지 않은 ${coin.toUpperCase()} 주소입니다`
-      });
-    }
-    
-    const userId = req.user?.id || 'default';
-    
-    // 임시: 메모리에 저장 (나중에 DB로 변경)
-    global.whitelistAddresses = global.whitelistAddresses || {};
-    global.whitelistAddresses[userId] = global.whitelistAddresses[userId] || [];
-    
-    // 중복 주소 확인
-    const existingAddress = global.whitelistAddresses[userId].find(
-      item => item.address.toLowerCase() === address.toLowerCase() && 
-              item.coin.toUpperCase() === coin.toUpperCase()
-    );
-    
-    if (existingAddress) {
-      return res.status(400).json({
-        success: false,
-        error: '이미 등록된 주소입니다'
-      });
-    }
-    
-    // 새 화이트리스트 주소 추가
-    const newWhitelistItem = {
-      id: Date.now(), // 임시 ID
-      address,
-      label,
-      coin: coin.toUpperCase(),
-      verified: false, // 초기에는 미검증
-      createdAt: new Date().toISOString(),
-      userId
-    };
-    
-    global.whitelistAddresses[userId].push(newWhitelistItem);
-    
-    console.log('📝 화이트리스트 주소 추가 완료:', newWhitelistItem);
-    console.log('📝 현재 화이트리스트:', global.whitelistAddresses[userId]);
-    
-    res.json({
-      success: true,
-      message: '화이트리스트 주소가 성공적으로 추가되었습니다',
-      data: newWhitelistItem
-    });
-    
-  } catch (error) {
-    console.error('📝 화이트리스트 주소 추가 오류:', error);
-    res.status(500).json({
-      success: false,
-      error: '화이트리스트 주소 추가 실패'
-    });
-  }
-});
-
-// 🔧 화이트리스트 주소 삭제 API (보너스)
-router.delete('/whitelist-address/:id', optionalAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user?.id || 'default';
-    
-    console.log('📝 화이트리스트 주소 삭제 요청:', { id, userId });
-    
-    if (!global.whitelistAddresses?.[userId]) {
-      return res.status(404).json({
-        success: false,
-        error: '화이트리스트가 없습니다'
-      });
-    }
-    
-    const initialLength = global.whitelistAddresses[userId].length;
-    global.whitelistAddresses[userId] = global.whitelistAddresses[userId].filter(
-      item => item.id !== parseInt(id)
-    );
-    
-    if (global.whitelistAddresses[userId].length === initialLength) {
-      return res.status(404).json({
-        success: false,
-        error: '삭제할 주소를 찾을 수 없습니다'
-      });
-    }
-    
-    console.log('📝 화이트리스트 주소 삭제 완료');
-    
-    res.json({
-      success: true,
-      message: '화이트리스트 주소가 삭제되었습니다'
-    });
-    
-  } catch (error) {
-    console.error('📝 화이트리스트 주소 삭제 오류:', error);
-    res.status(500).json({
-      success: false,
-      error: '화이트리스트 주소 삭제 실패'
-    });
-  }
-});
