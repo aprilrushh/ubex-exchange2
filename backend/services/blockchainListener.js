@@ -5,7 +5,7 @@ class BlockchainListener {
   constructor() {
     this.provider = null;
     this.isConnected = false;
-    this._isListening = false; // 🔧 private 속성으로 변경
+    this._isListening = false;
     this.watchedAddresses = new Set();
   }
 
@@ -15,7 +15,10 @@ class BlockchainListener {
       
       // 환경변수 확인
       if (!process.env.ETHEREUM_RPC_URL) {
-        throw new Error('ETHEREUM_RPC_URL이 설정되지 않았습니다');
+        console.log('[BE BlockListener] ETHEREUM_RPC_URL이 설정되지 않았습니다. 개발 모드로 실행됩니다.');
+        this.isConnected = false;
+        this._isListening = false;
+        return true;
       }
       
       this.provider = new ethers.JsonRpcProvider(process.env.ETHEREUM_RPC_URL);
@@ -38,7 +41,7 @@ class BlockchainListener {
       this._isListening = false;
       
       // 초기화 실패해도 서버는 계속 실행
-      return false;
+      return true;
     }
   }
 
@@ -201,7 +204,7 @@ class BlockchainListener {
 
   // 🔧 연결 상태 확인 (getter로 수정)
   get isListening() {
-    return this._isListening && this.isConnected;
+    return this._isListening;
   }
 
   // 🔧 상태 정보 반환
@@ -255,5 +258,4 @@ class BlockchainListener {
 // 🔧 싱글톤 인스턴스 생성
 const blockchainListener = new BlockchainListener();
 
-module.exports = blockchainListener;
 module.exports = blockchainListener;
