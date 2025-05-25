@@ -68,7 +68,7 @@ let userWallets = {
 
 
   // 입금 주소 조회 로직
-exports.getDepositAddress = async (req, res) => {
+module.exports.getDepositAddress = async (req, res) => {
     try {
       const { coin } = req.params;
       const coinSymbol = coin.toUpperCase();
@@ -109,7 +109,7 @@ exports.getDepositAddress = async (req, res) => {
   };
 
 // 사용자가 입금 주소를 수동으로 지정
-exports.setDepositAddress = async (req, res) => {
+module.exports.setDepositAddress = async (req, res) => {
   try {
     const { coin } = req.params;
     const { address } = req.body;
@@ -158,7 +158,7 @@ exports.setDepositAddress = async (req, res) => {
 };
   
   // 출금 요청 로직
-  exports.requestWithdrawal = async (req, res) => {
+  module.exports.requestWithdrawal = async (req, res) => {
     try {
       const { coin, amount, address } = req.body; // coin은 coinSymbol과 동일하게 취급
       const userId = req.user.id;
@@ -270,7 +270,7 @@ exports.setDepositAddress = async (req, res) => {
   };
   
   // 입금 내역 조회 로직
-  exports.getDeposits = async (req, res) => {
+  module.exports.getDeposits = async (req, res) => {
     try {
       const userId = req.user.id;
       // const { coin, startDate, endDate, page = 1, limit = 20 } = req.query; // 페이징 및 필터링은 추후 구현
@@ -300,7 +300,7 @@ exports.setDepositAddress = async (req, res) => {
   };
   
   // 출금 내역 조회 로직
-  exports.getWithdrawals = async (req, res) => {
+  module.exports.getWithdrawals = async (req, res) => {
     try {
       const userId = req.user.id;
       // const { coin, startDate, endDate, page = 1, limit = 20 } = req.query; // 페이징 및 필터링은 추후 구현
@@ -330,7 +330,7 @@ exports.setDepositAddress = async (req, res) => {
   };
   
   // 특정 코인 잔액 조회 로직
-  exports.getCoinBalance = async (req, res) => {
+  module.exports.getCoinBalance = async (req, res) => {
     try {
       const { coin } = req.params;
       const userId = req.user.id;
@@ -361,7 +361,7 @@ exports.setDepositAddress = async (req, res) => {
   };
   
   // 전체 사용자 잔액 조회 로직 (이전 버전과의 호환성 또는 요약용)
-exports.getUserBalances = async (req, res) => {
+module.exports.getUserBalances = async (req, res) => {
     const userId = req.user.id;
     const currentPort = req.app.get('port') || process.env.PORT || 3035;
   
@@ -383,7 +383,7 @@ exports.getUserBalances = async (req, res) => {
   };
 
   // 화이트리스트 주소 목록 조회
-  exports.listWhitelist = async (req, res) => {
+  module.exports.listWhitelist = async (req, res) => {
     try {
       const { coin } = req.params;
       const userId = req.user.id;
@@ -409,7 +409,7 @@ exports.getUserBalances = async (req, res) => {
   };
 
   // 화이트리스트 주소 추가
-  exports.addWhitelist = async (req, res) => {
+  module.exports.addWhitelist = async (req, res) => {
     try {
       const { coin, address, label } = req.body;
       const userId = req.user.id;
@@ -453,7 +453,7 @@ exports.getUserBalances = async (req, res) => {
   };
 
   // 화이트리스트 주소 삭제
-  exports.deleteWhitelist = async (req, res) => {
+  module.exports.deleteWhitelist = async (req, res) => {
     try {
       const { id } = req.params;
       const userId = req.user.id;
@@ -499,7 +499,7 @@ exports.getUserBalances = async (req, res) => {
   };
 
   // 화이트리스트 주소 확인
-exports.confirmWhitelistAddress = async (req, res) => {
+module.exports.confirmWhitelistAddress = async (req, res) => {
     try {
       const { token } = req.body;
       const record = await db.WhitelistConfirmationToken.findOne({ where: { token, used: false } });
