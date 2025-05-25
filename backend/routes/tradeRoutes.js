@@ -244,4 +244,49 @@ router.get('/orders', async (req, res) => {
     
     const dummyOrders = [
       {
-        id:
+        id: 'order_1',
+        symbol: symbol || 'BTC/USDT',
+        side: 'buy',
+        type: 'limit',
+        amount: '0.001',
+        price: '50000.00',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 3600000).toISOString()
+      },
+      {
+        id: 'order_2',
+        symbol: symbol || 'BTC/USDT',
+        side: 'sell',
+        type: 'market',
+        amount: '0.002',
+        price: '시장가',
+        status: 'pending',
+        createdAt: new Date(Date.now() - 1800000).toISOString()
+      }
+    ];
+    
+    // 필터링
+    let filteredOrders = dummyOrders;
+    if (symbol) {
+      filteredOrders = filteredOrders.filter(order => order.symbol === symbol);
+    }
+    if (status) {
+      filteredOrders = filteredOrders.filter(order => order.status === status);
+    }
+    
+    res.json({
+      success: true,
+      data: filteredOrders,
+      total: filteredOrders.length
+    });
+    
+  } catch (error) {
+    console.error('📋 주문 내역 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '주문 내역 조회 실패'
+    });
+  }
+});
+
+module.exports = router;
