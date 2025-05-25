@@ -49,105 +49,30 @@ class WebSocketService {
     }
     console.log('[BE WS] initWebSocket 메소드 실행됨');
     try {
-        this.io = socketIo(httpServerInstance, {
+      this.io = socketIo(httpServerInstance, {
         cors: {
-          origin: ["http://localhost:3000"],
-          methods: ["GET", "POST"],
-          credentials: true
-        },
-        transports: ['websocket', 'polling'],
-        allowEIO3: true,
-        pingTimeout: 60000,
-        pingInterval: 25000
+          origin: '*',
+          methods: ['GET', 'POST']
+        }
       });
 
       console.log('[BE WS] Socket.IO 서버 초기화 완료. 클라이언트 연결 대기 중...');
 
-      this.io.use((socket, next) => {
-        const token = socket.handshake.auth.token;
-        
-        if (!token) {
-          console.log('[BE WS] 토큰 없음 - 비인증 연결 허용');
-          return next();
-        }
-
-        try {
-          const decoded = jwt.verify(token, jwtConfig.secret);
-          socket.user = decoded;
-          console.log('[BE WS] 토큰 검증 성공:', decoded);
-          next();
-        } catch (error) {
-          console.error('[BE WS] 토큰 검증 실패:', error);
-          return next(new Error('Authentication error'));
-        }
-      });
-
       this.io.on('connection', (socket) => {
-        console.log(`[BE WS] 새 클라이언트 연결 성공: ${socket.id}, 사용자 ID: ${socket.user?.userId}`);
+        console.log('[WS] Client connected:', socket.id);
         
-        // 블록 리스너 이벤트 구독
-        socket.on('subscribeBlocks', () => {
-          console.log(`[BE WS] 클라이언트 ${socket.id}가 블록 이벤트 구독`);
-          socket.join('blocks');
+        socket.on('subscribe', (data) => {
+          console.log('[WS] Subscribe request:', data);
+          socket.join(data.channel);
         });
 
-        socket.on('unsubscribeBlocks', () => {
-          console.log(`[BE WS] 클라이언트 ${socket.id}가 블록 이벤트 구독 해지`);
-          socket.leave('blocks');
+        socket.on('unsubscribe', (data) => {
+          console.log('[WS] Unsubscribe request:', data);
+          socket.leave(data.channel);
         });
 
-        socket.on('getCandles', async ({ symbol, interval }) => {
-          try {
-            const intervalMs = INTERVAL_MS[interval] || INTERVAL_MS['1m'];
-            const endTime = Date.now();
-            const startTime = endTime - intervalMs * 50;
-            const candles = await this.marketDataService.getCandlestickData(
-              symbol,
-              interval,
-              startTime,
-              endTime
-            );
-            socket.emit('candles', candles);
-          } catch (err) {
-            console.error('[BE WS] getCandles error:', err);
-            socket.emit('candles', []);
-          }
-        });
-
-        socket.on('subscribe', (payload) => {
-          const channel = typeof payload === 'string' ? payload : payload.channel;
-          if (!channel) return;
-          console.log(`[BE WS] 클라이언트 ${socket.id}가 ${channel} 구독 요청`);
-          socket.join(channel);
-
-          const parsed = this._parseCandlestickChannel(channel);
-          if (parsed && !this.candlestickIntervals[channel]) {
-            this._startCandlestickUpdates(channel, parsed.symbol, parsed.interval);
-          }
-        });
-
-        socket.on('unsubscribe', (payload) => {
-          const channel = typeof payload === 'string' ? payload : payload.channel;
-          if (!channel) return;
-          console.log(`[BE WS] 클라이언트 ${socket.id}가 ${channel} 구독 해지 요청`);
-          socket.leave(channel);
-
-          const room = this.io.sockets.adapter.rooms.get(channel);
-          if (!room) {
-            const parsed = this._parseCandlestickChannel(channel);
-            if (parsed && this.candlestickIntervals[channel]) {
-              clearInterval(this.candlestickIntervals[channel]);
-              delete this.candlestickIntervals[channel];
-            }
-          }
-        });
-
-        socket.on('error', (error) => {
-          console.error(`[BE WS] 소켓 오류 (ID: ${socket.id}):`, error);
-        });
-
-        socket.on('disconnect', (reason) => {
-          console.log(`[BE WS] 클라이언트 연결 해제: ${socket.id}, 이유: ${reason}`);
+        socket.on('disconnect', () => {
+          console.log('[WS] Client disconnected:', socket.id);
         });
       });
 
