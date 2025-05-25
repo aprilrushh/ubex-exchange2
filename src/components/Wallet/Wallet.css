@@ -295,31 +295,234 @@
 }
 
 /* Wallet.css */
-.deposit-form {
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
-  background: #ffffff;
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.success-alert {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  color: #155724;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+  border-left: 5px solid #28a745;
+}
+
+.form-section {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.form-section h3 {
+  margin-bottom: 15px;
+  color: #495057;
+}
+
+.input-group {
+  margin: 15px 0;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.btn {
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+}
+
+.btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn.copied {
+  background: #28a745;
+}
+
+.notice {
+  background: #fff3cd;
+  color: #856404;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.notice h4 {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.notice ul {
+  margin-left: 20px;
+}
+
+.notice li {
+  margin: 8px 0;
+}
+
+/* 입금 내역 스타일 */
+.deposit-history {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 30px 0;
+  border: 1px solid #dee2e6;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.history-header h3 {
+  color: #495057;
+  font-size: 1.3em;
+}
+
+.refresh-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.refresh-btn:hover {
+  background: #218838;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.history-table th {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.history-table td {
+  padding: 12px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.history-table tr:hover {
+  background: #f8f9fa;
+}
+
+.status-badge {
+  padding: 4px 8px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
-.deposit-header {
+.status-confirmed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.tx-hash {
+  font-family: 'Courier New', monospace;
+  color: #007bff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tx-hash:hover {
+  text-decoration: underline;
+}
+
+.amount {
+  font-weight: bold;
+  color: #28a745;
+}
+
+.no-data {
   text-align: center;
-  margin-bottom: 2rem;
+  color: #6c757d;
+  padding: 40px;
+  font-style: italic;
 }
 
-.deposit-header h2 {
-  font-size: 2rem;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
+.view-all-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+  width: 100%;
+  transition: background 0.3s;
 }
 
-.deposit-subtitle {
-  color: #666;
-  font-size: 1.1rem;
+.view-all-btn:hover {
+  background: #5a6268;
 }
 
+/* 로딩 스피너 */
 .wallet-loading {
   display: flex;
   flex-direction: column;
@@ -343,201 +546,22 @@
   100% { transform: rotate(360deg); }
 }
 
-.wallet-error {
-  background-color: #fff2f0;
-  border: 1px solid #ffccc7;
-  color: #ff4d4f;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.address-card {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.address-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.status-badge {
-  background: #52c41a;
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.875rem;
-}
-
-.address-display {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: white;
-  padding: 1rem;
-  border-radius: 6px;
-  margin-bottom: 1.5rem;
-}
-
-.deposit-address {
-  flex: 1;
-  font-family: monospace;
-  font-size: 1rem;
-  color: #1a1a1a;
-  word-break: break-all;
-}
-
-.copy-button {
-  background: #f0f0f0;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.copy-button:hover {
-  background: #e0e0e0;
-}
-
-.copy-button.copied {
-  background: #52c41a;
-  color: white;
-}
-
-.qr-code-placeholder {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-.qr-code {
-  width: 200px;
-  height: 200px;
-  background: white;
-  border: 1px solid #e0e0e0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.qr-placeholder {
-  color: #999;
-  font-size: 0.875rem;
-}
-
-.input-card {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.input-group {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.address-input {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.address-input:focus {
-  outline: none;
-  border-color: #40a9ff;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-}
-
-.save-button {
-  background: #1890ff;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.save-button:hover {
-  background: #40a9ff;
-}
-
-.save-button:disabled {
-  background: #d9d9d9;
-  cursor: not-allowed;
-}
-
-.save-button.saving {
-  background: #1890ff;
-  opacity: 0.7;
-}
-
-.info-card {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
-}
-
-.info-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.info-list li {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  color: #666;
-}
-
-.info-list li:last-child {
-  margin-bottom: 0;
-}
-
-.info-list i {
-  color: #1890ff;
-  font-size: 1.1rem;
-}
-
-.info-list i.fa-exclamation-triangle {
-  color: #faad14;
-}
-
 /* 반응형 디자인 */
 @media (max-width: 768px) {
-  .deposit-form {
-    padding: 1rem;
+  .container {
+    padding: 15px;
   }
 
-  .input-group {
-    flex-direction: column;
+  .history-table {
+    font-size: 14px;
   }
 
-  .save-button {
-    width: 100%;
+  .history-table th,
+  .history-table td {
+    padding: 8px;
   }
 
-  .address-display {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .copy-button {
+  .btn {
     width: 100%;
   }
 }

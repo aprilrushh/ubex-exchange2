@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getDepositAddress } from '../../services/WalletService';
 import './Wallet.css';
 
-const DEPOSIT_COIN = 'ETH'; // 하드코딩 상수
+const DEPOSIT_COIN = 'ETH';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3035';
 
 const DepositForm = () => {
@@ -14,37 +14,55 @@ const DepositForm = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [deposits, setDeposits] = useState([]);
 
   useEffect(() => {
-    const fetchDepositAddress = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        console.log('🔍 입금 주소 조회 시작:', coin);
-        const response = await getDepositAddress(coin);
-        console.log('📋 조회된 입금 주소:', response);
-        
-        if (typeof response === 'string') {
-          setSavedAddress(response);
-        } else if (response && response.success) {
-          setSavedAddress(response.data.address);
-        } else if (response && response.address) {
-          setSavedAddress(response.address);
-        } else {
-          setError('입금 주소를 불러오는데 실패했습니다.');
-        }
-      } catch (error) {
-        console.error('❌ 입금 주소 조회 실패', error);
-        if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
-          setError('입금 주소를 불러오는데 실패했습니다.');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDepositAddress();
+    fetchDepositHistory();
+    // 30초마다 자동 새로고침
+    const interval = setInterval(fetchDepositHistory, 30000);
+    return () => clearInterval(interval);
   }, []);
+
+  const fetchDepositAddress = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('🔍 입금 주소 조회 시작:', coin);
+      const response = await getDepositAddress(coin);
+      console.log('📋 조회된 입금 주소:', response);
+      
+      if (typeof response === 'string') {
+        setSavedAddress(response);
+      } else if (response && response.success) {
+        setSavedAddress(response.data.address);
+      } else if (response && response.address) {
+        setSavedAddress(response.address);
+      } else {
+        setError('입금 주소를 불러오는데 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('❌ 입금 주소 조회 실패', error);
+      if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
+        setError('입금 주소를 불러오는데 실패했습니다.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDepositHistory = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/wallet/deposits?coin=ETH&limit=5`);
+      const result = await response.json();
+      
+      if (result.success) {
+        setDeposits(result.data);
+      }
+    } catch (error) {
+      console.error('입금 내역 조회 오류:', error);
+    }
+  };
 
   const handleSaveAddress = async () => {
     setSaving(true);
@@ -128,6 +146,19 @@ const DepositForm = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const openEtherscan = (txHash) => {
+    window.open(`https://sepolia.etherscan.io/tx/${txHash}`, '_blank');
+  };
+
+  const getStatusText = (status) => {
+    const statusMap = {
+      'pending': '대기중',
+      'confirmed': '확인됨',
+      'completed': '완료됨'
+    };
+    return statusMap[status] || status;
+  };
+
   if (loading) {
     return (
       <div className="wallet-loading">
@@ -138,90 +169,103 @@ const DepositForm = () => {
   }
 
   return (
-    <div className="deposit-form">
-      <div className="deposit-header">
-        <h2>{coin} 입금</h2>
-        <p className="deposit-subtitle">안전하고 빠른 입금 서비스를 이용하세요</p>
-      </div>
-
-      {error && (
-        <div className="wallet-error">
-          <i className="fas fa-exclamation-circle"></i>
-          {error}
+    <div className="container">
+      <h1>💰 ETH 입금</h1>
+      
+      {savedAddress && (
+        <div className="success-alert">
+          ✅ 주소가 저장되었습니다.
+          <br />
+          <strong>{savedAddress}</strong>
+          <button 
+            className={`btn ${copied ? 'copied' : ''}`}
+            onClick={handleCopyAddress}
+            style={{ marginLeft: '15px', padding: '5px 10px', fontSize: '12px' }}
+          >
+            {copied ? '✓ 복사됨' : '📋 복사'}
+          </button>
         </div>
       )}
       
-      {savedAddress ? (
-        <div className="saved-address-section">
-          <div className="address-card">
-            <div className="address-header">
-              <h3>등록된 입금 주소</h3>
-              <span className="status-badge">활성</span>
-            </div>
-            <div className="address-display">
-              <code className="deposit-address">{savedAddress}</code>
-              <button
-                className={`copy-button ${copied ? 'copied' : ''}`}
-                onClick={handleCopyAddress}
-                title="주소 복사"
-              >
-                {copied ? '✓ 복사됨' : '📋 복사'}
-              </button>
-            </div>
-            <div className="qr-code-placeholder">
-              <div className="qr-code">
-                {/* QR 코드 이미지가 들어갈 자리 */}
-                <div className="qr-placeholder">QR Code</div>
-              </div>
-            </div>
-          </div>
+      <div className="form-section">
+        <h3>📍 입금 주소 설정</h3>
+        <div className="input-group">
+          <input
+            type="text"
+            placeholder="ETH 주소를 입력하세요"
+            value={depositAddress}
+            onChange={(e) => setDepositAddress(e.target.value)}
+          />
         </div>
-      ) : (
-        <div className="address-input-section">
-          <div className="input-card">
-            <h3>입금 주소 설정</h3>
-            <div className="input-group">
-              <input
-                type="text"
-                placeholder="ETH 주소를 입력하세요"
-                value={depositAddress}
-                onChange={(e) => setDepositAddress(e.target.value)}
-                className="address-input"
-              />
-              <button 
-                onClick={handleSaveAddress}
-                disabled={saving || !depositAddress}
-                className={`save-button ${saving ? 'saving' : ''}`}
-              >
-                {saving ? '저장 중...' : '저장'}
-              </button>
-            </div>
-          </div>
+        <button 
+          className="btn"
+          onClick={handleSaveAddress}
+          disabled={saving || !depositAddress}
+        >
+          {saving ? '저장 중...' : '💾 저장'}
+        </button>
+      </div>
+      
+      <div className="deposit-history">
+        <div className="history-header">
+          <h3>📊 최근 입금 내역</h3>
+          <button className="refresh-btn" onClick={fetchDepositHistory}>
+            🔄 새로고침
+          </button>
         </div>
-      )}
-
-      <div className="deposit-info">
-        <div className="info-card">
-          <h3>입금 안내</h3>
-          <ul className="info-list">
-            <li>
-              <i className="fas fa-check-circle"></i>
-              <span>입금 주소는 {coin} 전용 주소입니다.</span>
-            </li>
-            <li>
-              <i className="fas fa-exclamation-triangle"></i>
-              <span>다른 코인을 이 주소로 보내면 자산이 손실될 수 있습니다.</span>
-            </li>
-            <li>
-              <i className="fas fa-clock"></i>
-              <span>입금 후 확인까지 최대 30분이 소요될 수 있습니다.</span>
-            </li>
-            <li>
-              <i className="fas fa-coins"></i>
-              <span>최소 입금 금액은 0.01 {coin}입니다.</span>
-            </li>
-          </ul>
-        </div>
+        
+        <table className="history-table">
+          <thead>
+            <tr>
+              <th>시간</th>
+              <th>금액</th>
+              <th>상태</th>
+              <th>TxHash</th>
+            </tr>
+          </thead>
+          <tbody>
+            {deposits.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="no-data">📭 입금 내역이 없습니다</td>
+              </tr>
+            ) : (
+              deposits.map((deposit) => (
+                <tr key={deposit.id}>
+                  <td>{new Date(deposit.created_at).toLocaleString('ko-KR')}</td>
+                  <td className="amount">+{deposit.amount} {deposit.coin_symbol}</td>
+                  <td>
+                    <span className={`status-badge status-${deposit.status}`}>
+                      {getStatusText(deposit.status)}
+                    </span>
+                  </td>
+                  <td 
+                    className="tx-hash" 
+                    onClick={() => openEtherscan(deposit.tx_hash)}
+                  >
+                    {deposit.tx_hash.slice(0,6)}...{deposit.tx_hash.slice(-4)}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+        
+        <button 
+          className="view-all-btn"
+          onClick={() => window.location.href = '/wallet/deposit-history'}
+        >
+          📋 전체 입금 내역 보기
+        </button>
+      </div>
+      
+      <div className="notice">
+        <h4>⚠️ 주의사항:</h4>
+        <ul>
+          <li>입금 주소는 ETH 전용 주소입니다.</li>
+          <li>다른 코인을 이 주소로 보내면 자산이 손실될 수 있습니다.</li>
+          <li>입금 후 확인까지 최대 30분이 소요될 수 있습니다.</li>
+          <li>최소 입금 금액은 0.01 ETH입니다.</li>
+        </ul>
       </div>
     </div>
   );
