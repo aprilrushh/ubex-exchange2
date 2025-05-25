@@ -1,9 +1,32 @@
 // src/services/WalletService.js
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3035';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3035';
 
-// 더미 입금 주소 생성
+// axios 인스턴스 생성
+const api = axios.create({
+  baseURL: `${API_BASE_URL}/api/v1`,
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// 요청 인터셉터 추가
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// 더미 데이터 생성 함수
 const generateDummyDepositAddress = (currency) => {
   const addresses = {
     BTC: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
@@ -25,29 +48,6 @@ const generateDummyBalance = (currency) => {
 
 // 더미 화이트리스트 주소 저장소
 let dummyWhitelistAddresses = [];
-
-const api = axios.create({
-  baseURL: `${API_URL}/api/v1`,
-  timeout: 15000,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  withCredentials: true
-});
-
-// 요청 인터셉터 추가
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 /**
  * 입금 주소 생성/조회
@@ -226,6 +226,6 @@ export const getBalance = async (currency) => {
  * 전체 잔액 조회
  */
 export async function getAllBalances() {
-  const res = await api.get('/wallet/balances');
-  return res.data.data;
+  const response = await api.get('/wallet/balances');
+  return response.data.data;
 }

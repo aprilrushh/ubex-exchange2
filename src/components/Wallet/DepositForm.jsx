@@ -4,6 +4,7 @@ import { getDepositAddress } from '../../services/WalletService';
 import './Wallet.css';
 
 const DEPOSIT_COIN = 'ETH'; // 하드코딩 상수
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3035';
 
 const DepositForm = () => {
   const coin = DEPOSIT_COIN;
@@ -70,7 +71,7 @@ const DepositForm = () => {
       }
       
       // 서버에 저장
-      const response = await fetch('http://localhost:3035/api/v1/wallet/deposit-address/ETH', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/wallet/deposit-address/ETH`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
