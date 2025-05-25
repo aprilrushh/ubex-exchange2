@@ -1,7 +1,7 @@
 // backend/routes/walletRoutes.js
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middlewares/authMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 const walletController = require('../controllers/walletController');
 const whitelistRateLimit = require('../middlewares/whitelistRateLimit');
 // const { validateWithdraw } = require('../middlewares/validation'); // 유효성 검사 미들웨어 (추후 구현 시 사용)

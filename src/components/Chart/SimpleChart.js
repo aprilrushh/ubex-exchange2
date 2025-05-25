@@ -211,6 +211,8 @@ const SimpleChart = ({
     const socket = webSocketService.connect();
     if (!socket || typeof socket !== 'object') {
       console.error('WebSocket initialization failed', socket);
+      const dummyData = generateDummyData();
+      processInitialData(dummyData);
       return;
     }
     wsRef.current = socket;
@@ -230,6 +232,9 @@ const SimpleChart = ({
     const handleDisconnect = () => {
       console.log('WebSocket 연결 끊김');
       setConnectionStatus('disconnected');
+      // 연결이 끊어졌을 때 더미 데이터로 대체
+      const dummyData = generateDummyData();
+      processInitialData(dummyData);
     };
 
     const handleError = (error) => {
@@ -248,15 +253,19 @@ const SimpleChart = ({
 
     const handleCandles = (data) => {
       if (!data || data.length === 0) {
+        console.log('캔들 데이터가 없어 더미 데이터로 대체합니다.');
         const dummyData = generateDummyData();
         processInitialData(dummyData);
       } else {
+        console.log('캔들 데이터 수신:', data.length);
         processInitialData(data);
       }
     };
 
     const handleCandlestick = (data) => {
-      updateCandle(data);
+      if (data) {
+        updateCandle(data);
+      }
     };
 
     webSocketService.on('connect', handleConnect);
@@ -277,6 +286,10 @@ const SimpleChart = ({
 
     if (socket.connected) {
       handleConnect();
+    } else {
+      // 초기 연결이 안된 경우 더미 데이터로 시작
+      const dummyData = generateDummyData();
+      processInitialData(dummyData);
     }
 
     return () => {
