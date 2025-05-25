@@ -1,251 +1,71 @@
 // AuthContext.js - JSON 파싱 오류 수정
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { login as loginService, register as registerService } from '../services/authService';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
-// 초기 상태
-const initialState = {
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  loading: false,
-  error: null
-};
-
-// 리듀서
-const authReducer = (state, action) => {
-  switch (action.type) {
-    case 'LOGIN_START':
-    case 'REGISTER_START':
-      return { ...state, loading: true, error: null };
-    case 'LOGIN_SUCCESS':
-    case 'REGISTER_SUCCESS':
-      return {
-        ...state,
-        loading: false,
-        isAuthenticated: true,
-        user: action.payload.user,
-        token: action.payload.token,
-        error: null
-      };
-    case 'LOGIN_FAILURE':
-    case 'REGISTER_FAILURE':
-      return {
-        ...state,
-        loading: false,
-        isAuthenticated: false,
-        user: null,
-        token: null,
-        error: action.payload
-      };
-    case 'LOGOUT':
-      return {
-        ...state,
-        isAuthenticated: false,
-        user: null,
-        token: null,
-        error: null
-      };
-    case 'CLEAR_ERROR':
-      return { ...state, error: null };
-    default:
-      return state;
-  }
-};
-
-// 🔧 안전한 JSON 파싱 함수
-const safeJSONParse = (value) => {
-  try {
-    // null, undefined, 빈 문자열 체크
-    if (!value || value === 'undefined' || value === 'null') {
-      return null;
-    }
-    return JSON.parse(value);
-  } catch (error) {
-    console.warn('JSON 파싱 실패:', value, error);
-    return null;
-  }
-};
-
-// 🔧 안전한 localStorage 접근 함수
-const safeGetLocalStorage = (key) => {
-  try {
-    const value = localStorage.getItem(key);
-    return safeJSONParse(value);
-  } catch (error) {
-    console.warn('localStorage 접근 실패:', key, error);
-    return null;
-  }
-};
-
-// AuthProvider 컴포넌트
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const getInitialAuthState = () => {
+    const token = localStorage.getItem('token');
+    const userString = localStorage.getItem('user');
+    
+    console.log('🔍 AuthContext 초기화 체크:', { token: !!token, userString });
+    
+    if (token && userString) {
+      try {
+        const user = JSON.parse(userString);
+        console.log('✅ 저장된 사용자 정보 복원:', user);
+        return { token, user, isAuthenticated: true };
+      } catch (error) {
+        console.error('❌ 사용자 정보 파싱 오류:', error);
+        // 파싱 오류 시 저장된 정보 제거
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return { token: null, user: null, isAuthenticated: false };
+      }
+    }
+    
+    console.log('🔓 로그인되지 않은 상태');
+    return { token: null, user: null, isAuthenticated: false };
+  };
 
-  // 컴포넌트 마운트 시 localStorage에서 인증 정보 복원
+  const [authState, setAuthState] = useState(getInitialAuthState);
+
+  // 🔧 authState 변경사항 디버깅
   useEffect(() => {
-    try {
-      console.log('🔄 AuthContext 초기화 시작');
-      
-      // 🔧 안전한 localStorage 접근
-      const savedToken = safeGetLocalStorage('token');
-      const savedUser = safeGetLocalStorage('user');
-      
-      console.log('💾 저장된 토큰:', savedToken ? '존재함' : '없음');
-      console.log('💾 저장된 사용자:', savedUser ? savedUser.email : '없음');
-      
-      if (savedToken && savedUser) {
-        dispatch({
-          type: 'LOGIN_SUCCESS',
-          payload: {
-            user: savedUser,
-            token: savedToken
-          }
-        });
-        console.log('✅ 인증 정보 복원 완료');
-      } else {
-        console.log('ℹ️ 저장된 인증 정보 없음');
-      }
-    } catch (error) {
-      console.error('❌ AuthContext 초기화 오류:', error);
-      // 오류 발생 시 localStorage 정리
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    }
-  }, []);
+    console.log('🔄 AuthState 변경됨:', {
+      isAuthenticated: authState.isAuthenticated,
+      hasUser: !!authState.user,
+      userInfo: authState.user
+    });
+  }, [authState]);
 
-  // 로그인 함수
-  const login = async (credentials) => {
-    try {
-      console.log('[AuthContext] 로그인 시도:', credentials);
-      dispatch({ type: 'LOGIN_START' });
-
-      const response = await loginService(credentials);
-      console.log('[AuthContext] 로그인 응답 받음:', response);
-      
-      // �� 응답 구조 확인 및 안전한 처리
-      if (response && response.success && response.data) {
-        const { user, token } = response.data;
-        
-        // 🔧 user와 token 존재 확인
-        if (user && token) {
-          console.log('[AuthContext] 사용자 정보:', user);
-          console.log('[AuthContext] 토큰:', token);
-          
-          // localStorage에 안전하게 저장
-          try {
-            localStorage.setItem('token', JSON.stringify(token));
-            localStorage.setItem('user', JSON.stringify(user));
-            console.log('[AuthContext] localStorage 저장 완료');
-          } catch (storageError) {
-            console.warn('[AuthContext] localStorage 저장 실패:', storageError);
-          }
-
-          dispatch({
-            type: 'LOGIN_SUCCESS',
-            payload: { user, token }
-          });
-
-          console.log('[AuthContext] 로그인 성공:', user.email || user.name || 'unknown');
-          return { success: true };
-        } else {
-          console.error('[AuthContext] 응답에 user 또는 token이 없음:', response);
-          throw new Error('서버 응답에 사용자 정보가 없습니다');
-        }
-      } else {
-        console.error('[AuthContext] 잘못된 응답 구조:', response);
-        throw new Error(response?.message || 'Login failed');
-      }
-    } catch (error) {
-      console.error('[AuthContext] 로그인 실패:', error);
-      console.error('[AuthContext] 오류 상세:', error.message);
-      
-      dispatch({
-        type: 'LOGIN_FAILURE',
-        payload: error.message
-      });
-      return { success: false, error: error.message };
-    }
+  const login = (token, user) => {
+    console.log('🔐 로그인 시도:', { token: !!token, user });
+    
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    
+    const newAuthState = { token, user, isAuthenticated: true };
+    setAuthState(newAuthState);
+    
+    console.log('✅ 로그인 완료, 새 상태:', newAuthState);
   };
 
-  // 회원가입 함수
-  const register = async (userData) => {
-    try {
-      console.log('[AuthContext] 회원가입 시도:', userData);
-      dispatch({ type: 'REGISTER_START' });
-
-      const response = await registerService(userData);
-      console.log('[AuthContext] 회원가입 응답 받음:', response);
-      
-      // 🔧 응답 구조 확인 및 안전한 처리
-      if (response && response.success && response.data) {
-        const { user, token } = response.data;
-        
-        // 🔧 user와 token 존재 확인
-        if (user && token) {
-          console.log('[AuthContext] 새 사용자 정보:', user);
-          
-          // localStorage에 안전하게 저장
-          try {
-            localStorage.setItem('token', JSON.stringify(token));
-            localStorage.setItem('user', JSON.stringify(user));
-            console.log('[AuthContext] 회원가입 localStorage 저장 완료');
-          } catch (storageError) {
-            console.warn('[AuthContext] localStorage 저장 실패:', storageError);
-          }
-
-          dispatch({
-            type: 'REGISTER_SUCCESS',
-            payload: { user, token }
-          });
-
-          console.log('[AuthContext] 회원가입 성공:', user.email || user.name || 'unknown');
-          return { success: true };
-        } else {
-          console.error('[AuthContext] 회원가입 응답에 user 또는 token이 없음:', response);
-          throw new Error('서버 응답에 사용자 정보가 없습니다');
-        }
-      } else {
-        console.error('[AuthContext] 잘못된 회원가입 응답 구조:', response);
-        throw new Error(response?.message || 'Registration failed');
-      }
-    } catch (error) {
-      console.error('[AuthContext] 회원가입 실패:', error);
-      
-      dispatch({
-        type: 'REGISTER_FAILURE',
-        payload: error.message
-      });
-      return { success: false, error: error.message };
-    }
-  };
-
-  // 로그아웃 함수
   const logout = () => {
-    try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      dispatch({ type: 'LOGOUT' });
-      console.log('[AuthContext] 로그아웃 완료');
-    } catch (error) {
-      console.error('[AuthContext] 로그아웃 오류:', error);
-    }
+    console.log('🚪 로그아웃 시작');
+    
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
+    const newAuthState = { token: null, user: null, isAuthenticated: false };
+    setAuthState(newAuthState);
+    
+    console.log('✅ 로그아웃 완료, 새 상태:', newAuthState);
   };
 
-  // 오류 클리어 함수
-  const clearError = () => {
-    dispatch({ type: 'CLEAR_ERROR' });
-  };
-
-  const value = {
-    ...state,
-    login,
-    register,
-    logout,
-    clearError
-  };
+  const value = { authState, login, logout };
 
   return (
     <AuthContext.Provider value={value}>
@@ -254,10 +74,9 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// useAuth 훅
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
