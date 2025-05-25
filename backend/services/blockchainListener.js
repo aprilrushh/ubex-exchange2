@@ -103,8 +103,8 @@ class BlockchainListener {
       console.log(`[BE BlockListener] ${this.reconnectDelay/1000}초 후 재연결 시도 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
       
       setTimeout(() => {
-        blockchainListener.stopListening();
-        blockchainListener.startListening();
+        this.stopListening();
+        this.startListening();
       }, this.reconnectDelay);
     } else {
       console.error('[BE BlockListener] 최대 재연결 시도 횟수를 초과했습니다.');
