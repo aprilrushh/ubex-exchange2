@@ -182,3 +182,48 @@ router.post('/deposit-address', optionalAuth, async (req, res) => {
 });
 
 // 🔧 화이트리스트 조회 API (코인별) - 프론트엔드 호환
+router.get('/whitelist/:coin', optionalAuth, async (req, res) => {
+  try {
+    const { coin } = req.params;
+    console.log('🔒 화이트리스트 조회 요청:', coin);
+    
+    const userId = req.user?.id || 'default';
+    const whitelist = global.whitelist?.[userId]?.[coin] || [];
+    
+    res.json({
+      success: true,
+      data: whitelist
+    });
+    
+  } catch (error) {
+    console.error('🔒 화이트리스트 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '화이트리스트 조회 실패'
+    });
+  }
+});
+
+// 🔧 화이트리스트 조회 API (일반) - 기존 호환성
+router.get('/whitelist', optionalAuth, async (req, res) => {
+  try {
+    console.log('🔒 화이트리스트 조회 요청 (일반)');
+    
+    const userId = req.user?.id || 'default';
+    const whitelist = global.whitelist?.[userId] || {};
+    
+    res.json({
+      success: true,
+      data: whitelist
+    });
+    
+  } catch (error) {
+    console.error('🔒 화이트리스트 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '화이트리스트 조회 실패'
+    });
+  }
+});
+
+module.exports = router;

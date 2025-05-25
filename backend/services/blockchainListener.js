@@ -258,7 +258,7 @@ class BlockchainListener {
 
   // 🔧 상태 확인
   get isListening() {
-    return this._isListening && this.isConnected;
+    return this._isListening;
   }
 
   getStatus() {
@@ -286,5 +286,25 @@ class BlockchainListener {
   }
 }
 
+// 싱글톤 인스턴스 생성
 const blockchainListener = new BlockchainListener();
-module.exports = blockchainListener;
+
+// 초기화 함수
+async function startListening() {
+  try {
+    const initialized = await blockchainListener.initialize();
+    if (!initialized) {
+      console.log('[BE BlockListener] 초기화 실패 - 리스닝을 시작하지 않습니다.');
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('[BE BlockListener] 리스닝 시작 중 오류:', error);
+    return false;
+  }
+}
+
+module.exports = {
+  blockchainListener,
+  startListening
+};
