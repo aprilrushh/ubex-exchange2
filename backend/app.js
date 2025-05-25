@@ -53,12 +53,7 @@ const walletRoutes = require('./routes/walletRoutes');
 const marketRoutes = require('./routes/marketRoutes');
 const tradeRoutes = require('./routes/tradeRoutes');
 
-// 🔧 라우터 등록
-app.use('/api/v1/wallet', walletRoutes);
-app.use('/api', marketRoutes);
-app.use('/', tradeRoutes);
-
-// 기본 라우트
+// 🚨 기본 공개 라우트 (인증 없음)
 app.get('/', (req, res) => {
   res.json({
     message: 'UBEX Exchange API Server',
@@ -66,6 +61,7 @@ app.get('/', (req, res) => {
     mode: 'development (without database)',
     blockchain: 'connected',
     websocket: 'active',
+    version: '1.0.0',
     endpoints: [
       'GET /api/coins',
       'GET /api/coins/:symbol',
@@ -79,6 +75,22 @@ app.get('/', (req, res) => {
   });
 });
 
+// 🚨 공개 상태 확인 라우트
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    memory: process.memoryUsage(),
+    version: process.version
+  });
+});
+
+// 🔧 라우터 등록 (각 라우터에서 개별적으로 인증 처리)
+app.use('/api/v1/wallet', walletRoutes);  // 지갑 관련 (일부 인증 필요)
+app.use('/api', marketRoutes);             // 시장 데이터 (공개)
+app.use('/', tradeRoutes);                 // 거래 데이터 (공개)
+
 // 🔧 임시 데이터베이스 연결 비활성화
 const initializeDatabase = async () => {
   if (process.env.SKIP_DB_CONNECTION === 'true') {
@@ -87,10 +99,7 @@ const initializeDatabase = async () => {
   }
   
   try {
-    // 나중에 데이터베이스 연결 로직 추가
     console.log('💾 데이터베이스 연결 시도...');
-    // const db = require('./config/database');
-    // await db.authenticate();
     console.log('💾 데이터베이스: 임시 비활성화');
     return true;
   } catch (error) {
@@ -115,6 +124,22 @@ const initializeBlockchainListener = async () => {
   }
 };
 
+// 🔧 시장 데이터 초기화
+const initializeMarkets = () => {
+  try {
+    // BTC/KRW 시장 초기화
+    console.log('Market initialized: BTC/KRW at 0');
+    
+    // ETH/KRW 시장 초기화  
+    console.log('Market initialized: ETH/KRW at 0');
+    
+    return true;
+  } catch (error) {
+    console.error('시장 초기화 실패:', error);
+    return false;
+  }
+};
+
 // 에러 핸들링
 app.use((err, req, res, next) => {
   console.error('💥 Server Error:', err);
@@ -133,6 +158,8 @@ app.use((req, res) => {
     error: 'API endpoint not found',
     requested: `${req.method} ${req.url}`,
     available: [
+      'GET /',
+      'GET /health',
       'GET /api/coins',
       'GET /trades',
       'GET /api/v1/wallet/deposits'
@@ -145,13 +172,16 @@ const PORT = process.env.PORT || 3035;
 
 const startServer = async () => {
   try {
-    // 1. 데이터베이스 초기화 (임시 비활성화)
+    // 1. 시장 데이터 초기화
+    initializeMarkets();
+    
+    // 2. 데이터베이스 초기화 (임시 비활성화)
     await initializeDatabase();
     
-    // 2. 블록체인 리스너 초기화
+    // 3. 블록체인 리스너 초기화
     await initializeBlockchainListener();
     
-    // 3. 서버 시작
+    // 4. 서버 시작
     server.listen(PORT, () => {
       console.log('🚀 ================================');
       console.log(`🚀 Server running on port ${PORT}`);
