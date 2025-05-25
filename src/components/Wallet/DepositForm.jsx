@@ -83,9 +83,33 @@ const DepositForm = () => {
       console.log('📡 API 응답 상태:', response.status);
       
       if (response.status === 401) {
-        console.log('❌ 인증 실패 - 하지만 로그아웃하지 않음');
+        console.log('❌ 인증 실패 - 토큰 갱신 시도');
+        // 토큰 갱신 시도
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+          try {
+            const refreshResponse = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${refreshToken}`
+              }
+            });
+            
+            if (refreshResponse.ok) {
+              const { token: newToken } = await refreshResponse.json();
+              localStorage.setItem('token', newToken);
+              console.log('✅ 토큰 갱신 성공');
+              // 갱신된 토큰으로 다시 시도
+              return handleSaveAddress();
+            }
+          } catch (refreshError) {
+            console.error('💥 토큰 갱신 실패:', refreshError);
+          }
+        }
         alert('인증이 만료되었습니다. 다시 로그인해주세요.');
-        return; // 로그아웃하지 말고 여기서 중단
+        window.location.href = '/login';
+        return;
       }
       
       const data = await response.json();
@@ -101,7 +125,6 @@ const DepositForm = () => {
       }
     } catch (error) {
       console.error('💥 API 호출 오류:', error);
-      // 여기서 자동 로그아웃하지 말고 에러만 표시
       alert('네트워크 오류가 발생했습니다.');
     } finally {
       setSaving(false);
