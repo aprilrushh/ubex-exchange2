@@ -28,11 +28,15 @@ const wsService = new WebSocketService(app);
 // 서버 시작
 app.listen(port, async () => {
     console.log(`[Server] Listening on port ${port}`);
-    try {
-        await sequelize.authenticate();
-        await sequelize.sync();
-        console.log('[DB] Connected and synced');
-    } catch (error) {
-        console.error('[DB] Connection error:', error);
+    if (process.env.NODE_ENV !== 'development') {
+        try {
+            await sequelize.authenticate();
+            await sequelize.sync();
+            console.log('[DB] Connected and synced');
+        } catch (error) {
+            console.error('[DB] Connection error:', error);
+        }
+    } else {
+        console.log('🚫 데이터베이스 연결 건너뜀 (개발 모드)');
     }
 }); 
