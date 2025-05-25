@@ -142,15 +142,11 @@ const WithdrawForm = ({ coin, currency }) => {
         <AddWhitelistModal
           coin={coinSymbol}
           onClose={() => setShowModal(false)}
-          onSuccess={() => {
+          onSuccess={async () => {
             setShowModal(false);
-            // refresh list
-            (async () => {
-              const addresses = await listWhitelist(coinSymbol);
-              setWhitelist(addresses);
-              // 새 주소 추가 후에도 직접 선택하도록 초기화
-              setSelectedAddress('');
-            })();
+            const addresses = await listWhitelist(coinSymbol);
+            setWhitelist(addresses);
+            setSelectedAddress('');
           }}
         />
       )}
