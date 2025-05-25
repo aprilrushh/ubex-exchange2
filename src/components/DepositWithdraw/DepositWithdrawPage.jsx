@@ -24,7 +24,7 @@ const DepositWithdrawPage = () => {
   }, [authState.isAuthenticated]);
 
   const handleCoinSelection = (coinSymbol) => {
-    console.log('코인 선택됨:', coinSymbol);
+    console.log('🪙 코인 선택됨:', coinSymbol);
     setSelectedCoinSymbol(coinSymbol);
   };
 
@@ -44,7 +44,7 @@ const DepositWithdrawPage = () => {
         tabs={tabItems}
         activeTab={activeTab}
         onChange={(key) => {
-          console.log('탭 변경:', key);
+          console.log('📑 탭 변경:', key);
           setActiveTab(key);
         }}
       />

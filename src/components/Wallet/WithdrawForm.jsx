@@ -7,8 +7,9 @@ import {
 import AddWhitelistModal from './AddWhitelistModal.jsx';
 import './Wallet.css';
 
-const WithdrawForm = ({ coin }) => {
-  console.log('WithdrawForm mounted with coin:', coin);
+const WithdrawForm = ({ coin = 'ETH' }) => {
+  const actualCoin = 'ETH'; // 임시로 ETH 고정
+  console.log('WithdrawForm mounted with coin:', actualCoin);
   const [whitelist, setWhitelist] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [amount, setAmount] = useState('');
@@ -21,9 +22,9 @@ const WithdrawForm = ({ coin }) => {
     try {
       setLoading(true);
       setError(null);
-      console.log('화이트리스트 조회 시작:', coin);
-      const response = await listWhitelist(coin);
-      console.log('조회된 화이트리스트:', response);
+      console.log('🔍 화이트리스트 조회 시작:', actualCoin);
+      const response = await listWhitelist(actualCoin);
+      console.log('📋 조회된 화이트리스트:', response);
       if (response.success && Array.isArray(response.data)) {
         setWhitelist(response.data);
         if (response.data.length > 0) {
@@ -36,7 +37,7 @@ const WithdrawForm = ({ coin }) => {
         setSelectedAddress('');
       }
     } catch (error) {
-      console.error('화이트리스트 조회 실패', error);
+      console.error('❌ 화이트리스트 조회 실패', error);
       if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
         setError('화이트리스트를 불러오는데 실패했습니다.');
       }
@@ -45,12 +46,12 @@ const WithdrawForm = ({ coin }) => {
     } finally {
       setLoading(false);
     }
-  }, [coin]);
+  }, []);
 
   useEffect(() => {
-    console.log('WithdrawForm useEffect triggered with coin:', coin);
+    console.log('🔄 WithdrawForm useEffect triggered with coin:', actualCoin);
     fetchWhitelist();
-  }, [coin, fetchWhitelist]);
+  }, [fetchWhitelist]);
 
   const handleAddWhitelistSuccess = async () => {
     console.log('화이트리스트 주소 추가 성공, 목록 갱신 시작');
@@ -70,7 +71,7 @@ const WithdrawForm = ({ coin }) => {
       }
 
       const response = await requestWithdrawal({
-        currency: coin,
+        currency: actualCoin,
         address: selectedAddress,
         amount: parseFloat(amount)
       });
@@ -104,7 +105,7 @@ const WithdrawForm = ({ coin }) => {
 
   return (
     <div className="withdraw-form">
-      <h3>{coin} 출금</h3>
+      <h3>{actualCoin} 출금</h3>
       {error && <div className="wallet-error">{error}</div>}
       {success && (
         <div className="wallet-success">
@@ -171,7 +172,7 @@ const WithdrawForm = ({ coin }) => {
       </div>
       {showModal && (
         <AddWhitelistModal
-          coin={coin}
+          coin={actualCoin}
           onClose={() => setShowModal(false)}
           onSuccess={handleAddWhitelistSuccess}
         />
