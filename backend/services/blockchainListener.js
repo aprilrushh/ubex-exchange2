@@ -83,7 +83,7 @@ class BlockchainListener {
 
     } catch (error) {
       console.error('[BE BlockListener] 리스닝 시작 중 오류:', error);
-      this.handleError(error);
+      blockchainListener.handleError(error);
     }
   }
 
@@ -103,8 +103,8 @@ class BlockchainListener {
       console.log(`[BE BlockListener] ${this.reconnectDelay/1000}초 후 재연결 시도 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
       
       setTimeout(() => {
-        this.stopListening();
-        this.startListening();
+        blockchainListener.stopListening();
+        blockchainListener.startListening();
       }, this.reconnectDelay);
     } else {
       console.error('[BE BlockListener] 최대 재연결 시도 횟수를 초과했습니다.');
@@ -113,4 +113,5 @@ class BlockchainListener {
   }
 }
 
-module.exports = new BlockchainListener();
+const blockchainListener = new BlockchainListener();
+module.exports = blockchainListener;
