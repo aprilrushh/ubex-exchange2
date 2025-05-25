@@ -22,7 +22,7 @@ class BlockchainListener {
       }
 
       // Sepolia 테스트넷 URL 사용
-      const rpcUrl = process.env.ETHEREUM_RPC_URL || 'https://sepolia.infura.io/v3/your-project-id';
+      const rpcUrl = process.env.ETHEREUM_RPC_URL || 'https://sepolia.infura.io/v3/5265c45bc1b0428fb9ceaea55ca42706';
       this.provider = new ethers.JsonRpcProvider(rpcUrl);
       
       // 연결 테스트
