@@ -21,11 +21,53 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const whitelistRateLimit = require('../middlewares/whitelistRateLimit');
 // const { validateWithdraw } = require('../middlewares/validation'); // 유효성 검사 미들웨어 (추후 구현 시 사용)
 
+// ETH 주소 검증 함수
+function isValidEthAddress(address) {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+}
+
 // GET /api/wallet/deposit-address/:coin - 입금 주소 조회
 router.get('/deposit-address/:coin', authMiddleware, getDepositAddress);
 
 // POST /api/wallet/deposit-address/:coin - 입금 주소 수동 설정
-router.post('/deposit-address/:coin', authMiddleware, setDepositAddress);
+router.post('/deposit-address/:coin', authMiddleware, async (req, res) => {
+  try {
+    const { coin } = req.params;
+    const { address } = req.body;
+    const userId = req.user.id;
+    
+    console.log('입금 주소 저장 요청:', { coin, address, userId });
+    
+    // 주소 형식 검증
+    if (coin === 'ETH' && !isValidEthAddress(address)) {
+      return res.status(400).json({ error: '유효하지 않은 ETH 주소입니다' });
+    }
+    
+    // 데이터베이스에 저장 (또는 메모리 저장)
+    const depositAddress = {
+      userId,
+      coin,
+      address,
+      createdAt: new Date()
+    };
+    
+    // 임시로 메모리에 저장 (테스트용)
+    global.depositAddresses = global.depositAddresses || [];
+    global.depositAddresses.push(depositAddress);
+    
+    console.log('저장된 입금 주소:', depositAddress);
+    
+    res.json({ 
+      success: true, 
+      message: '입금 주소가 저장되었습니다',
+      data: depositAddress 
+    });
+    
+  } catch (error) {
+    console.error('입금 주소 저장 오류:', error);
+    res.status(500).json({ error: '서버 오류가 발생했습니다' });
+  }
+});
 
 // POST /api/wallet/withdraw - 출금 요청
 // 사용자님 코드의 validateWithdraw 미들웨어는 우선 컨트롤러 내에서 처리합니다.
@@ -59,6 +101,9 @@ router.post(
 
 // DELETE /api/v1/wallet/whitelist-address/:id - 화이트리스트 주소 삭제
 router.delete('/whitelist-address/:id', authMiddleware, deleteWhitelist);
+
+// POST /api/v1/wallet/whitelist/:id/confirm - 화이트리스트 확인
+router.post('/whitelist/:id/confirm', authMiddleware, confirmWhitelistAddress);
 
 // POST /api/v1/wallet/whitelist/:id/resend - 화이트리스트 확인 또는 재발송
 router.post('/whitelist/:id/resend', authMiddleware, resendWhitelistConfirmation);
