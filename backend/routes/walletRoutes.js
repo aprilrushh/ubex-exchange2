@@ -28,7 +28,7 @@ function isValidEthAddress(address) {
 router.get('/deposit-address/:coin', authMiddleware, getDepositAddress);
 
 // POST /api/wallet/deposit-address/:coin - 입금 주소 수동 설정
-router.post('/deposit-address/:coin', authMiddleware, setDepositAddress);
+router.post('/deposit-address/:coin', setDepositAddress);
 
 // POST /api/wallet/withdraw - 출금 요청
 // 사용자님 코드의 validateWithdraw 미들웨어는 우선 컨트롤러 내에서 처리합니다.
