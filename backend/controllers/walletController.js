@@ -113,7 +113,7 @@ exports.setDepositAddress = async (req, res) => {
   try {
     const { coin } = req.params;
     const { address } = req.body;
-    const userId = req.user.id;
+    const userId = req.user?.id || 'test-user-123'; // 안전하게 처리
     const coinSymbol = coin.toUpperCase();
     const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
