@@ -24,19 +24,13 @@ const DepositForm = () => {
         const response = await getDepositAddress(coin);
         console.log('📋 조회된 입금 주소:', response);
         
-        // 응답이 문자열인 경우 직접 사용
         if (typeof response === 'string') {
           setSavedAddress(response);
-        }
-        // 응답이 객체이고 success가 true인 경우
-        else if (response && response.success) {
+        } else if (response && response.success) {
           setSavedAddress(response.data.address);
-        }
-        // 응답이 객체이고 address가 직접 있는 경우
-        else if (response && response.address) {
+        } else if (response && response.address) {
           setSavedAddress(response.address);
-        }
-        else {
+        } else {
           setError('입금 주소를 불러오는데 실패했습니다.');
         }
       } catch (error) {
@@ -65,7 +59,6 @@ const DepositForm = () => {
         return;
       }
 
-      // ETH 주소 형식 검증
       if (!isValidEthAddress(depositAddress)) {
         alert('유효하지 않은 ETH 주소입니다.');
         return;
@@ -84,7 +77,6 @@ const DepositForm = () => {
       
       if (response.status === 401) {
         console.log('❌ 인증 실패 - 토큰 갱신 시도');
-        // 토큰 갱신 시도
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
           try {
@@ -100,7 +92,6 @@ const DepositForm = () => {
               const { token: newToken } = await refreshResponse.json();
               localStorage.setItem('token', newToken);
               console.log('✅ 토큰 갱신 성공');
-              // 갱신된 토큰으로 다시 시도
               return handleSaveAddress();
             }
           } catch (refreshError) {
@@ -117,7 +108,7 @@ const DepositForm = () => {
       if (response.ok) {
         console.log('✅ 저장 성공:', data);
         setSavedAddress(depositAddress);
-        setDepositAddress(''); // 입력창 초기화
+        setDepositAddress('');
         alert('ETH 입금 주소가 등록되었습니다!');
       } else {
         console.log('❌ 저장 실패:', data);
@@ -138,65 +129,104 @@ const DepositForm = () => {
   };
 
   if (loading) {
-    return <div className="wallet-loading">Loading...</div>;
+    return (
+      <div className="wallet-loading">
+        <div className="loading-spinner"></div>
+        <p>입금 주소를 불러오는 중...</p>
+      </div>
+    );
   }
 
   return (
     <div className="deposit-form">
-      <h3>{coin} 입금</h3>
-      {error && <div className="wallet-error">{error}</div>}
-      
-      {/* 등록된 주소가 있으면 표시 */}
-      {savedAddress && (
-        <div className="saved-address-section">
-          <div className="success-message">
-            주소가 저장되었습니다.
-          </div>
-          <div className="address-display">
-            <code className="deposit-address">{savedAddress}</code>
-            <button
-              className="copy-button"
-              onClick={handleCopyAddress}
-              title="주소 복사"
-            >
-              {copied ? '✓ 복사됨' : '📋 복사'}
-            </button>
-          </div>
+      <div className="deposit-header">
+        <h2>{coin} 입금</h2>
+        <p className="deposit-subtitle">안전하고 빠른 입금 서비스를 이용하세요</p>
+      </div>
+
+      {error && (
+        <div className="wallet-error">
+          <i className="fas fa-exclamation-circle"></i>
+          {error}
         </div>
       )}
       
-      {/* 주소 입력 섹션 */}
-      <div className="address-input-section">
-        <h3>입금 주소 설정</h3>
-        <input
-          type="text"
-          placeholder="ETH 주소를 입력하세요"
-          value={depositAddress}
-          onChange={(e) => setDepositAddress(e.target.value)}
-        />
-        <button 
-          onClick={handleSaveAddress}
-          disabled={saving || !depositAddress}
-          className="save-button"
-        >
-          {saving ? '저장 중...' : '저장'}
-        </button>
-      </div>
+      {savedAddress ? (
+        <div className="saved-address-section">
+          <div className="address-card">
+            <div className="address-header">
+              <h3>등록된 입금 주소</h3>
+              <span className="status-badge">활성</span>
+            </div>
+            <div className="address-display">
+              <code className="deposit-address">{savedAddress}</code>
+              <button
+                className={`copy-button ${copied ? 'copied' : ''}`}
+                onClick={handleCopyAddress}
+                title="주소 복사"
+              >
+                {copied ? '✓ 복사됨' : '📋 복사'}
+              </button>
+            </div>
+            <div className="qr-code-placeholder">
+              <div className="qr-code">
+                {/* QR 코드 이미지가 들어갈 자리 */}
+                <div className="qr-placeholder">QR Code</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="address-input-section">
+          <div className="input-card">
+            <h3>입금 주소 설정</h3>
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="ETH 주소를 입력하세요"
+                value={depositAddress}
+                onChange={(e) => setDepositAddress(e.target.value)}
+                className="address-input"
+              />
+              <button 
+                onClick={handleSaveAddress}
+                disabled={saving || !depositAddress}
+                className={`save-button ${saving ? 'saving' : ''}`}
+              >
+                {saving ? '저장 중...' : '저장'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="deposit-info">
-        <p>※ 주의사항:</p>
-        <ul>
-          <li>입금 주소는 {coin} 전용 주소입니다.</li>
-          <li>다른 코인을 이 주소로 보내면 자산이 손실될 수 있습니다.</li>
-          <li>입금 후 확인까지 최대 30분이 소요될 수 있습니다.</li>
-          <li>최소 입금 금액은 0.01 {coin}입니다.</li>
-        </ul>
+        <div className="info-card">
+          <h3>입금 안내</h3>
+          <ul className="info-list">
+            <li>
+              <i className="fas fa-check-circle"></i>
+              <span>입금 주소는 {coin} 전용 주소입니다.</span>
+            </li>
+            <li>
+              <i className="fas fa-exclamation-triangle"></i>
+              <span>다른 코인을 이 주소로 보내면 자산이 손실될 수 있습니다.</span>
+            </li>
+            <li>
+              <i className="fas fa-clock"></i>
+              <span>입금 후 확인까지 최대 30분이 소요될 수 있습니다.</span>
+            </li>
+            <li>
+              <i className="fas fa-coins"></i>
+              <span>최소 입금 금액은 0.01 {coin}입니다.</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
 };
 
-// ETH 주소 검증 함수
 const isValidEthAddress = (address) => {
   return /^0x[a-fA-F0-9]{40}$/.test(address);
 };
