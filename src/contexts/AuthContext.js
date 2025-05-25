@@ -123,30 +123,45 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: 'LOGIN_START' });
 
       const response = await loginService(credentials);
+      console.log('[AuthContext] 로그인 응답 받음:', response);
       
-      if (response.success) {
+      // �� 응답 구조 확인 및 안전한 처리
+      if (response && response.success && response.data) {
         const { user, token } = response.data;
         
-        // localStorage에 안전하게 저장
-        try {
-          localStorage.setItem('token', JSON.stringify(token));
-          localStorage.setItem('user', JSON.stringify(user));
-        } catch (storageError) {
-          console.warn('localStorage 저장 실패:', storageError);
+        // 🔧 user와 token 존재 확인
+        if (user && token) {
+          console.log('[AuthContext] 사용자 정보:', user);
+          console.log('[AuthContext] 토큰:', token);
+          
+          // localStorage에 안전하게 저장
+          try {
+            localStorage.setItem('token', JSON.stringify(token));
+            localStorage.setItem('user', JSON.stringify(user));
+            console.log('[AuthContext] localStorage 저장 완료');
+          } catch (storageError) {
+            console.warn('[AuthContext] localStorage 저장 실패:', storageError);
+          }
+
+          dispatch({
+            type: 'LOGIN_SUCCESS',
+            payload: { user, token }
+          });
+
+          console.log('[AuthContext] 로그인 성공:', user.email || user.name || 'unknown');
+          return { success: true };
+        } else {
+          console.error('[AuthContext] 응답에 user 또는 token이 없음:', response);
+          throw new Error('서버 응답에 사용자 정보가 없습니다');
         }
-
-        dispatch({
-          type: 'LOGIN_SUCCESS',
-          payload: { user, token }
-        });
-
-        console.log('[AuthContext] 로그인 성공:', user.email);
-        return { success: true };
       } else {
-        throw new Error(response.message || 'Login failed');
+        console.error('[AuthContext] 잘못된 응답 구조:', response);
+        throw new Error(response?.message || 'Login failed');
       }
     } catch (error) {
       console.error('[AuthContext] 로그인 실패:', error);
+      console.error('[AuthContext] 오류 상세:', error.message);
+      
       dispatch({
         type: 'LOGIN_FAILURE',
         payload: error.message
@@ -158,31 +173,47 @@ export const AuthProvider = ({ children }) => {
   // 회원가입 함수
   const register = async (userData) => {
     try {
+      console.log('[AuthContext] 회원가입 시도:', userData);
       dispatch({ type: 'REGISTER_START' });
 
       const response = await registerService(userData);
+      console.log('[AuthContext] 회원가입 응답 받음:', response);
       
-      if (response.success) {
+      // 🔧 응답 구조 확인 및 안전한 처리
+      if (response && response.success && response.data) {
         const { user, token } = response.data;
         
-        // localStorage에 안전하게 저장
-        try {
-          localStorage.setItem('token', JSON.stringify(token));
-          localStorage.setItem('user', JSON.stringify(user));
-        } catch (storageError) {
-          console.warn('localStorage 저장 실패:', storageError);
+        // 🔧 user와 token 존재 확인
+        if (user && token) {
+          console.log('[AuthContext] 새 사용자 정보:', user);
+          
+          // localStorage에 안전하게 저장
+          try {
+            localStorage.setItem('token', JSON.stringify(token));
+            localStorage.setItem('user', JSON.stringify(user));
+            console.log('[AuthContext] 회원가입 localStorage 저장 완료');
+          } catch (storageError) {
+            console.warn('[AuthContext] localStorage 저장 실패:', storageError);
+          }
+
+          dispatch({
+            type: 'REGISTER_SUCCESS',
+            payload: { user, token }
+          });
+
+          console.log('[AuthContext] 회원가입 성공:', user.email || user.name || 'unknown');
+          return { success: true };
+        } else {
+          console.error('[AuthContext] 회원가입 응답에 user 또는 token이 없음:', response);
+          throw new Error('서버 응답에 사용자 정보가 없습니다');
         }
-
-        dispatch({
-          type: 'REGISTER_SUCCESS',
-          payload: { user, token }
-        });
-
-        return { success: true };
       } else {
-        throw new Error(response.message || 'Registration failed');
+        console.error('[AuthContext] 잘못된 회원가입 응답 구조:', response);
+        throw new Error(response?.message || 'Registration failed');
       }
     } catch (error) {
+      console.error('[AuthContext] 회원가입 실패:', error);
+      
       dispatch({
         type: 'REGISTER_FAILURE',
         payload: error.message
