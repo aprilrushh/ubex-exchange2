@@ -1,5 +1,5 @@
 // src/components/Wallet/WithdrawForm.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   listWhitelist,
   requestWithdrawal
@@ -17,7 +17,7 @@ const WithdrawForm = ({ coin }) => {
   const [success, setSuccess] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const fetchWhitelist = async () => {
+  const fetchWhitelist = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -45,11 +45,11 @@ const WithdrawForm = ({ coin }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [coin]);
 
   useEffect(() => {
     fetchWhitelist();
-  }, [coin]);
+  }, [fetchWhitelist]);
 
   const handleAddWhitelistSuccess = async () => {
     console.log('화이트리스트 주소 추가 성공, 목록 갱신 시작');

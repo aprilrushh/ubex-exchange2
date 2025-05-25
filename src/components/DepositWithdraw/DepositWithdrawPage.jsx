@@ -8,12 +8,12 @@ import './DepositWithdrawPage.css';
 
 const DepositWithdrawPage = () => {
   const [activeTab, setActiveTab] = useState('deposit');
-  const [selectedCoinSymbol, setSelectedCoinSymbol] = useState(null);
+  const [selectedCoinSymbol, setSelectedCoinSymbol] = useState('ETH');
   const { authState } = useAuth();
 
   const availableCoins = [
-    { symbol: 'BTC', name: '비트코인' },
     { symbol: 'ETH', name: '이더리움' },
+    { symbol: 'BTC', name: '비트코인' },
     { symbol: 'USDT', name: '테더' },
   ];
 
