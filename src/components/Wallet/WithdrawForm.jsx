@@ -7,7 +7,8 @@ import {
 import AddWhitelistModal from './AddWhitelistModal.jsx';
 import './Wallet.css';
 
-const WithdrawForm = ({ currency }) => {
+const WithdrawForm = ({ coin, currency }) => {
+  const coinSymbol = coin || currency;
   const [whitelist, setWhitelist] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [amount, setAmount] = useState('');
@@ -21,7 +22,7 @@ const WithdrawForm = ({ currency }) => {
       try {
         setLoading(true);
         setError(null);
-        const addresses = await listWhitelist(currency);
+        const addresses = await listWhitelist(coinSymbol);
         setWhitelist(addresses);
         // 기본 선택값을 비워 사용자가 직접 주소를 선택하도록 한다
         setSelectedAddress('');
@@ -36,7 +37,7 @@ const WithdrawForm = ({ currency }) => {
     };
 
     fetchWhitelist();
-  }, [currency]);
+  }, [coinSymbol]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,7 +51,7 @@ const WithdrawForm = ({ currency }) => {
       }
 
       const response = await requestWithdrawal({
-        currency,
+        currency: coinSymbol,
         address: selectedAddress,
         amount: parseFloat(amount)
       });
@@ -84,7 +85,7 @@ const WithdrawForm = ({ currency }) => {
 
   return (
     <div className="withdraw-form">
-      <h3>{currency} 출금</h3>
+      <h3>{coinSymbol} 출금</h3>
       {error && <div className="wallet-error">{error}</div>}
       {success && (
         <div className="wallet-success">
@@ -139,13 +140,13 @@ const WithdrawForm = ({ currency }) => {
       </div>
       {showModal && (
         <AddWhitelistModal
-          coin={currency}
+          coin={coinSymbol}
           onClose={() => setShowModal(false)}
           onSuccess={() => {
             setShowModal(false);
             // refresh list
             (async () => {
-              const addresses = await listWhitelist(currency);
+              const addresses = await listWhitelist(coinSymbol);
               setWhitelist(addresses);
               // 새 주소 추가 후에도 직접 선택하도록 초기화
               setSelectedAddress('');
