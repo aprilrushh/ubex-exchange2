@@ -91,7 +91,7 @@ export const listWhitelist = async (currency) => {
   
   if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
     console.log('더미 데이터 모드에서 화이트리스트 조회');
-    const addresses = dummyWhitelistAddresses.filter(addr => addr.coin_symbol === currency);
+    const addresses = dummyWhitelistAddresses.filter(addr => addr.coin === currency);
     console.log('조회된 더미 화이트리스트:', addresses);
     return { success: true, data: addresses };
   }
@@ -113,7 +113,7 @@ export const addWhitelistAddress = async ({ coin, address, label }) => {
     console.log('더미 데이터 모드에서 화이트리스트 주소 추가');
     const newAddress = {
       id: dummyWhitelistAddresses.length + 1,
-      coin_symbol: coin,
+      coin,
       address,
       label,
       status: 'CONFIRMED',
