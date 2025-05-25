@@ -3,8 +3,6 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createChart } from 'lightweight-charts';
 import IndicatorSelector from './Indicators/IndicatorSelector';
 import TimeframeSelector from './TimeframeSelector';
-import { calculateMA, calculateRSI, calculateMACD } from '../../utils/chartIndicators';
-import webSocketService from '../../services/websocketService';
 import './SimpleChart.css';
 
 const SimpleChart = ({
@@ -13,10 +11,8 @@ const SimpleChart = ({
 }) => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
-  const wsRef = useRef(null);
   const candleSeriesRef = useRef(null);
   const volumeSeriesRef = useRef(null);
-  const lineSeriesRefs = useRef({});
 
   // 상태 관리
   const [timeframe, setTimeframe] = useState('1h');
@@ -29,9 +25,7 @@ const SimpleChart = ({
     rsi: false,
     macd: false
   });
-  const [chartData, setChartData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
   const generateDummyData = () => {
     const data = [];
@@ -146,7 +140,24 @@ const SimpleChart = ({
 
     // 초기 더미 데이터 설정
     const dummyData = generateDummyData();
-    processInitialData(dummyData);
+    const candleData = dummyData.map(candle => ({
+      time: candle.time,
+      open: candle.open,
+      high: candle.high,
+      low: candle.low,
+      close: candle.close
+    }));
+
+    const volumeData = dummyData.map(candle => ({
+      time: candle.time,
+      value: candle.volume,
+      color: candle.close >= candle.open ? 'rgba(214, 0, 0, 0.5)' : 'rgba(0, 81, 199, 0.5)'
+    }));
+
+    candleSeries.setData(candleData);
+    volumeSeries.setData(volumeData);
+    chart.timeScale().fitContent();
+    setIsLoading(false);
 
     const tooltip = document.createElement('div');
     tooltip.className = 'chart-tooltip';
@@ -210,42 +221,7 @@ const SimpleChart = ({
     };
   }, []);
 
-  // 초기 데이터 처리
-  const processInitialData = useCallback((data) => {
-    if (!data || data.length === 0) return;
-
-    const candleData = data.map(candle => ({
-      time: candle.time,
-      open: candle.open,
-      high: candle.high,
-      low: candle.low,
-      close: candle.close
-    }));
-
-    const volumeData = data.map(candle => ({
-      time: candle.time,
-      value: candle.volume,
-      color: candle.close >= candle.open ? 'rgba(214, 0, 0, 0.5)' : 'rgba(0, 81, 199, 0.5)'
-    }));
-
-    if (candleSeriesRef.current) {
-      candleSeriesRef.current.setData(candleData);
-    }
-
-    if (volumeSeriesRef.current) {
-      volumeSeriesRef.current.setData(volumeData);
-    }
-
-    setChartData(data);
-    updateIndicators(data);
-    setIsLoading(false);
-
-    if (chartRef.current) {
-      chartRef.current.timeScale().fitContent();
-    }
-  }, []);
-
-  // 차트 초기화 및 웹소켓 연결
+  // 차트 초기화
   useEffect(() => {
     const cleanup = initChart();
     return () => {
@@ -253,7 +229,17 @@ const SimpleChart = ({
     };
   }, [initChart]);
 
-  // 차트 컨테이너 렌더링
+  const handleTimeframeChange = (newTimeframe) => {
+    setTimeframe(newTimeframe);
+    if (onTimeframeChange) {
+      onTimeframeChange(newTimeframe);
+    }
+  };
+
+  const handleIndicatorChange = (newIndicators) => {
+    setIndicators(newIndicators);
+  };
+
   return (
     <div className="chart-container">
       <div className="chart-header">
