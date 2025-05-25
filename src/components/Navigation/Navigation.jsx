@@ -12,6 +12,11 @@ const Navigation = () => {
     navigate('/login');
   };
 
+  const getUserDisplayName = () => {
+    if (!authState?.user) return '';
+    return authState.user.username || authState.user.email || '사용자';
+  };
+
   return (
     <nav className="main-nav">
       <NavLink end to="/" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
@@ -25,8 +30,8 @@ const Navigation = () => {
       </NavLink>
       {authState?.isAuthenticated ? (
         <>
-          <span className="nav-item user-info">
-            {authState.user?.username || authState.user?.email}님
+          <span className="user-info">
+            {getUserDisplayName()}
           </span>
           <button onClick={handleLogout} className="nav-item logout-button">
             로그아웃

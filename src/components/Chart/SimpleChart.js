@@ -144,6 +144,10 @@ const SimpleChart = ({
 
     volumeSeriesRef.current = volumeSeries;
 
+    // 초기 더미 데이터 설정
+    const dummyData = generateDummyData();
+    processInitialData(dummyData);
+
     const tooltip = document.createElement('div');
     tooltip.className = 'chart-tooltip';
     chartContainerRef.current.appendChild(tooltip);
@@ -206,102 +210,6 @@ const SimpleChart = ({
     };
   }, []);
 
-  // 웹소켓 연결 및 이벤트 설정
-  const connectWebSocket = useCallback(() => {
-    const socket = webSocketService.connect();
-    if (!socket || typeof socket !== 'object') {
-      console.error('WebSocket initialization failed', socket);
-      const dummyData = generateDummyData();
-      processInitialData(dummyData);
-      return;
-    }
-    wsRef.current = socket;
-
-    const subscribe = () => {
-      const channel = `candlestick:${symbol}:${timeframe}`;
-      webSocketService.emit('subscribe', { channel });
-      webSocketService.emit('getCandles', { symbol, interval: timeframe });
-    };
-
-    const handleConnect = () => {
-      console.log('WebSocket 연결됨');
-      setConnectionStatus('connected');
-      subscribe();
-    };
-
-    const handleDisconnect = () => {
-      console.log('WebSocket 연결 끊김');
-      setConnectionStatus('disconnected');
-      // 연결이 끊어졌을 때 더미 데이터로 대체
-      const dummyData = generateDummyData();
-      processInitialData(dummyData);
-    };
-
-    const handleError = (error) => {
-      console.error('WebSocket 오류:', error);
-      setConnectionStatus('error');
-      const dummyData = generateDummyData();
-      processInitialData(dummyData);
-    };
-
-    const handleConnectError = (error) => {
-      console.error('WebSocket 연결 실패:', error);
-      setConnectionStatus('error');
-      const dummyData = generateDummyData();
-      processInitialData(dummyData);
-    };
-
-    const handleCandles = (data) => {
-      if (!data || data.length === 0) {
-        console.log('캔들 데이터가 없어 더미 데이터로 대체합니다.');
-        const dummyData = generateDummyData();
-        processInitialData(dummyData);
-      } else {
-        console.log('캔들 데이터 수신:', data.length);
-        processInitialData(data);
-      }
-    };
-
-    const handleCandlestick = (data) => {
-      if (data) {
-        updateCandle(data);
-      }
-    };
-
-    webSocketService.on('connect', handleConnect);
-    webSocketService.on('disconnect', handleDisconnect);
-    webSocketService.on('error', handleError);
-    webSocketService.on('connect_error', handleConnectError);
-    webSocketService.on('candles', handleCandles);
-    webSocketService.on('candlestick', handleCandlestick);
-
-    wsRef.current.__handlers = {
-      handleConnect,
-      handleDisconnect,
-      handleError,
-      handleConnectError,
-      handleCandles,
-      handleCandlestick,
-    };
-
-    if (socket.connected) {
-      handleConnect();
-    } else {
-      // 초기 연결이 안된 경우 더미 데이터로 시작
-      const dummyData = generateDummyData();
-      processInitialData(dummyData);
-    }
-
-    return () => {
-      webSocketService.off('connect', handleConnect);
-      webSocketService.off('disconnect', handleDisconnect);
-      webSocketService.off('error', handleError);
-      webSocketService.off('connect_error', handleConnectError);
-      webSocketService.off('candles', handleCandles);
-      webSocketService.off('candlestick', handleCandlestick);
-    };
-  }, [symbol, timeframe]);
-
   // 초기 데이터 처리
   const processInitialData = useCallback((data) => {
     if (!data || data.length === 0) return;
@@ -337,197 +245,26 @@ const SimpleChart = ({
     }
   }, []);
 
-  // 실시간 캔들스틱 업데이트
-  const updateCandle = (candle) => {
-    if (!candleSeriesRef.current || !volumeSeriesRef.current) return;
-
-    const candleData = {
-      time: candle.time,
-      open: candle.open,
-      high: candle.high,
-      low: candle.low,
-      close: candle.close
-    };
-
-    const volumeData = {
-      time: candle.time,
-      value: candle.volume,
-      color: candle.close >= candle.open ? 'rgba(214, 0, 0, 0.5)' : 'rgba(0, 81, 199, 0.5)'
-    };
-
-    candleSeriesRef.current.update(candleData);
-    volumeSeriesRef.current.update(volumeData);
-
-    setChartData(prevData => {
-      const newData = [...prevData];
-      const lastIndex = newData.length - 1;
-
-      if (lastIndex >= 0 && newData[lastIndex].time === candle.time) {
-        newData[lastIndex] = candle;
-      } else {
-        newData.push(candle);
-      }
-
-      updateIndicators(newData);
-      return newData;
-    });
-  };
-
-  // 지표 업데이트
-  const updateIndicators = (data) => {
-    if (!data || data.length === 0 || !chartRef.current) return;
-
-    const prices = data.map(d => d.close);
-
-    Object.values(lineSeriesRefs.current).forEach(series => {
-      if (series) {
-        chartRef.current.removeSeries(series);
-      }
-    });
-    lineSeriesRefs.current = {};
-
-    ['ma5', 'ma10', 'ma20', 'ma60', 'ma120'].forEach(key => {
-      if (indicators[key]) {
-        const period = parseInt(key.replace('ma', ''));
-        const maData = calculateMA(prices, period);
-        const series = chartRef.current.addLineSeries({
-          color: getMAColor(key),
-          lineWidth: 2,
-        });
-        series.setData(maData.map((value, index) => ({
-          time: data[index].time,
-          value: Number(value)
-        })));
-        lineSeriesRefs.current[key] = series;
-      }
-    });
-
-    if (indicators.rsi) {
-      const rsiData = calculateRSI(prices);
-      const series = chartRef.current.addLineSeries({
-        color: '#FF6B6B',
-        lineWidth: 2,
-        priceScaleId: 'right',
-      });
-      series.setData(rsiData.map((value, index) => ({
-        time: data[index].time,
-        value: Number(value)
-      })));
-      lineSeriesRefs.current.rsi = series;
-    }
-
-    if (indicators.macd) {
-      const { macdLine, signalLine, histogram } = calculateMACD(prices);
-      const macdSeries = chartRef.current.addLineSeries({
-        color: '#2196F3',
-        lineWidth: 2,
-        priceScaleId: 'right',
-      });
-      const signalSeries = chartRef.current.addLineSeries({
-        color: '#FF9800',
-        lineWidth: 2,
-        priceScaleId: 'right',
-      });
-      const histogramSeries = chartRef.current.addHistogramSeries({
-        color: '#4CAF50',
-        priceScaleId: 'right',
-      });
-
-      macdSeries.setData(macdLine.map((value, index) => ({
-        time: data[index].time,
-        value: Number(value)
-      })));
-      signalSeries.setData(signalLine.map((value, index) => ({
-        time: data[index].time,
-        value: Number(value)
-      })));
-      histogramSeries.setData(histogram.map((value, index) => ({
-        time: data[index].time,
-        value: Number(value),
-        color: value >= 0 ? '#4CAF50' : '#F44336'
-      })));
-
-      lineSeriesRefs.current.macd = macdSeries;
-      lineSeriesRefs.current.signal = signalSeries;
-      lineSeriesRefs.current.histogram = histogramSeries;
-    }
-  };
-
-  const getMAColor = (key) => {
-    const colors = {
-      ma5: '#FF6B6B',
-      ma10: '#4ECDC4',
-      ma20: '#45B7D1',
-      ma60: '#96CEB4',
-      ma120: '#FFEEAD'
-    };
-    return colors[key] || '#FF6B6B';
-  };
-
-  const handleTimeframeChange = (timeframeInfo) => {
-    const newTimeframe = typeof timeframeInfo === 'string'
-      ? timeframeInfo
-      : timeframeInfo?.id;
-
-    if (wsRef.current && newTimeframe) {
-      webSocketService.emit('unsubscribe', {
-        channel: `candlestick:${symbol}:${timeframe}`,
-      });
-      webSocketService.emit('subscribe', {
-        channel: `candlestick:${symbol}:${newTimeframe}`,
-      });
-      webSocketService.emit('getCandles', { symbol, interval: newTimeframe });
-    }
-
-    if (newTimeframe) {
-      setTimeframe(newTimeframe);
-      if (onTimeframeChange) {
-        onTimeframeChange(newTimeframe);
-      }
-    }
-  };
-
-  const handleIndicatorChange = (newIndicators) => {
-    setIndicators(newIndicators);
-    updateIndicators(chartData);
-  };
-
+  // 차트 초기화 및 웹소켓 연결
   useEffect(() => {
     const cleanup = initChart();
-    
-    try {
-      const wsCleanup = connectWebSocket();
-      return () => {
-        cleanup?.();
-        wsCleanup?.();
-      };
-    } catch (error) {
-      console.error('WebSocket 연결 실패, 더미 데이터로 대체:', error);
-      const dummyData = generateDummyData();
-      processInitialData(dummyData);
-      return cleanup;
-    }
-  }, [initChart, connectWebSocket, processInitialData]);
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [initChart]);
 
-  useEffect(() => {
-    const wsCleanup = connectWebSocket();
-    return wsCleanup;
-  }, [symbol, timeframe, connectWebSocket]);
-
+  // 차트 컨테이너 렌더링
   return (
     <div className="chart-container">
       <div className="chart-header">
         <TimeframeSelector
           timeframe={timeframe}
-          onTimeframeChange={handleTimeframeChange}
+          onChange={handleTimeframeChange}
         />
         <IndicatorSelector
           indicators={indicators}
-          onIndicatorChange={handleIndicatorChange}
+          onChange={handleIndicatorChange}
         />
-      </div>
-      <div className="chart-status">
-        {connectionStatus === 'connected' ? '연결됨' : '연결 끊김'}
       </div>
       <div ref={chartContainerRef} className="chart" />
       {isLoading && <div className="chart-loading">로딩 중...</div>}

@@ -3,6 +3,19 @@ const express = require('express');
 const router = express.Router();
 const { authMiddleware, optionalAuth } = require('../middleware/authMiddleware');
 
+// 화이트리스트 조회 함수
+const getWhitelist = async (userId) => {
+  // 임시 더미 데이터
+  return [
+    {
+      id: 1,
+      address: '0x1234567890abcdef1234567890abcdef12345678',
+      label: '내 지갑',
+      createdAt: new Date().toISOString()
+    }
+  ];
+};
+
 // 🔧 입금 주소 조회 API (코인별) - 프론트엔드 호환
 router.get('/deposit-address/:coin', optionalAuth, async (req, res) => {
   try {
@@ -424,6 +437,25 @@ router.post('/withdraw', authMiddleware, async (req, res) => {
     res.status(500).json({
       success: false,
       error: '출금 요청 실패'
+    });
+  }
+});
+
+// 화이트리스트 조회 API
+router.get('/whitelist', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const whitelist = await getWhitelist(userId);
+    
+    res.json({
+      success: true,
+      data: whitelist
+    });
+  } catch (error) {
+    console.error('화이트리스트 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '화이트리스트 조회 실패'
     });
   }
 });
