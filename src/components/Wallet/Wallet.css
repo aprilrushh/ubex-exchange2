@@ -230,3 +230,66 @@
   text-align: center;
   padding: 1rem;
 }
+
+/* 성공 메시지 */
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+/* 주소 표시 영역 */
+.saved-address-section {
+  margin: 20px 0;
+}
+
+.address-display {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  font-family: monospace;
+  word-break: break-all;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* 입력 섹션 */
+.address-input-section {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.address-input-section input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.address-input-section button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.address-input-section button:hover {
+  background-color: #0056b3;
+}
+
+.address-input-section button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

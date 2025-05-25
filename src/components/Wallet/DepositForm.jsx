@@ -8,7 +8,9 @@ const DEPOSIT_COIN = 'ETH'; // 하드코딩 상수
 const DepositForm = () => {
   const coin = DEPOSIT_COIN;
   const [depositAddress, setDepositAddress] = useState('');
+  const [savedAddress, setSavedAddress] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
 
@@ -23,15 +25,15 @@ const DepositForm = () => {
         
         // 응답이 문자열인 경우 직접 사용
         if (typeof response === 'string') {
-          setDepositAddress(response);
+          setSavedAddress(response);
         }
         // 응답이 객체이고 success가 true인 경우
         else if (response && response.success) {
-          setDepositAddress(response.data.address);
+          setSavedAddress(response.data.address);
         }
         // 응답이 객체이고 address가 직접 있는 경우
         else if (response && response.address) {
-          setDepositAddress(response.address);
+          setSavedAddress(response.address);
         }
         else {
           setError('입금 주소를 불러오는데 실패했습니다.');
@@ -49,8 +51,45 @@ const DepositForm = () => {
     fetchDepositAddress();
   }, []);
 
+  const handleSaveAddress = async () => {
+    setSaving(true);
+    
+    try {
+      // ETH 주소 형식 검증
+      if (!isValidEthAddress(depositAddress)) {
+        alert('유효하지 않은 ETH 주소입니다.');
+        return;
+      }
+      
+      // 서버에 저장
+      const response = await fetch('http://localhost:3035/api/v1/wallet/deposit-address/ETH', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ address: depositAddress })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSavedAddress(depositAddress);
+        setDepositAddress(''); // 입력창 초기화
+        alert('ETH 입금 주소가 등록되었습니다!');
+      } else {
+        const error = await response.json();
+        alert(error.message || '저장에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('주소 저장 오류:', error);
+      alert('저장 중 오류가 발생했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(depositAddress);
+    navigator.clipboard.writeText(savedAddress);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -63,18 +102,42 @@ const DepositForm = () => {
     <div className="deposit-form">
       <h3>{coin} 입금</h3>
       {error && <div className="wallet-error">{error}</div>}
-      <div className="deposit-address-container">
-        <p className="deposit-address-label">입금 주소:</p>
-        <div className="deposit-address-box">
-          <code className="deposit-address">{depositAddress}</code>
-          <button
-            className="copy-button"
-            onClick={handleCopyAddress}
-            title="주소 복사"
-          >
-            {copied ? '✓ 복사됨' : '📋 복사'}
-          </button>
+      
+      {/* 등록된 주소가 있으면 표시 */}
+      {savedAddress && (
+        <div className="saved-address-section">
+          <div className="success-message">
+            주소가 저장되었습니다.
+          </div>
+          <div className="address-display">
+            <code className="deposit-address">{savedAddress}</code>
+            <button
+              className="copy-button"
+              onClick={handleCopyAddress}
+              title="주소 복사"
+            >
+              {copied ? '✓ 복사됨' : '📋 복사'}
+            </button>
+          </div>
         </div>
+      )}
+      
+      {/* 주소 입력 섹션 */}
+      <div className="address-input-section">
+        <h3>입금 주소 설정</h3>
+        <input
+          type="text"
+          placeholder="ETH 주소를 입력하세요"
+          value={depositAddress}
+          onChange={(e) => setDepositAddress(e.target.value)}
+        />
+        <button 
+          onClick={handleSaveAddress}
+          disabled={saving || !depositAddress}
+          className="save-button"
+        >
+          {saving ? '저장 중...' : '저장'}
+        </button>
       </div>
 
       <div className="deposit-info">
@@ -88,6 +151,11 @@ const DepositForm = () => {
       </div>
     </div>
   );
+};
+
+// ETH 주소 검증 함수
+const isValidEthAddress = (address) => {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
 };
 
 export default DepositForm;
