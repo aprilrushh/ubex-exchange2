@@ -41,12 +41,41 @@
 .user-info {
   color: var(--text-primary);
   font-weight: 600;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-info::before {
+  content: '👤';
+  font-size: 16px;
 }
 
 .logout-button {
   color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  margin-left: 8px;
 }
 
 .logout-button:hover {
   color: var(--accent-color);
+  background-color: var(--hover-overlay);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .nav-item {
+    padding: 0 12px;
+  }
+
+  .user-info {
+    padding: 0 12px;
+  }
+
+  .logout-button {
+    padding: 4px 8px;
+  }
 }

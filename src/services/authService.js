@@ -1,36 +1,58 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3035';
+import axios from 'axios';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3035';
 
 export const register = async (userData) => {
   if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
-    // 더미 데이터 모드에서는 성공 응답 반환
-    return { success: true, message: 'Registration successful' };
+    console.log('[authService] 더미 데이터 모드 - 회원가입 성공');
+    return { 
+      success: true, 
+      data: {
+        user: {
+          id: 1,
+          username: userData.email,
+          email: userData.email
+        },
+        token: 'dummy-token'
+      }
+    };
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-
-    const data = await response.json();
+    console.log('[authService] 회원가입 요청 시작:', userData.email);
     
-    if (!response.ok) {
-      throw new Error(data.message || 'Registration failed');
+    const response = await axios.post(`${API_BASE_URL}/api/auth/register`, userData);
+    console.log('[authService] 회원가입 응답 받음:', response);
+    console.log('[authService] 응답 데이터:', response.data);
+    
+    // 🔧 응답 구조 확인
+    if (response.data && response.data.success) {
+      console.log('[authService] 회원가입 성공 응답:', response.data);
+      return response.data; // { success: true, data: { user, token } }
+    } else {
+      console.error('[authService] 회원가입 실패 응답:', response.data);
+      throw new Error(response.data?.message || 'Registration failed');
     }
-
-    return { success: true, data };
   } catch (error) {
-    console.error('Registration error:', error);
-    return { success: false, message: error.message };
+    console.error('[authService] 회원가입 오류:', error);
+    
+    // 🔧 오류 응답 처리
+    if (error.response) {
+      console.error('[authService] 서버 오류 응답:', error.response.data);
+      throw new Error(error.response.data?.message || `Server error: ${error.response.status}`);
+    } else if (error.request) {
+      console.error('[authService] 네트워크 오류:', error.request);
+      throw new Error('Network error: Cannot reach server');
+    } else {
+      console.error('[authService] 기타 오류:', error.message);
+      throw new Error(error.message || 'Registration failed');
+    }
   }
 };
 
 export const login = async (credentials) => {
   if (process.env.REACT_APP_USE_DUMMY_DATA === 'true') {
-    // 더미 데이터 모드에서는 성공 응답 반환
+    console.log('[authService] 더미 데이터 모드 - 로그인 성공');
     return {
       success: true,
       data: {
@@ -45,23 +67,48 @@ export const login = async (credentials) => {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-
-    const data = await response.json();
+    console.log('[authService] 로그인 요청 시작:', credentials.email);
     
-    if (!response.ok) {
-      throw new Error(data.message || 'Login failed');
+    const response = await axios.post(`${API_BASE_URL}/api/auth/login`, credentials);
+    console.log('[authService] 로그인 응답 받음:', response);
+    console.log('[authService] 응답 데이터:', response.data);
+    
+    // 🔧 응답 구조 확인
+    if (response.data && response.data.success) {
+      console.log('[authService] 로그인 성공 응답:', response.data);
+      return response.data; // { success: true, data: { user, token } }
+    } else {
+      console.error('[authService] 로그인 실패 응답:', response.data);
+      throw new Error(response.data?.message || 'Login failed');
     }
-
-    return { success: true, data };
   } catch (error) {
-    console.error('Login error:', error);
-    return { success: false, message: error.message };
+    console.error('[authService] 로그인 오류:', error);
+    
+    // 🔧 오류 응답 처리
+    if (error.response) {
+      console.error('[authService] 서버 오류 응답:', error.response.data);
+      throw new Error(error.response.data?.message || `Server error: ${error.response.status}`);
+    } else if (error.request) {
+      console.error('[authService] 네트워크 오류:', error.request);
+      throw new Error('Network error: Cannot reach server');
+    } else {
+      console.error('[authService] 기타 오류:', error.message);
+      throw new Error(error.message || 'Login failed');
+    }
+  }
+};
+
+// 🧪 디버깅용 - API 베이스 URL 확인
+console.log('[authService] API_BASE_URL:', API_BASE_URL);
+
+// 🧪 디버깅용 - 백엔드 연결 테스트
+export const testConnection = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/`);
+    console.log('[authService] 백엔드 연결 테스트 성공:', response.data);
+    return true;
+  } catch (error) {
+    console.error('[authService] 백엔드 연결 테스트 실패:', error);
+    return false;
   }
 }; 
