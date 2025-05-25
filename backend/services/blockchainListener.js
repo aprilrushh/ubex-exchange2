@@ -21,8 +21,13 @@ class BlockchainListener {
         return;
       }
 
-      this.provider = new ethers.JsonRpcProvider(process.env.ETHEREUM_RPC_URL);
-      console.log('[BE BlockListener] 이더리움 노드에 연결되었습니다.');
+      // Sepolia 테스트넷 URL 사용
+      const rpcUrl = process.env.ETHEREUM_RPC_URL || 'https://sepolia.infura.io/v3/your-project-id';
+      this.provider = new ethers.JsonRpcProvider(rpcUrl);
+      
+      // 연결 테스트
+      const network = await this.provider.getNetwork();
+      console.log('[BE BlockListener] 이더리움 노드에 연결되었습니다:', network.name);
 
       this.provider.on('block', async (blockNumber) => {
         try {

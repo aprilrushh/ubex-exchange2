@@ -6,7 +6,6 @@ const {
   getDepositAddress,
   setDepositAddress,
   requestWithdrawal,
-  getDeposits,
   getWithdrawals,
   getCoinBalance,
   getUserBalances,
