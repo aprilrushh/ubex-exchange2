@@ -1,39 +1,119 @@
+// backend/app.js (또는 server.js)
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
-const { initializeWebSocket } = require('./websocket/socketHandler');
+const socketIo = require('socket.io');
+
 const app = express();
+const server = http.createServer(app);
 
-// 미들웨어 설정
-app.use(cors());
+// 🔧 CORS 설정
+app.use(cors({
+  origin: ["http://localhost:3000", "http://localhost:3001"],
+  credentials: true
+}));
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// 🆕 라우터 import 추가
+// 🔧 Socket.IO 설정
+const io = socketIo(server, {
+  cors: {
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    methods: ["GET", "POST"]
+  }
+});
+
+// 전역 io 객체 설정 (블록체인 리스너에서 사용)
+global.io = io;
+
+// Socket.IO 연결 처리
+io.on('connection', (socket) => {
+  console.log('[WS] Client connected:', socket.id);
+  
+  socket.on('subscribe', (data) => {
+    console.log('[WS] Subscribe request:', data);
+    socket.join(data.channel);
+    socket.emit('subscribed', { channel: data.channel, status: 'success' });
+  });
+  
+  socket.on('unsubscribe', (data) => {
+    console.log('[WS] Unsubscribe request:', data);
+    socket.leave(data.channel);
+  });
+  
+  socket.on('disconnect', () => {
+    console.log('[WS] Client disconnected:', socket.id);
+  });
+});
+
+// 🔧 라우터 import
 const walletRoutes = require('./routes/walletRoutes');
-const marketRoutes = require('./routes/marketRoutes'); // 새로 추가
-const tradeRoutes = require('./routes/tradeRoutes');   // 새로 추가
+const marketRoutes = require('./routes/marketRoutes');
+const tradeRoutes = require('./routes/tradeRoutes');
 
-// 🆕 라우터 등록
-app.use('/api/v1/wallet', walletRoutes);  // 기존
-app.use('/api', marketRoutes);             // 새로 추가: /api/coins
-app.use('/', tradeRoutes);                 // 새로 추가: /trades
+// 🔧 라우터 등록
+app.use('/api/v1/wallet', walletRoutes);
+app.use('/api', marketRoutes);
+app.use('/', tradeRoutes);
 
-// 기본 루트
+// 기본 라우트
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'UBEX Exchange API Server',
     status: 'running',
+    mode: 'development (without database)',
+    blockchain: 'connected',
+    websocket: 'active',
     endpoints: [
       'GET /api/coins',
-      'GET /api/coins/:symbol', 
+      'GET /api/coins/:symbol',
       'GET /trades',
       'GET /orderbook/:symbol',
       'GET /ticker/:symbol',
       'GET /api/v1/wallet/deposit-address',
       'GET /api/v1/wallet/deposits'
-    ]
+    ],
+    timestamp: new Date().toISOString()
   });
 });
+
+// 🔧 임시 데이터베이스 연결 비활성화
+const initializeDatabase = async () => {
+  if (process.env.SKIP_DB_CONNECTION === 'true') {
+    console.log('🚫 데이터베이스 연결 건너뜀 (개발 모드)');
+    return true;
+  }
+  
+  try {
+    // 나중에 데이터베이스 연결 로직 추가
+    console.log('💾 데이터베이스 연결 시도...');
+    // const db = require('./config/database');
+    // await db.authenticate();
+    console.log('💾 데이터베이스: 임시 비활성화');
+    return true;
+  } catch (error) {
+    console.error('💾 데이터베이스 연결 실패:', error.message);
+    console.log('💾 더미 데이터 모드로 계속 진행...');
+    return false;
+  }
+};
+
+// 🔧 블록체인 리스너 초기화
+const initializeBlockchainListener = async () => {
+  try {
+    const blockchainListener = require('./services/blockchainListener');
+    await blockchainListener.initialize();
+    
+    // 감시할 주소 추가 (입금 주소)
+    blockchainListener.addWatchedAddress('0x9726a5943D6e371FFC9FEc5Cb56FCDDB87f7b3d7');
+    
+    console.log('⛓️  블록체인 리스너 초기화 완료');
+  } catch (error) {
+    console.error('⛓️  블록체인 리스너 초기화 실패:', error.message);
+  }
+};
 
 // 에러 핸들링
 app.use((err, req, res, next) => {
@@ -41,7 +121,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     error: 'Internal Server Error',
-    message: err.message
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
   });
 });
 
@@ -60,17 +140,46 @@ app.use((req, res) => {
   });
 });
 
-// Express 앱을 HTTP 서버로 감싸기
-const server = http.createServer(app);
-
-// WebSocket 초기화
-initializeWebSocket(server);
-
+// 서버 시작
 const PORT = process.env.PORT || 3035;
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 API endpoints available at http://localhost:${PORT}`);
-  console.log(`🔌 WebSocket server ready`);
+
+const startServer = async () => {
+  try {
+    // 1. 데이터베이스 초기화 (임시 비활성화)
+    await initializeDatabase();
+    
+    // 2. 블록체인 리스너 초기화
+    await initializeBlockchainListener();
+    
+    // 3. 서버 시작
+    server.listen(PORT, () => {
+      console.log('🚀 ================================');
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📡 API: http://localhost:${PORT}`);
+      console.log(`🔌 WebSocket: active`);
+      console.log(`⛓️  Blockchain: listening`);
+      console.log(`💾 Database: disabled (dev mode)`);
+      console.log('🚀 ================================');
+    });
+    
+  } catch (error) {
+    console.error('💥 서버 시작 실패:', error);
+    process.exit(1);
+  }
+};
+
+// 서버 시작
+startServer();
+
+// 프로세스 종료 처리
+process.on('SIGINT', () => {
+  console.log('\n🛑 서버 종료 중...');
+  const blockchainListener = require('./services/blockchainListener');
+  blockchainListener.stop();
+  server.close(() => {
+    console.log('🛑 서버가 정상적으로 종료되었습니다.');
+    process.exit(0);
+  });
 });
 
 module.exports = app;
