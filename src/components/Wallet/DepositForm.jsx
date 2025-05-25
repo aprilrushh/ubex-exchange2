@@ -55,6 +55,14 @@ const DepositForm = () => {
     setSaving(true);
     
     try {
+      // 로그인 상태 확인
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        window.location.href = '/login';
+        return;
+      }
+
       // ETH 주소 형식 검증
       if (!isValidEthAddress(depositAddress)) {
         alert('유효하지 않은 ETH 주소입니다.');
@@ -66,19 +74,31 @@ const DepositForm = () => {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ address: depositAddress })
       });
       
+      const data = await response.json();
+      
       if (response.ok) {
-        const data = await response.json();
         setSavedAddress(depositAddress);
         setDepositAddress(''); // 입력창 초기화
         alert('ETH 입금 주소가 등록되었습니다!');
       } else {
-        const error = await response.json();
-        alert(error.message || '저장에 실패했습니다.');
+        if (response.status === 401) {
+          if (data.message === '토큰이 만료되었습니다.') {
+            alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          } else {
+            alert('인증에 실패했습니다. 다시 로그인해주세요.');
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          }
+        } else {
+          alert(data.message || '저장에 실패했습니다.');
+        }
       }
     } catch (error) {
       console.error('주소 저장 오류:', error);
