@@ -565,3 +565,432 @@ h1 {
     width: 100%;
   }
 }
+/* 🎯 통합형 출금 UI 스타일 - 기존 Wallet.css 파일 끝에 추가하세요 */
+
+/* 출금 폼 컨테이너 */
+.withdraw-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.withdraw-form-header h3 {
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+/* 🎯 통합 주소 선택기 */
+.unified-address-selector {
+  position: relative;
+}
+
+.current-selection {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 60px;
+}
+
+.current-selection:hover {
+  border-color: #3b82f6;
+}
+
+.current-selection.active {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.current-selection.empty {
+  color: #9ca3af;
+}
+
+.selection-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.selection-label {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.selection-address {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selection-placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.dropdown-icon {
+  margin-left: 12px;
+  transition: transform 0.2s;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.dropdown-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* 🎯 통합 드롭다운 메뉴 */
+.unified-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  z-index: 100;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.unified-dropdown.show {
+  animation: fadeInDown 0.2s ease;
+}
+
+/* 드롭다운 헤더 */
+.dropdown-header {
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 주소 목록 */
+.address-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.address-option {
+  padding: 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f9fafb;
+  transition: background 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.address-option:hover {
+  background: #f9fafb;
+}
+
+.address-option:last-child {
+  border-bottom: none;
+}
+
+.address-option.selected {
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+}
+
+.address-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.address-label {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.address-value {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.address-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.check-icon {
+  color: #3b82f6;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* 빈 상태 */
+.empty-state {
+  padding: 32px 16px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.empty-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.empty-text {
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* 새 주소 추가 섹션 */
+.add-address-section {
+  border-top: 2px solid #f3f4f6;
+  background: #fafbfc;
+}
+
+.add-address-button {
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+  border: none;
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.add-address-button:hover {
+  background: #f1f5f9;
+}
+
+/* 🎯 수량 입력 개선 */
+.amount-input-group {
+  position: relative;
+}
+
+.amount-input {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+.amount-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.amount-suffix {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.balance-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.max-button {
+  background: #f3f4f6;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.max-button:hover {
+  background: #e5e7eb;
+}
+
+/* 🎯 출금 버튼 개선 */
+.withdraw-button {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 10px;
+}
+
+.withdraw-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.withdraw-button:disabled {
+  background: #d1d5db;
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* 🎯 모달 스타일 개선 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #1f2937;
+}
+
+.modal-content .form-group {
+  margin-bottom: 16px;
+}
+
+.modal-content .form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.modal-content .form-group input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-buttons button[type="submit"] {
+  background: #3b82f6;
+  color: white;
+}
+
+.modal-buttons button[type="button"] {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modal-buttons button:hover {
+  transform: translateY(-1px);
+}
+
+/* 🎯 애니메이션 */
+@keyframes fadeInDown {
+  from { 
+    opacity: 0; 
+    transform: translateY(-10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* 🎯 반응형 디자인 */
+@media (max-width: 768px) {
+  .withdraw-form-container {
+    padding: 16px;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .current-selection {
+    padding: 12px;
+    min-height: 50px;
+  }
+
+  .address-option {
+    padding: 12px;
+  }
+
+  .modal-content {
+    padding: 16px;
+    margin: 20px;
+  }
+}
