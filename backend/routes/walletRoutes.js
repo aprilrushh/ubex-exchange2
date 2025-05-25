@@ -1,19 +1,8 @@
 // backend/routes/walletRoutes.js
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../middlewares/authMiddleware');
-const {
-  getDepositAddress,
-  setDepositAddress,
-  requestWithdrawal,
-  getWithdrawals,
-  getCoinBalance,
-  getUserBalances,
-  listWhitelist,
-  addWhitelist,
-  deleteWhitelist,
-  confirmWhitelistAddress
-} = require('../controllers/walletController');
+const authMiddleware = require('../middlewares/authMiddleware');
+const walletController = require('../controllers/walletController');
 const whitelistRateLimit = require('../middlewares/whitelistRateLimit');
 // const { validateWithdraw } = require('../middlewares/validation'); // 유효성 검사 미들웨어 (추후 구현 시 사용)
 
@@ -23,8 +12,8 @@ function isValidEthAddress(address) {
 }
 
 // 입금 주소 관련
-router.get('/deposit-address/:coin', getDepositAddress);
-router.post('/deposit-address/:coin', setDepositAddress);
+router.get('/deposit-address/:coin', walletController.getDepositAddress);
+router.post('/deposit-address/:coin', walletController.setDepositAddress);
 
 // 입금 내역 조회
 router.get('/deposits', async (req, res) => {
@@ -96,17 +85,17 @@ router.get('/deposits', async (req, res) => {
 });
 
 // 출금 관련
-router.post('/withdraw', authMiddleware, requestWithdrawal);
-router.get('/withdrawals', authMiddleware, getWithdrawals);
+router.post('/withdraw', authMiddleware, walletController.requestWithdrawal);
+router.get('/withdrawals', authMiddleware, walletController.getWithdrawals);
 
 // 잔액 조회
-router.get('/balance/:coin', authMiddleware, getCoinBalance);
-router.get('/balances', authMiddleware, getUserBalances);
+router.get('/balance/:coin', authMiddleware, walletController.getCoinBalance);
+router.get('/balances', authMiddleware, walletController.getUserBalances);
 
 // 화이트리스트 관련
-router.get('/whitelist', authMiddleware, listWhitelist);
-router.post('/whitelist', authMiddleware, addWhitelist);
-router.delete('/whitelist/:id', authMiddleware, deleteWhitelist);
-router.post('/whitelist/confirm', authMiddleware, confirmWhitelistAddress);
+router.get('/whitelist', authMiddleware, walletController.listWhitelist);
+router.post('/whitelist', authMiddleware, walletController.addWhitelist);
+router.delete('/whitelist/:id', authMiddleware, walletController.deleteWhitelist);
+router.post('/whitelist/confirm', authMiddleware, walletController.confirmWhitelistAddress);
 
 module.exports = router;

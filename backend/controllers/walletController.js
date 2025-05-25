@@ -68,7 +68,8 @@ let userWallets = {
 
 
   // 입금 주소 조회 로직
-module.exports.getDepositAddress = async (req, res) => {
+const walletController = {
+  getDepositAddress: async function(req, res) {
     try {
       const { coin } = req.params;
       const coinSymbol = coin.toUpperCase();
@@ -106,59 +107,59 @@ module.exports.getDepositAddress = async (req, res) => {
         message: '입금 주소 조회 중 오류가 발생했습니다.'
       });
     }
-  };
+  },
 
-// 사용자가 입금 주소를 수동으로 지정
-module.exports.setDepositAddress = async (req, res) => {
-  try {
-    const { coin } = req.params;
-    const { address } = req.body;
-    const userId = req.user?.id || 'test-user-123'; // 안전하게 처리
-    const coinSymbol = coin.toUpperCase();
-    const currentPort = req.app.get('port') || process.env.PORT || 3035;
+  // 사용자가 입금 주소를 수동으로 지정
+  setDepositAddress: async function(req, res) {
+    try {
+      const { coin } = req.params;
+      const { address } = req.body;
+      const userId = req.user?.id || 'test-user-123'; // 안전하게 처리
+      const coinSymbol = coin.toUpperCase();
+      const currentPort = req.app.get('port') || process.env.PORT || 3035;
 
-    if (!address || address.trim() === '') {
-      return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
-    }
+      if (!address || address.trim() === '') {
+        return res.status(400).json({ success: false, message: '주소가 필요합니다.' });
+      }
 
-    if (address.startsWith('0x') && !validateEthereumAddress(address)) {
-      return res.status(400).json({ success: false, message: 'Invalid Ethereum address.' });
-    }
+      if (address.startsWith('0x') && !validateEthereumAddress(address)) {
+        return res.status(400).json({ success: false, message: 'Invalid Ethereum address.' });
+      }
 
-    let wallet = await db.Wallet.findOne({
-      where: { user_id: userId, coin_symbol: coinSymbol }
-    });
-
-    if (wallet) {
-      await wallet.update({
-        address,
-        private_key: wallet.private_key // 기존 private_key 유지
+      let wallet = await db.Wallet.findOne({
+        where: { user_id: userId, coin_symbol: coinSymbol }
       });
-    } else {
-      // 새 지갑 생성 시 임시 private_key 설정
-      await db.Wallet.create({
-        user_id: userId,
-        coin_symbol: coinSymbol,
-        address,
-        private_key: 'TEMP_KEY' // 임시 키 설정
+
+      if (wallet) {
+        await wallet.update({
+          address,
+          private_key: wallet.private_key // 기존 private_key 유지
+        });
+      } else {
+        // 새 지갑 생성 시 임시 private_key 설정
+        await db.Wallet.create({
+          user_id: userId,
+          coin_symbol: coinSymbol,
+          address,
+          private_key: 'TEMP_KEY' // 임시 키 설정
+        });
+      }
+
+      console.log(
+        `[Port:${currentPort}] 사용자 ID ${userId}의 ${coinSymbol} 입금 주소 설정: ${address}`
+      );
+      res.json({ success: true });
+    } catch (error) {
+      console.error('[WalletController] 입금 주소 설정 오류:', error);
+      res.status(500).json({
+        success: false,
+        message: '입금 주소 설정 중 오류가 발생했습니다.'
       });
     }
-
-    console.log(
-      `[Port:${currentPort}] 사용자 ID ${userId}의 ${coinSymbol} 입금 주소 설정: ${address}`
-    );
-    res.json({ success: true });
-  } catch (error) {
-    console.error('[WalletController] 입금 주소 설정 오류:', error);
-    res.status(500).json({
-      success: false,
-      message: '입금 주소 설정 중 오류가 발생했습니다.'
-    });
-  }
-};
+  },
   
   // 출금 요청 로직
-  module.exports.requestWithdrawal = async (req, res) => {
+  requestWithdrawal: async function(req, res) {
     try {
       const { coin, amount, address } = req.body; // coin은 coinSymbol과 동일하게 취급
       const userId = req.user.id;
@@ -267,10 +268,10 @@ module.exports.setDepositAddress = async (req, res) => {
         message: '출금 요청 처리 중 오류가 발생했습니다.'
       });
     }
-  };
+  },
   
   // 입금 내역 조회 로직
-  module.exports.getDeposits = async (req, res) => {
+  getDeposits: async function(req, res) {
     try {
       const userId = req.user.id;
       // const { coin, startDate, endDate, page = 1, limit = 20 } = req.query; // 페이징 및 필터링은 추후 구현
@@ -297,10 +298,10 @@ module.exports.setDepositAddress = async (req, res) => {
         message: '입금 내역 조회 중 오류가 발생했습니다.'
       });
     }
-  };
+  },
   
   // 출금 내역 조회 로직
-  module.exports.getWithdrawals = async (req, res) => {
+  getWithdrawals: async function(req, res) {
     try {
       const userId = req.user.id;
       // const { coin, startDate, endDate, page = 1, limit = 20 } = req.query; // 페이징 및 필터링은 추후 구현
@@ -327,10 +328,10 @@ module.exports.setDepositAddress = async (req, res) => {
         message: '출금 내역 조회 중 오류가 발생했습니다.'
       });
     }
-  };
+  },
   
   // 특정 코인 잔액 조회 로직
-  module.exports.getCoinBalance = async (req, res) => {
+  getCoinBalance: async function(req, res) {
     try {
       const { coin } = req.params;
       const userId = req.user.id;
@@ -358,10 +359,10 @@ module.exports.setDepositAddress = async (req, res) => {
         message: '잔액 조회 중 오류가 발생했습니다.'
       });
     }
-  };
+  },
   
   // 전체 사용자 잔액 조회 로직 (이전 버전과의 호환성 또는 요약용)
-module.exports.getUserBalances = async (req, res) => {
+getUserBalances: async function(req, res) {
     const userId = req.user.id;
     const currentPort = req.app.get('port') || process.env.PORT || 3035;
   
@@ -380,10 +381,10 @@ module.exports.getUserBalances = async (req, res) => {
       success: true,
       data: responseBalances // 예: { BTC: "0.1", ETH: "2", KRW: "1000000" }
     });
-  };
+  },
 
   // 화이트리스트 주소 목록 조회
-  module.exports.listWhitelist = async (req, res) => {
+  listWhitelist: async function(req, res) {
     try {
       const { coin } = req.params;
       const userId = req.user.id;
@@ -406,10 +407,10 @@ module.exports.getUserBalances = async (req, res) => {
         message: '화이트리스트 조회 중 오류가 발생했습니다.'
       });
     }
-  };
+  },
 
   // 화이트리스트 주소 추가
-  module.exports.addWhitelist = async (req, res) => {
+  addWhitelist: async function(req, res) {
     try {
       const { coin, address, label } = req.body;
       const userId = req.user.id;
@@ -450,10 +451,10 @@ module.exports.getUserBalances = async (req, res) => {
         message: '화이트리스트 추가 중 오류가 발생했습니다.'
       });
     }
-  };
+  },
 
   // 화이트리스트 주소 삭제
-  module.exports.deleteWhitelist = async (req, res) => {
+  deleteWhitelist: async function(req, res) {
     try {
       const { id } = req.params;
       const userId = req.user.id;
@@ -496,10 +497,10 @@ module.exports.getUserBalances = async (req, res) => {
         message: '화이트리스트 삭제 중 오류가 발생했습니다.'
       });
     }
-  };
+  },
 
   // 화이트리스트 주소 확인
-module.exports.confirmWhitelistAddress = async (req, res) => {
+confirmWhitelistAddress: async function(req, res) {
     try {
       const { token } = req.body;
       const record = await db.WhitelistConfirmationToken.findOne({ where: { token, used: false } });
@@ -523,5 +524,8 @@ module.exports.confirmWhitelistAddress = async (req, res) => {
       console.error('[WalletController] 화이트리스트 확인 오류:', error);
       res.status(500).json({ success: false, message: '주소 확인 중 오류가 발생했습니다.' });
     }
-  };
+  }
+};
+
+module.exports = walletController;
   
