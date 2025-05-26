@@ -1,6 +1,6 @@
 // src/components/Wallet/DepositForm.jsx
 import React, { useState, useEffect } from 'react';
-import { getDepositAddress, setDepositAddress } from '../../services/WalletService';
+import { getDepositAddress, setDepositAddress, getBalance } from '../../services/WalletService';
 import './Wallet.css';
 
 const DepositForm = ({ coin, currency }) => {
@@ -10,6 +10,7 @@ const DepositForm = ({ coin, currency }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [balance, setBalance] = useState(null);
 
   useEffect(() => {
     const fetchDepositAddress = async () => {
@@ -18,6 +19,8 @@ const DepositForm = ({ coin, currency }) => {
         setError(null);
         const depositAddress = await getDepositAddress(coinSymbol);
         setAddress(depositAddress);
+        const currentBalance = await getBalance(coinSymbol);
+        setBalance(currentBalance);
       } catch (error) {
         console.error('입금주소 조회 실패', error);
         if (process.env.REACT_APP_USE_DUMMY_DATA !== 'true') {
@@ -74,6 +77,9 @@ const DepositForm = ({ coin, currency }) => {
           </button>
         </div>
       </div>
+      {balance !== null && (
+        <div className="deposit-balance">현재 잔액: {balance} {coinSymbol}</div>
+      )}
       <form onSubmit={handleSubmit} className="form-group">
         <label>입금 주소 설정</label>
         <input
