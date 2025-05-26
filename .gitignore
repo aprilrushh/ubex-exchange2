@@ -35,3 +35,5 @@ yarn-error.log*
 *.log
 dist/
 mysqlconnect.ini
+.DS_Store
+src/.DS_Store
