@@ -12,7 +12,6 @@ const {
   getUserBalances,
   listAllWhitelist,
   listWhitelist,
-  listAllWhitelist,
   addWhitelist,
   deleteWhitelist,
   confirmWhitelistAddress,
@@ -47,7 +46,6 @@ router.get('/balances', authMiddleware, getUserBalances);
 // GET /api/v1/wallet/whitelist-addresses/:coin - 화이트리스트 주소 목록 조회
 router.get('/whitelist-addresses', authMiddleware, listAllWhitelist);
 router.get('/whitelist-addresses/:coin', authMiddleware, listWhitelist);
-router.get('/whitelist-addresses', authMiddleware, listAllWhitelist); // new controller
 
 // POST /api/v1/wallet/whitelist-address - 화이트리스트 주소 추가
 router.post(
