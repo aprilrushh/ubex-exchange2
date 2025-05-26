@@ -4,6 +4,8 @@ const crypto = require('crypto');
 const Web3 = require('web3');
 const web3 = new Web3();
 const emailService = require('../services/emailService');
+const validateEthereumAddress = require('../utils/addressValidator');
+const whitelistConfig = require('../config/whitelist');
 
 // 간단한 화이트리스트 추가 속도 제한 관리
 const whitelistRateMap = new Map();
