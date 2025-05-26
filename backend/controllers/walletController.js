@@ -19,47 +19,14 @@ const checkRateLimit = (userId) => {
   return true;
 };
 
-// 임시 사용자 잔액 저장소 (서버 재시작 시 초기화됨)
-// userId: { BTC: { available: 1, inOrder: 0.1, total: 1.1 }, ETH: { ... }, KRW: { ... } } 형태
-// 기본 데모 코인 잔액 (테스트용 시드 데이터)
-let userWallets = {
-    1: { // 예시: test@example.com 사용자의 ID가 1이라고 가정
-      BTC:   { available: 0.5,    inOrder: 0, total: 0.5 },
-      ETH:   { available: 5,      inOrder: 0, total: 5 },
-      XRP:   { available: 1000,   inOrder: 0, total: 1000 },
-      ADA:   { available: 2000,   inOrder: 0, total: 2000 },
-      DOT:   { available: 300,    inOrder: 0, total: 300 },
-      LAYER: { available: 5000,   inOrder: 0, total: 5000 },
-      KAITO: { available: 5000,   inOrder: 0, total: 5000 },
-      STPT:  { available: 10000,  inOrder: 0, total: 10000 },
-      MOVE:  { available: 5000,   inOrder: 0, total: 5000 },
-      USDT:  { available: 1000,   inOrder: 0, total: 1000 },
-      KRW:   { available: 5000000, inOrder: 0, total: 5000000 }
-    },
-    2: { // 예시: fff@gmail.com 사용자의 ID가 2이라고 가정
-      BTC: { available: 0.1, inOrder: 0, total: 0.1 },
-      ETH: { available: 2, inOrder: 0, total: 2 },
-      USDT: { available: 500, inOrder: 0, total: 500 },
-      KRW: { available: 1000000, inOrder: 0, total: 1000000 }
-    },
-  };
-  
+// 임시 사용자 잔액 저장소는 서비스 모듈에서 관리한다
+const { userWallets, ensureUserWallet } = require('../services/balanceStore');
+
   // 임시 입출금 내역 저장소
   let transactionHistory = [];
   let nextTransactionId = 1;
   
-  // Helper function to ensure user wallet exists
-  const demoCoins = ['BTC', 'ETH', 'XRP', 'ADA', 'DOT', 'LAYER', 'KAITO', 'STPT', 'MOVE', 'USDT', 'KRW'];
-  const ensureUserWallet = (userId) => {
-    if (!userWallets[userId]) {
-      userWallets[userId] = {};
-    }
-    demoCoins.forEach(sym => {
-      if (!userWallets[userId][sym]) {
-        userWallets[userId][sym] = { available: 0, inOrder: 0, total: 0 };
-      }
-    });
-  };
+  // Helper function to ensure user wallet exists is provided by balanceStore
   
   
   // DB 및 블록체인 서비스 불러오기
