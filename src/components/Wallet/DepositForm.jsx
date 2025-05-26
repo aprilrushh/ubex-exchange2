@@ -19,9 +19,8 @@ const DepositForm = () => {
   const [copied, setCopied] = useState(false);
   const [deposits, setDeposits] = useState([]);
   
-  // 🎯 UI 상태
+  // 🎯 UI 상태 - 최소화
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [showQR, setShowQR] = useState(false);
 
   // 🎯 컴포넌트 마운트 시 데이터 로드
   useEffect(() => {
@@ -169,125 +168,86 @@ const DepositForm = () => {
   // 🎯 로딩 화면
   if (loading) {
     return (
-      <div className="deposit-container">
-        <div className="loading-state">
-          <div className="loading-spinner"></div>
-          <span>입금 정보를 불러오는 중...</span>
-        </div>
+      <div className="wallet-loading">
+        <div className="loading-spinner"></div>
+        <p>입금 정보를 불러오는 중...</p>
       </div>
     );
   }
 
   return (
-    <div className="deposit-container">
-      {/* 🎯 헤더 */}
-      <div className="section-title">
-        <span>💰 ETH 입금</span>
-        <button className="refresh-btn" onClick={refreshAll}>
-          🔄 새로고침
-        </button>
-      </div>
+    <div className="deposit-form">
+      <h3>💰 ETH 입금</h3>
 
       {/* 🎯 상태 메시지 */}
       {message && (
-        <div className={`status-message status-${messageType}`}>
-          <span>
-            {messageType === 'success' ? '✅' : 
-             messageType === 'error' ? '❌' : 
-             messageType === 'warning' ? '⚠️' : 'ℹ️'}
-          </span>
-          <span>{message}</span>
+        <div className={`wallet-${messageType}`}>
+          {messageType === 'success' ? '✅' : 
+           messageType === 'error' ? '❌' : 
+           messageType === 'warning' ? '⚠️' : 'ℹ️'} {message}
         </div>
       )}
 
-      {/* 🎯 입금 주소 섹션 */}
-      <div className="deposit-address-section">
-        <div className="section-label">입금 주소</div>
+      {/* 🎯 입금 주소 섹션 - 기존 스타일 활용 */}
+      <div className="deposit-address">
+        <h4>📍 입금 주소</h4>
         
         {savedAddress ? (
-          <div className="address-display has-address">
-            <div className="address-content">
-              <div className="address-label">현재 등록된 ETH 입금 주소</div>
-              <div className="address-value">{savedAddress}</div>
-            </div>
-            <div className="address-actions">
-              <button 
-                className={`copy-btn ${copied ? 'copied' : ''}`}
-                onClick={handleCopyAddress}
-              >
-                {copied ? '✓ 복사됨!' : '📋 주소 복사'}
-              </button>
-              <button 
-                className="change-btn" 
-                onClick={() => setShowAddressForm(!showAddressForm)}
-              >
-                ✏️ 주소 변경
-              </button>
-              <button 
-                className="qr-toggle" 
-                onClick={() => setShowQR(!showQR)}
-              >
-                📱 QR 코드
-              </button>
-            </div>
+          <div className="address-container">
+            <code>{savedAddress}</code>
+            <button 
+              onClick={handleCopyAddress}
+              className={copied ? 'copied' : ''}
+            >
+              {copied ? '✓ 복사됨!' : '📋 복사'}
+            </button>
+            <button onClick={() => setShowAddressForm(!showAddressForm)}>
+              ✏️ 변경
+            </button>
           </div>
         ) : (
-          <div className="address-display">
-            <div className="address-content">
-              <div className="address-label">입금 주소가 설정되지 않았습니다</div>
-              <div style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
-                ETH 입금을 받기 위해 주소를 등록해주세요
-              </div>
-            </div>
-            <div className="address-actions">
-              <button 
-                className="change-btn" 
-                onClick={() => setShowAddressForm(true)}
-              >
-                📝 주소 등록
-              </button>
-            </div>
+          <div className="wallet-info" style={{ textAlign: 'center', padding: '20px' }}>
+            <p>입금 주소가 설정되지 않았습니다</p>
+            <button 
+              className="btn"
+              onClick={() => setShowAddressForm(true)}
+              style={{ marginTop: '12px' }}
+            >
+              📝 주소 등록
+            </button>
           </div>
         )}
 
-        {/* QR 코드 섹션 */}
-        {showQR && savedAddress && (
-          <div className="qr-section show">
-            <div className="qr-placeholder">QR 코드</div>
-            <div style={{ fontSize: '12px', color: '#6b7280' }}>
-              모바일에서 스캔하여 주소를 확인하세요
-            </div>
-          </div>
-        )}
-
-        {/* 주소 설정 폼 */}
+        {/* 주소 설정 폼 - 조건부 표시 */}
         {showAddressForm && (
-          <div className="address-setup-form show">
-            <div className="form-group">
-              <label className="form-label">
-                {savedAddress ? '새 입금 주소' : 'ETH 입금 주소'}
-              </label>
+          <div className="form-section" style={{ marginTop: '16px' }}>
+            <div className="input-group">
               <input 
                 type="text" 
-                className="form-input" 
                 placeholder="0x로 시작하는 ETH 주소를 입력하세요"
                 value={depositAddress}
                 onChange={(e) => setDepositAddress(e.target.value)}
               />
             </div>
-            <div className="form-actions">
+            <div style={{ display: 'flex', gap: '8px' }}>
               <button 
-                className="save-btn" 
+                className="btn" 
                 onClick={handleSaveAddress}
                 disabled={saving || !depositAddress.trim()}
+                style={{ flex: 1 }}
               >
                 {saving ? '💾 저장 중...' : '💾 저장'}
               </button>
               <button 
-                className="cancel-btn" 
+                className="btn"
                 onClick={() => {
                   setShowAddressForm(false);
                   setDepositAddress('');
+                }}
+                style={{ 
+                  flex: 1, 
+                  background: '#6c757d',
+                  borderColor: '#6c757d'
                 }}
               >
                 ✖️ 취소
@@ -297,67 +257,64 @@ const DepositForm = () => {
         )}
       </div>
 
-      {/* 🎯 최근 입금 내역 (컴팩트) */}
-      <div className="deposit-history-compact">
+      {/* 🎯 최근 입금 내역 - 기존 스타일 활용 */}
+      <div className="deposit-history">
         <div className="history-header">
-          <div className="history-title">📊 최근 입금 내역</div>
-          <a 
-            href="#" 
-            className="view-all-link" 
-            onClick={(e) => {
-              e.preventDefault();
-              console.log('📋 전체 입금 내역 보기');
-            }}
-          >
-            전체 보기
-          </a>
+          <h3>📊 최근 입금 내역</h3>
+          <button className="refresh-btn" onClick={refreshAll}>
+            🔄 새로고침
+          </button>
         </div>
         
-        <div className="history-list">
-          {deposits.length > 0 ? (
-            deposits.map((deposit) => (
-              <div key={deposit.id} className="history-item">
-                <div className="history-left">
-                  <div className="history-amount">+{deposit.amount} {deposit.coin_symbol}</div>
-                  <div className="history-time">
+        <table className="history-table">
+          <thead>
+            <tr>
+              <th>시간</th>
+              <th>금액</th>
+              <th>상태</th>
+              <th>TxHash</th>
+            </tr>
+          </thead>
+          <tbody>
+            {deposits.length > 0 ? (
+              deposits.map((deposit) => (
+                <tr key={deposit.id}>
+                  <td>
                     {new Date(deposit.created_at).toLocaleString('ko-KR', {
                       month: '2-digit',
                       day: '2-digit',
                       hour: '2-digit',
                       minute: '2-digit'
                     })}
-                  </div>
-                </div>
-                <div className="history-right">
-                  <span className={`history-status status-${deposit.status}`}>
-                    {deposit.status === 'confirmed' ? '확인됨' : 
-                     deposit.status === 'pending' ? '대기중' : deposit.status}
-                  </span>
-                  <span 
-                    className="history-tx" 
+                  </td>
+                  <td className="amount">+{deposit.amount} {deposit.coin_symbol}</td>
+                  <td>
+                    <span className={`status-badge status-${deposit.status}`}>
+                      {deposit.status === 'confirmed' ? '확인됨' : 
+                       deposit.status === 'pending' ? '대기중' : deposit.status}
+                    </span>
+                  </td>
+                  <td 
+                    className="tx-hash" 
                     onClick={() => openEtherscan(deposit.tx_hash)}
                   >
                     {deposit.tx_hash.slice(0,6)}...{deposit.tx_hash.slice(-4)}
-                  </span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="empty-history">
-              <div className="empty-icon">📭</div>
-              <div>입금 내역이 없습니다</div>
-            </div>
-          )}
-        </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="no-data">📭 입금 내역이 없습니다</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
-      {/* 🎯 주의사항 */}
-      <div className="notice-section">
-        <div className="notice-title">
-          <span>⚠️</span>
-          주의사항
-        </div>
-        <ul className="notice-list">
+      {/* 🎯 주의사항 - 기존 스타일 활용 */}
+      <div className="notice">
+        <h4>⚠️ 주의사항</h4>
+        <ul>
           <li>입금 주소는 ETH 전용 주소입니다</li>
           <li>다른 코인을 이 주소로 보내면 자산이 손실될 수 있습니다</li>
           <li>입금 후 확인까지 최대 30분이 소요될 수 있습니다</li>
